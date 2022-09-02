@@ -1,0 +1,258 @@
+[
+    Instruction(
+        [
+            I {
+                op: Op(
+                    8,
+                ),
+                rt: Register(
+                    8,
+                ),
+                rs: Register(
+                    0,
+                ),
+                imm: Value(
+                    0,
+                ),
+            },
+        ],
+    ),
+    Instruction(
+        [
+            I {
+                op: Op(
+                    8,
+                ),
+                rt: Register(
+                    9,
+                ),
+                rs: Register(
+                    0,
+                ),
+                imm: Value(
+                    100,
+                ),
+            },
+        ],
+    ),
+    Label(
+        "loop",
+    ),
+    Instruction(
+        [
+            I {
+                op: Op(
+                    8,
+                ),
+                rt: Register(
+                    2,
+                ),
+                rs: Register(
+                    0,
+                ),
+                imm: Value(
+                    1,
+                ),
+            },
+        ],
+    ),
+    Instruction(
+        [
+            R {
+                op: Funct(
+                    32,
+                ),
+                rd: Register(
+                    4,
+                ),
+                rs: Register(
+                    8,
+                ),
+                rt: Register(
+                    0,
+                ),
+                shamt: 0,
+            },
+        ],
+    ),
+    Instruction(
+        [
+            R {
+                op: Funct(
+                    12,
+                ),
+                rd: Register(
+                    0,
+                ),
+                rs: Register(
+                    0,
+                ),
+                rt: Register(
+                    0,
+                ),
+                shamt: 0,
+            },
+        ],
+    ),
+    Instruction(
+        [
+            I {
+                op: Op(
+                    8,
+                ),
+                rt: Register(
+                    2,
+                ),
+                rs: Register(
+                    0,
+                ),
+                imm: Value(
+                    11,
+                ),
+            },
+        ],
+    ),
+    Instruction(
+        [
+            I {
+                op: Op(
+                    8,
+                ),
+                rt: Register(
+                    4,
+                ),
+                rs: Register(
+                    0,
+                ),
+                imm: Value(
+                    10,
+                ),
+            },
+        ],
+    ),
+    Instruction(
+        [
+            R {
+                op: Funct(
+                    12,
+                ),
+                rd: Register(
+                    0,
+                ),
+                rs: Register(
+                    0,
+                ),
+                rt: Register(
+                    0,
+                ),
+                shamt: 0,
+            },
+        ],
+    ),
+    Blank,
+    Instruction(
+        [
+            I {
+                op: Op(
+                    8,
+                ),
+                rt: Register(
+                    8,
+                ),
+                rs: Register(
+                    8,
+                ),
+                imm: Value(
+                    1,
+                ),
+            },
+        ],
+    ),
+    Blank,
+    Instruction(
+        [
+            R {
+                op: Funct(
+                    42,
+                ),
+                rd: Register(
+                    1,
+                ),
+                rs: Register(
+                    9,
+                ),
+                rt: Register(
+                    8,
+                ),
+                shamt: 0,
+            },
+            I {
+                op: Op(
+                    4,
+                ),
+                rt: Register(
+                    0,
+                ),
+                rs: Register(
+                    1,
+                ),
+                imm: PcRelative(
+                    "loop",
+                ),
+            },
+            Literal {
+                data: [
+                    0,
+                    0,
+                    0,
+                    0,
+                ],
+            },
+            Literal {
+                data: [
+                    0,
+                    0,
+                    0,
+                    0,
+                ],
+            },
+        ],
+    ),
+    Instruction(
+        [
+            I {
+                op: Op(
+                    8,
+                ),
+                rt: Register(
+                    2,
+                ),
+                rs: Register(
+                    0,
+                ),
+                imm: Value(
+                    10,
+                ),
+            },
+        ],
+    ),
+    Instruction(
+        [
+            R {
+                op: Funct(
+                    12,
+                ),
+                rd: Register(
+                    0,
+                ),
+                rs: Register(
+                    0,
+                ),
+                rt: Register(
+                    0,
+                ),
+                shamt: 0,
+            },
+        ],
+    ),
+]
