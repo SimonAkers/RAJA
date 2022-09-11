@@ -20,6 +20,11 @@ num = "0.4.0"
 eframe = "0.18.0"
 rfd = "0.8.1"
 
+# GTK dependencies
+adw = { package = "libadwaita", version = "0.1.1" }
+gtk = { package = "gtk4", version = "0.4.8", features = ["v4_6"] }
+sourceview5 = "0.4.2"
+
 [features]
 default = ["persistence"]
 persistence = ["eframe/persistence"] # Enable if you want to persist app state on shutdown
