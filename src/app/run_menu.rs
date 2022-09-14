@@ -1,7 +1,5 @@
 use std::ops::ControlFlow;
 
-use eframe::egui::{Context, Response, Ui, Widget};
-
 use crate::{assembler, parser::model::LabelTable, syscall::Syscall, Machine, Memory};
 
 use super::console::Console;
@@ -14,19 +12,17 @@ pub struct RunMenu<'a> {
     running: &'a mut bool,
     script: &'a str,
     console: &'a mut Console,
-    ctx: &'a Context,
 }
 
+/*
 impl<'a> RunMenu<'a> {
     pub fn new(
-        ctx: &'a Context,
         machine: &'a mut Machine,
         running: &'a mut bool,
         script: &'a str,
         console: &'a mut Console,
     ) -> Self {
         Self {
-            ctx,
             machine,
             running,
             script,
@@ -151,3 +147,4 @@ impl<'a> Widget for RunMenu<'a> {
         response
     }
 }
+ */

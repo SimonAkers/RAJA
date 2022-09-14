@@ -1,13 +1,5 @@
 use std::{ops::Range, sync::Arc};
 
-use eframe::{
-    egui::{
-        text::LayoutJob, Color32, Galley, Response, ScrollArea, TextBuffer, TextEdit, TextFormat,
-        TextStyle, Ui, Widget,
-    },
-    epaint::FontId,
-};
-
 #[derive(Default)]
 pub struct Console {
     text: String,
@@ -48,7 +40,7 @@ impl Console {
         None
     }
 
-    pub fn view<'a>(&'a mut self) -> ConsoleView<'a> {
+    pub fn view(&mut self) -> ConsoleView {
         ConsoleView {
             text: &mut self.text,
             cursor: self.cursor,
@@ -69,6 +61,7 @@ impl<'a> AsRef<str> for ConsoleView<'a> {
     }
 }
 
+/*
 impl<'a> TextBuffer for ConsoleView<'a> {
     fn is_mutable(&self) -> bool {
         true
@@ -91,51 +84,4 @@ impl<'a> TextBuffer for ConsoleView<'a> {
         }
     }
 }
-
-impl<'a> Widget for ConsoleView<'a> {
-    fn ui(mut self, ui: &mut Ui) -> Response {
-        ScrollArea::vertical()
-            .show(ui, |ui| {
-                ui.add_sized(
-                    ui.available_size(),
-                    TextEdit::multiline(&mut self)
-                        .code_editor()
-                        .layouter(&mut layouter),
-                )
-            })
-            .inner
-    }
-}
-
-pub fn layouter(ui: &Ui, string: &str, wrap_width: f32) -> Arc<Galley> {
-    let mut layout = LayoutJob::default();
-    let mut sect = String::new();
-    let mut color = Color32::WHITE;
-    for c in string.chars() {
-        if c == '\x07' {
-            layout.append(
-                &sect,
-                0.0,
-                TextFormat::simple(FontId::monospace(16.0), color),
-            );
-            color = Color32::RED;
-            sect = String::new();
-        } else if c == '\x1b' {
-            layout.append(
-                &sect,
-                0.0,
-                TextFormat::simple(FontId::monospace(16.0), color),
-            );
-            color = Color32::WHITE;
-            sect = String::new();
-        } else {
-            sect.push(c);
-        }
-    }
-    layout.append(
-        &sect,
-        0.0,
-        TextFormat::simple(FontId::monospace(16.0), color),
-    );
-    ui.fonts().layout_job(layout)
-}
+ */
