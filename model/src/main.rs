@@ -1,4 +1,4 @@
-use simulator::App;
+use model::app::App;
 
 fn main() {
     let app = App::new();

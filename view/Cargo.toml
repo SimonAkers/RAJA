@@ -1,0 +1,11 @@
+[package]
+name = "view"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+adw = { package = "libadwaita", version = "0.1.1" }
+gtk = { package = "gtk4", version = "0.4.8", features = ["v4_6"] }
+sourceview5 = "0.4.2"

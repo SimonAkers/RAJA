@@ -133,6 +133,6 @@ pub fn compute_labels(input: &[Line]) -> LabelTable {
         }
     }
 
-    std::fs::write("labels.txt", format!("{:#?}", input)).unwrap();
+    std::fs::write("../../labels.txt", format!("{:#?}", input)).unwrap();
     labels
 }
