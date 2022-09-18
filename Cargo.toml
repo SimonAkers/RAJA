@@ -1,8 +1,12 @@
 [workspace]
-name = "simulator"
+name = "raja"
 version = "0.1.0"
-authors = ["James Pruitt <jamescpruitt@gmail.com>"]
-edition = "2018"
+authors = [
+    "Simon Akers",
+    "Lauren Fleming",
+    "James Pruitt <jamescpruitt@gmail.com>",
+]
+edition = "2021"
 
 members = [
     "model",
