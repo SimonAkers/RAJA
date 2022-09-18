@@ -58,24 +58,28 @@
                 <child>
                     <object class="GtkButton">
                         <property name="icon-name">media-playback-start-symbolic</property>
+                        <property name="tooltip-text">Run</property>
                     </object>
                 </child>
 
                 <child>
                     <object class="GtkButton">
                         <property name="icon-name">go-bottom-symbolic</property>
+                        <property name="tooltip-text">Step into</property>
                     </object>
                 </child>
 
                 <child>
                     <object class="GtkButton">
                         <property name="icon-name">go-jump-symbolic</property>
+                        <property name="tooltip-text">Step over</property>
                     </object>
                 </child>
 
                 <child>
                     <object class="GtkButton">
                         <property name="icon-name">go-top-symbolic</property>
+                        <property name="tooltip-text">Step out</property>
                     </object>
                 </child>
 
