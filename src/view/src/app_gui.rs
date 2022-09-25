@@ -54,7 +54,7 @@ fn build_from_xml(app: &Application) {
     StyleManager::default().set_color_scheme(ColorScheme::PreferDark);
 
     // Build UI from the specification
-    let builder = Builder::from_file("view/res/ui/main.ui");
+    let builder = Builder::from_file("src/view/res/ui/main.ui");
 
     // Style the source view
     let srcview: sourceview5::View = builder.object("source_view").unwrap();

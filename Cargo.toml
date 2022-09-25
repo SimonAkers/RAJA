@@ -1,4 +1,4 @@
-[workspace]
+[package]
 name = "raja"
 version = "0.1.0"
 authors = [
@@ -8,10 +8,17 @@ authors = [
 ]
 edition = "2021"
 
+[[bin]]
+name = "raja"
+
+[workspace]
 members = [
-    "model",
-    "view",
+    "src/model",
+    "src/view",
 ]
+
+[dependencies]
+model = { path = "src/model" }
 
 [profile.release]
 opt-level = 2 # fast and small wasm

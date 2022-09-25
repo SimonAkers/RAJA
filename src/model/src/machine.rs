@@ -2,7 +2,7 @@ use std::ops::ControlFlow;
 
 use crate::{
     parser::{
-        self, compute_labels,
+        self,
         model::{LabelTable, Line, Segment, Segments, STACK_BASE, TEXT_BASE},
     },
     pipeline::{self, PipelineState},
@@ -17,8 +17,8 @@ pub struct Machine {
     pc: u32,
     regs: RegisterFile,
     state: PipelineState,
-    mem: Memory,
-    syms: LabelTable,
+    memory: Memory,
+    symbols: LabelTable,
     pending_syscall: Option<Syscall>,
 }
 
@@ -33,11 +33,11 @@ impl Machine {
     }
 
     pub fn read_word(&self, addr: u32) -> Result<u32> {
-        self.mem.get(addr)
+        self.memory.get(addr)
     }
 
     pub fn write_word(&mut self, addr: u32, val: u32) -> Result<()> {
-        *self.mem.get_mut(addr)? = val;
+        *self.memory.get_mut(addr)? = val;
         Ok(())
     }
 
@@ -53,25 +53,25 @@ impl Machine {
 
     /// Fully resets this machine including memory contents and registers
     pub fn hard_reset(&mut self) {
-        self.mem = Memory::default();
-        self.syms = LabelTable::default();
+        self.memory = Memory::default();
+        self.symbols = LabelTable::default();
         self.reset();
     }
 
     /// Set the contents of this machines memory to `mem`
     pub fn flash(&mut self, mem: Memory, syms: LabelTable) {
-        self.mem = mem;
-        self.syms = syms;
+        self.memory = mem;
+        self.symbols = syms;
     }
 
     /// Gets the current source code line
     pub fn current_line(&mut self) -> [Option<usize>; 5] {
         [
-            self.syms.get_line(self.state.if_id.pc),
-            self.syms.get_line(self.state.id_ex.pc),
-            self.syms.get_line(self.state.ex_mem.pc),
-            self.syms.get_line(self.state.mem_wb.pc),
-            self.syms.get_line(self.state.pipe_out.pc),
+            self.symbols.get_line(self.state.if_id.pc),
+            self.symbols.get_line(self.state.id_ex.pc),
+            self.symbols.get_line(self.state.ex_mem.pc),
+            self.symbols.get_line(self.state.mem_wb.pc),
+            self.symbols.get_line(self.state.pipe_out.pc),
         ]
     }
 
@@ -86,7 +86,7 @@ impl Machine {
         let mut stack = vec![];
         for i in sp..STACK_BASE / 4 {
             let addr = i * 4;
-            stack.push((addr, self.mem.get(addr).unwrap_or(0)));
+            stack.push((addr, self.memory.get(addr).unwrap_or(0)));
         }
         stack
     }
@@ -131,7 +131,7 @@ impl Machine {
             let (new_state, syscall) = pipeline::pipe_cycle(
                 &mut self.pc,
                 &mut self.regs,
-                &mut self.mem,
+                &mut self.memory,
                 self.state.clone(),
             )?;
             self.state = new_state;
@@ -147,7 +147,7 @@ impl Machine {
 pub fn assembler(script: &str) -> Result<(Memory, LabelTable)> {
     // parse assembly
     let lines = parser::parse_string(script)?;
-    let labels = compute_labels(&lines);
+    let labels = parser::compute_labels(&lines);
 
     // for each line in the parsed assembly assemble that line and add the result to a vec
     let mut memory = Memory::new();

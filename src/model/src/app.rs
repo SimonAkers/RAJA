@@ -22,21 +22,12 @@ pub struct App {
     machine: Machine,
     script: String,
     console: Console,
-    show_watches: bool,
-    show_stack: bool,
-    show_pipeline: bool,
-    show_regs: bool,
-    regs_hex: bool,
-    stack_hex: bool,
     watches: Vec<Watch>,
     running: bool,
-    show_memory: bool,
-    view_address: usize,
-    view_endian: bool,
 }
 
 fn open_script() -> Option<String> {
-    let file = FileDialog::new().set_directory("../..").pick_file();
+    let file = FileDialog::new().set_directory("../../../../..").pick_file();
     if let Some(path) = file {
         let file = read_to_string(path).unwrap();
         Some(file)
@@ -50,19 +41,10 @@ impl App {
         Self {
             gui: AppGUI::new(),
             machine: Default::default(),
-            script: "".to_string(),
+            script: String::new(),
             console: Default::default(),
-            show_watches: false,
-            show_stack: false,
-            show_pipeline: false,
-            show_regs: false,
-            regs_hex: false,
-            stack_hex: false,
             watches: vec![],
             running: false,
-            show_memory: false,
-            view_address: 0,
-            view_endian: false
         }
     }
 
