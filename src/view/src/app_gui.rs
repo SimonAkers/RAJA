@@ -21,7 +21,7 @@ impl AppGUI {
         sourceview5::Language::ensure_type();
 
         app.connect_startup(|_| load_css());
-        app.connect_activate(build_from_xml);
+        app.connect_activate(build_ui);
 
         Self { adw_app: app }
     }
@@ -50,8 +50,9 @@ fn load_css() {
     );
 }
 
-fn build_from_xml(app: &Application) {
-    StyleManager::default().set_color_scheme(ColorScheme::Default);
+fn build_ui(app: &Application) {
+    // Set the app color scheme to match the system (dark or light)
+    StyleManager::default().set_color_scheme(get_system_color_scheme());
 
     // Build UI from the specification
     let builder = Builder::from_file("src/view/res/ui/main.ui");
@@ -76,6 +77,17 @@ fn build_from_xml(app: &Application) {
 
     // Show the window
     window.show();
+}
+
+/// Gets a color scheme based on the system's theme (i.e. dark or light mode).
+///
+/// # Returns
+/// A ColorScheme matching the system's theme (dark or light)
+fn get_system_color_scheme() -> ColorScheme {
+    match dark_light::detect() {
+        dark_light::Mode::Dark => ColorScheme::PreferDark,
+        dark_light::Mode::Light => ColorScheme::PreferLight,
+    }
 }
 
 /// Styles a GtkSourceView as the MIPS code view
