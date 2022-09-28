@@ -51,7 +51,7 @@ fn load_css() {
 }
 
 fn build_from_xml(app: &Application) {
-    StyleManager::default().set_color_scheme(ColorScheme::PreferDark);
+    StyleManager::default().set_color_scheme(ColorScheme::Default);
 
     // Build UI from the specification
     let builder = Builder::from_file("src/view/res/ui/main.ui");
@@ -59,10 +59,6 @@ fn build_from_xml(app: &Application) {
     // Style the source view
     let srcview: sourceview5::View = builder.object("source_view").unwrap();
     style_srcview(&srcview);
-
-    // Style the console
-    let console: sourceview5::View = builder.object("console").unwrap();
-    style_console(&console);
 
     // Get the main widget from the builder
     let content: Widget = builder.object("main_box").unwrap();
@@ -83,7 +79,6 @@ fn build_from_xml(app: &Application) {
 }
 
 /// Styles a GtkSourceView as the MIPS code view
-/// Probably can be consolidated
 fn style_srcview(srcview: &sourceview5::View) {
     let buffer = sourceview5::Buffer::new(None);
 
@@ -91,21 +86,5 @@ fn style_srcview(srcview: &sourceview5::View) {
         buffer.set_language(Some(language));
     }
 
-    if let Some(ref scheme) = sourceview5::StyleSchemeManager::new().scheme("Adwaita-dark") {
-        buffer.set_style_scheme(Some(scheme));
-    }
-
     srcview.set_buffer(Some(&buffer));
-}
-
-/// Styles a GtkSourceView as the console
-/// Probably can be consolidated
-fn style_console(console: &sourceview5::View) {
-    let buffer = sourceview5::Buffer::new(None);
-
-    if let Some(ref scheme) = sourceview5::StyleSchemeManager::new().scheme("Adwaita-dark") {
-        buffer.set_style_scheme(Some(scheme));
-    }
-
-    console.set_buffer(Some(&buffer));
 }
