@@ -4,12 +4,29 @@ use sourceview5::prelude::*;
 use adw::{Application, ApplicationWindow, ColorScheme, StyleManager};
 use gtk::{Builder, CssProvider, StyleContext, Widget};
 use gtk::gdk::Display;
+use crate::source::Source;
 
-pub struct AppGUI {
+/// A trait defining required functionality for the application's GUI.
+pub trait AppGUI {
+    fn run(&self);
+    fn get_source(&self) -> Box<dyn Source>;
+}
+
+pub struct AdwGUI {
     adw_app: Application,
 }
 
-impl AppGUI {
+impl AppGUI for AdwGUI {
+    fn run(&self) {
+        self.adw_app.run();
+    }
+
+    fn get_source(&self) -> Box<dyn Source> {
+        todo!()
+    }
+}
+
+impl AdwGUI {
     pub fn new() -> Self {
         let app = Application::builder()
             .application_id("net.shayes.raja")
@@ -20,63 +37,53 @@ impl AppGUI {
         sourceview5::Buffer::ensure_type();
         sourceview5::Language::ensure_type();
 
-        app.connect_startup(|_| load_css());
-        app.connect_activate(build_ui);
+        app.connect_startup(|_| AdwGUI::load_css());
+        app.connect_activate(AdwGUI::build_ui);
 
         Self { adw_app: app }
     }
 
-    pub fn run(&self) {
-        self.adw_app.run();
+    fn load_css() {
+        // Load the CSS file and add it to the provider
+        let provider = CssProvider::new();
+        provider.load_from_data(include_bytes!("../res/style.css"));
+
+        // Add the provider to the default screen
+        StyleContext::add_provider_for_display(
+            &Display::default().expect("Could not connect to a display."),
+            &provider,
+            gtk::STYLE_PROVIDER_PRIORITY_APPLICATION,
+        );
     }
-}
 
-impl Default for AppGUI {
-    fn default() -> Self {
-        AppGUI::new()
+    fn build_ui(app: &Application) {
+        // Set the app color scheme to match the system (dark or light)
+        StyleManager::default().set_color_scheme(get_system_color_scheme());
+
+        // Build UI from the specification
+        let builder = Builder::from_file("src/view/res/ui/main.ui");
+
+        // Style the source view
+        let srcview: sourceview5::View = builder.object("source_view").unwrap();
+        style_srcview(&srcview);
+
+        // Get the main widget from the builder
+        let content: Widget = builder.object("main_box").unwrap();
+
+        // Create the window
+        let window = ApplicationWindow::builder()
+            .application(app)
+            .default_width(960)
+            .default_height(540)
+            .width_request(400)
+            .height_request(300)
+            .title("RAJA")
+            .content(&content)
+            .build();
+
+        // Show the window
+        window.show();
     }
-}
-
-fn load_css() {
-    // Load the CSS file and add it to the provider
-    let provider = CssProvider::new();
-    provider.load_from_data(include_bytes!("../res/style.css"));
-
-    // Add the provider to the default screen
-    StyleContext::add_provider_for_display(
-        &Display::default().expect("Could not connect to a display."),
-        &provider,
-        gtk::STYLE_PROVIDER_PRIORITY_APPLICATION,
-    );
-}
-
-fn build_ui(app: &Application) {
-    // Set the app color scheme to match the system (dark or light)
-    StyleManager::default().set_color_scheme(get_system_color_scheme());
-
-    // Build UI from the specification
-    let builder = Builder::from_file("src/view/res/ui/main.ui");
-
-    // Style the source view
-    let srcview: sourceview5::View = builder.object("source_view").unwrap();
-    style_srcview(&srcview);
-
-    // Get the main widget from the builder
-    let content: Widget = builder.object("main_box").unwrap();
-
-    // Create the window
-    let window = ApplicationWindow::builder()
-        .application(app)
-        .default_width(960)
-        .default_height(540)
-        .width_request(400)
-        .height_request(300)
-        .title("RAJA")
-        .content(&content)
-        .build();
-
-    // Show the window
-    window.show();
 }
 
 /// Gets a color scheme based on the system's theme (i.e. dark or light mode).
