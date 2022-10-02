@@ -1,11 +1,11 @@
 use gtk::prelude::*;
 
-pub trait EditorExt {
+pub trait Source {
     fn get_text(&self) -> String;
     fn clear(&self);
 }
 
-impl EditorExt for sourceview5::View {
+impl Source for sourceview5::View {
     /// Gets the text of the GtkSourceView
     ///
     /// # Returns
