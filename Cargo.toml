@@ -13,12 +13,14 @@ name = "raja"
 
 [workspace]
 members = [
+    "src/controller",
     "src/model",
     "src/view",
 ]
 
 [dependencies]
-model = { path = "src/model" }
+controller = { path = "src/controller" }
+view = { path = "src/view" }
 
 [profile.release]
 opt-level = 2 # fast and small wasm

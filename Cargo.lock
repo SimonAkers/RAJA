@@ -259,6 +259,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "controller"
+version = "0.1.0"
+dependencies = [
+ "model",
+ "view",
+]
+
+[[package]]
 name = "cty"
 version = "0.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1265,7 +1273,8 @@ dependencies = [
 name = "raja"
 version = "0.1.0"
 dependencies = [
- "model",
+ "controller",
+ "view",
 ]
 
 [[package]]

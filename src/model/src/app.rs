@@ -18,7 +18,6 @@ mod watches;
 
 #[derive(Default)]
 pub struct App {
-    gui: AppGUI,
     machine: Machine,
     script: String,
     console: Console,
@@ -39,7 +38,6 @@ fn open_script() -> Option<String> {
 impl App {
     pub fn new() -> Self {
         Self {
-            gui: AppGUI::new(),
             machine: Default::default(),
             script: String::new(),
             console: Default::default(),
@@ -49,7 +47,7 @@ impl App {
     }
 
     pub fn run(&self) {
-        self.gui.run();
+        todo!()
     }
 }
 
