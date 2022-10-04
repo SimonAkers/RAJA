@@ -3,7 +3,6 @@ name = "raja"
 version = "0.1.0"
 authors = [
     "Simon Akers",
-    "Lauren Fleming",
     "James Pruitt <jamescpruitt@gmail.com>",
 ]
 edition = "2021"
