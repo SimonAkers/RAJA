@@ -1,5 +1,5 @@
 use controller::app::App;
-use view::app_gui::{AdwGUI, AppGUI};
+use view::adw_gui::AdwGUI;
 
 fn main() {
     let gui = AdwGUI::new();

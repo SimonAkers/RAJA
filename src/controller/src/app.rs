@@ -1,11 +1,11 @@
-use view::app_gui::AppGUI;
+use view::app_ui::AppUI;
 
 pub struct App {
-    gui: Box<dyn AppGUI>
+    gui: Box<dyn AppUI>
 }
 
 impl App {
-    pub fn new(gui: Box<dyn AppGUI>) -> Self {
+    pub fn new(gui: Box<dyn AppUI>) -> Self {
         Self { gui }
     }
 
