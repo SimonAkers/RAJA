@@ -1,4 +1,4 @@
-use view::app_ui::AppUI;
+use view::traits::AppUI;
 
 pub struct App {
     gui: Box<dyn AppUI>

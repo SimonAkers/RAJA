@@ -1,7 +1,7 @@
 use std::fs::read_to_string;
 use rfd::FileDialog;
 
-use view::app_ui::AppUI;
+use view::traits::AppUI;
 use crate::Machine;
 
 use self::{

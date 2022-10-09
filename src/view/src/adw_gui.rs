@@ -5,7 +5,7 @@ use adw::{Application, ApplicationWindow, ColorScheme, StyleManager};
 use gtk::{Builder, CssProvider, StyleContext, Widget};
 use gtk::gdk::Display;
 
-use crate::app_ui::*;
+use crate::traits::*;
 
 pub struct AdwGUI {
     adw_app: Application,
