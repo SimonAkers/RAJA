@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
+    <template class="RajaAppWindow" parent="GtkApplicationWindow">
+
     <menu id='app-menu'>
         <section>
             <item>
@@ -149,4 +151,6 @@
             </object>
         </child>
     </object>
+
+    </template>
 </interface>

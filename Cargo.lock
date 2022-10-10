@@ -1274,6 +1274,7 @@ name = "raja"
 version = "0.1.0"
 dependencies = [
  "controller",
+ "gtk4",
  "view",
 ]
 

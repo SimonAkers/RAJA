@@ -6,17 +6,23 @@ use gtk::{Builder, CssProvider, StyleContext, Widget};
 use gtk::gdk::Display;
 
 use crate::traits::*;
+use crate::app_window::imp::AppWindow;
 
 pub struct AdwGUI {
-    adw_app: Application,
+    app: Application,
+    window: AppWindow,
 }
 
 impl AppUI for AdwGUI {
     fn run(&self) {
-        self.adw_app.run();
+        self.app.run();
     }
 
     fn get_source(&self) -> Box<dyn Source> {
+        todo!()
+    }
+
+    fn get_console(&self) -> Box<dyn Console> {
         todo!()
     }
 }
@@ -54,7 +60,9 @@ impl AdwGUI {
         app.connect_startup(|_| AdwGUI::load_css());
         app.connect_activate(AdwGUI::build_ui);
 
-        Self { adw_app: app }
+        let window = AppWindow::new(&app);
+
+        Self { app, window }
     }
 
     fn load_css() {
@@ -121,6 +129,3 @@ impl AdwGUI {
         srcview.set_buffer(Some(&buffer));
     }
 }
-
-
-
