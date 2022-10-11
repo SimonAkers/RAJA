@@ -8,5 +8,6 @@ edition = "2021"
 [dependencies]
 adw = { package = "libadwaita", version = "0.1.1" }
 gtk = { package = "gtk4", version = "0.4.8", features = ["v4_6"] }
+glib = "0.15.12"
 sourceview5 = "0.4.2"
 dark-light = "0.2.3"

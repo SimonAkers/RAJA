@@ -2,15 +2,14 @@ use gtk::prelude::*;
 use sourceview5::prelude::*;
 
 use adw::{Application, ApplicationWindow, ColorScheme, StyleManager};
-use gtk::{Builder, CssProvider, StyleContext, Widget};
+use gtk::{Builder, CssProvider, gio, StyleContext, Widget};
 use gtk::gdk::Display;
 
 use crate::traits::*;
-use crate::app_window::imp::AppWindow;
+use crate::app_window::AppWindow;
 
 pub struct AdwGUI {
     app: Application,
-    window: AppWindow,
 }
 
 impl AppUI for AdwGUI {
@@ -60,9 +59,7 @@ impl AdwGUI {
         app.connect_startup(|_| AdwGUI::load_css());
         app.connect_activate(AdwGUI::build_ui);
 
-        let window = AppWindow::new(&app);
-
-        Self { app, window }
+        Self { app }
     }
 
     fn load_css() {
@@ -82,6 +79,7 @@ impl AdwGUI {
         // Set the app color scheme to match the system (dark or light)
         StyleManager::default().set_color_scheme(Self::get_system_color_scheme());
 
+        /*
         // Build UI from the specification
         let builder = Builder::from_file("src/view/res/ui/main.ui");
 
@@ -102,6 +100,9 @@ impl AdwGUI {
             .title("RAJA")
             .content(&content)
             .build();
+         */
+
+        let window = AppWindow::new(app);
 
         // Show the window
         window.show();

@@ -1274,7 +1274,6 @@ name = "raja"
 version = "0.1.0"
 dependencies = [
  "controller",
- "gtk4",
  "view",
 ]
 
@@ -1708,6 +1707,7 @@ name = "view"
 version = "0.1.0"
 dependencies = [
  "dark-light",
+ "glib",
  "gtk4",
  "libadwaita",
  "sourceview5",

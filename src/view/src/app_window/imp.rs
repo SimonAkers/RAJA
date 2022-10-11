@@ -1,3 +1,5 @@
+use adw::subclass::prelude::AdwApplicationWindowImpl;
+use gtk::prelude::*;
 use gtk::subclass::prelude::*;
 
 use gtk::glib;
@@ -5,7 +7,7 @@ use gtk::CompositeTemplate;
 use glib::subclass::InitializingObject;
 
 #[derive(CompositeTemplate, Default)]
-#[template(resource = "/net/shayes/raja/view/window.ui")]
+#[template(file = "../../res/ui/main.ui")]
 pub struct AppWindow {
     #[template_child]
     pub header_bar: TemplateChild<gtk::HeaderBar>,
@@ -17,11 +19,12 @@ pub struct AppWindow {
 impl ObjectSubclass for AppWindow {
     // `NAME` needs to match `class` attribute of template
     const NAME: &'static str = "RajaAppWindow";
-    type Type = AppWindow;
+
+    type Type = super::AppWindow;
     type ParentType = adw::ApplicationWindow;
 
     fn class_init(klass: &mut Self::Class) {
-        klass.bind_template();
+        Self::bind_template(klass);
     }
 
     fn instance_init(obj: &InitializingObject<Self>) {
@@ -29,7 +32,13 @@ impl ObjectSubclass for AppWindow {
     }
 }
 
-impl ObjectImpl for AppWindow {}
+impl ObjectImpl for AppWindow {
+    fn constructed(&self, obj: &Self::Type) {
+        self.parent_constructed(obj);
+    }
+}
+
 impl WidgetImpl for AppWindow {}
 impl WindowImpl for AppWindow {}
 impl ApplicationWindowImpl for AppWindow {}
+impl AdwApplicationWindowImpl for AppWindow {}

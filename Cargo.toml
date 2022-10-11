@@ -6,7 +6,6 @@ authors = [
     "James Pruitt <jamescpruitt@gmail.com>",
 ]
 edition = "2021"
-build = "build.rs"
 
 [[bin]]
 name = "raja"
@@ -21,9 +20,6 @@ members = [
 [dependencies]
 controller = { path = "src/controller" }
 view = { path = "src/view" }
-
-[build-dependencies]
-gtk = { package = "gtk4", version = "0.4.8", features = ["v4_6"] }
 
 [profile.release]
 opt-level = 2 # fast and small wasm
