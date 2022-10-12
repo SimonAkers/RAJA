@@ -8,7 +8,7 @@ use glib::subclass::InitializingObject;
 
 #[derive(CompositeTemplate, Default)]
 #[template(file = "../../res/ui/main.ui")]
-pub struct AppWindow {
+pub struct AppWindowTemplate {
     #[template_child]
     pub header_bar: TemplateChild<gtk::HeaderBar>,
     #[template_child]
@@ -16,15 +16,15 @@ pub struct AppWindow {
 }
 
 #[glib::object_subclass]
-impl ObjectSubclass for AppWindow {
+impl ObjectSubclass for AppWindowTemplate {
     // `NAME` needs to match `class` attribute of template
-    const NAME: &'static str = "RajaAppWindow";
+    const NAME: &'static str = "AppWindow";
 
     type Type = super::AppWindow;
     type ParentType = adw::ApplicationWindow;
 
     fn class_init(klass: &mut Self::Class) {
-        Self::bind_template(klass);
+        klass.bind_template();
     }
 
     fn instance_init(obj: &InitializingObject<Self>) {
@@ -32,13 +32,13 @@ impl ObjectSubclass for AppWindow {
     }
 }
 
-impl ObjectImpl for AppWindow {
+impl ObjectImpl for AppWindowTemplate {
     fn constructed(&self, obj: &Self::Type) {
         self.parent_constructed(obj);
     }
 }
 
-impl WidgetImpl for AppWindow {}
-impl WindowImpl for AppWindow {}
-impl ApplicationWindowImpl for AppWindow {}
-impl AdwApplicationWindowImpl for AppWindow {}
+impl WidgetImpl for AppWindowTemplate {}
+impl WindowImpl for AppWindowTemplate {}
+impl ApplicationWindowImpl for AppWindowTemplate {}
+impl AdwApplicationWindowImpl for AppWindowTemplate {}

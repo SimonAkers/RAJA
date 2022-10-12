@@ -1,12 +1,14 @@
 use gtk::prelude::*;
 use sourceview5::prelude::*;
 
-use adw::{Application, ApplicationWindow, ColorScheme, StyleManager};
-use gtk::{Builder, CssProvider, gio, StyleContext, Widget};
+use adw::{Application, ColorScheme, StyleManager};
+use gtk::{CssProvider, StyleContext};
 use gtk::gdk::Display;
 
 use crate::traits::*;
 use crate::app_window::AppWindow;
+
+const APP_ID: &str = "net.shayes.raja";
 
 pub struct AdwGUI {
     app: Application,
@@ -48,8 +50,7 @@ impl Source for sourceview5::View {
 impl AdwGUI {
     pub fn new() -> Self {
         let app = Application::builder()
-            .application_id("net.shayes.raja")
-            .flags(Default::default())
+            .application_id(APP_ID)
             .build();
 
         sourceview5::View::ensure_type();
@@ -79,30 +80,10 @@ impl AdwGUI {
         // Set the app color scheme to match the system (dark or light)
         StyleManager::default().set_color_scheme(Self::get_system_color_scheme());
 
-        /*
-        // Build UI from the specification
-        let builder = Builder::from_file("src/view/res/ui/main.ui");
+        let window = AppWindow::new(app);
 
         // Style the source view
-        let srcview: sourceview5::View = builder.object("source_view").unwrap();
-        Self::style_srcview(&srcview);
-
-        // Get the main widget from the builder
-        let content: Widget = builder.object("main_box").unwrap();
-
-        // Create the window
-        let window = ApplicationWindow::builder()
-            .application(app)
-            .default_width(960)
-            .default_height(540)
-            .width_request(400)
-            .height_request(300)
-            .title("RAJA")
-            .content(&content)
-            .build();
-         */
-
-        let window = AppWindow::new(app);
+        Self::style_srcview(&window.source_view());
 
         // Show the window
         window.show();
