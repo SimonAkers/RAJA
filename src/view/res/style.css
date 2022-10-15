@@ -1,0 +1,19 @@
+/*
+headerbar entry,
+headerbar spinbutton,
+headerbar button,
+headerbar separator {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+headerbar {
+    min-height: 0px;
+    padding: 8px;
+    margin: 0;
+}
+ */
+
+.sourceview {
+    font: 13px "JetBrains Mono NL";
+}

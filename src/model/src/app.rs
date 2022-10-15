@@ -1,18 +1,12 @@
 use std::fs::read_to_string;
-
-use eframe::egui::{self, menu, ScrollArea};
-
 use rfd::FileDialog;
 
-use crate::{Machine, Register};
+use view::traits::AppUI;
+use crate::Machine;
 
 use self::{
     console::Console,
-    editor::Editor,
-    memory::MemoryView,
-    pipeline_view::PipelineView,
-    run_menu::RunMenu,
-    watches::{Watch, WatchList},
+    watches::Watch,
 };
 
 mod console;
@@ -27,21 +21,12 @@ pub struct App {
     machine: Machine,
     script: String,
     console: Console,
-    show_watches: bool,
-    show_stack: bool,
-    show_pipeline: bool,
-    show_regs: bool,
-    regs_hex: bool,
-    stack_hex: bool,
     watches: Vec<Watch>,
     running: bool,
-    show_memory: bool,
-    view_address: usize,
-    view_endian: bool,
 }
 
 fn open_script() -> Option<String> {
-    let file = FileDialog::new().set_directory(".").pick_file();
+    let file = FileDialog::new().set_directory("../../../../..").pick_file();
     if let Some(path) = file {
         let file = read_to_string(path).unwrap();
         Some(file)
@@ -50,6 +35,23 @@ fn open_script() -> Option<String> {
     }
 }
 
+impl App {
+    pub fn new() -> Self {
+        Self {
+            machine: Default::default(),
+            script: String::new(),
+            console: Default::default(),
+            watches: vec![],
+            running: false,
+        }
+    }
+
+    pub fn run(&self) {
+        todo!()
+    }
+}
+
+/*
 impl eframe::App for App {
     fn update(&mut self, ctx: &egui::Context, frame: &mut eframe::Frame) {
         frame.set_window_title("Just Another Mips Editor and Simulator");
@@ -219,3 +221,4 @@ impl eframe::App for App {
         });
     }
 }
+ */

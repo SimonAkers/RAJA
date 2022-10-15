@@ -1,7 +1,9 @@
-mod app;
+use crate::Machine;
+
+pub mod parser;
+pub mod app;
 mod machine;
 mod memory;
-mod parser;
 mod pipeline;
 mod register;
 mod syscall;
@@ -30,7 +32,7 @@ pub mod stages {
     }
 }
 
-pub use app::App;
+pub use parser::*;
 pub use machine::*;
 pub use memory::*;
 pub use register::*;
