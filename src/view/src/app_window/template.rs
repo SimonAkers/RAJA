@@ -2,7 +2,6 @@ use adw::subclass::prelude::AdwApplicationWindowImpl;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
 
-use gtk::glib;
 use gtk::CompositeTemplate;
 use glib::subclass::InitializingObject;
 
@@ -33,8 +32,8 @@ impl ObjectSubclass for AppWindowTemplate {
 }
 
 impl ObjectImpl for AppWindowTemplate {
-    fn constructed(&self, obj: &Self::Type) {
-        self.parent_constructed(obj);
+    fn constructed(&self) {
+        self.parent_constructed();
     }
 }
 

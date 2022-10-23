@@ -15,7 +15,9 @@ glib::wrapper! {
 impl AppWindow {
     pub fn new(app: &Application) -> Self {
         // Create new window
-        Object::new(&[("application", app)]).expect("Failed to create Window")
+        Object::builder::<AppWindow>()
+            .property("application", app)
+            .build()
     }
 
     pub fn header_bar(&self) -> HeaderBar {
