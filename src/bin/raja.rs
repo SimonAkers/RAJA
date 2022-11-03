@@ -5,5 +5,5 @@ fn main() {
     let gui = AdwGUI::new();
     let app = App::new(Box::new(gui));
 
-    app.run();
+    app.start();
 }

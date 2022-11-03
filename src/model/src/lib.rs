@@ -2,7 +2,7 @@ use crate::Machine;
 
 pub mod parser;
 pub mod app;
-mod machine;
+pub mod machine;
 mod memory;
 mod pipeline;
 mod register;

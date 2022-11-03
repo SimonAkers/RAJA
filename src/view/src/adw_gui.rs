@@ -11,16 +11,22 @@ use crate::app_window::AppWindow;
 const APP_ID: &str = "net.shayes.raja";
 
 pub struct AdwGUI {
-    app: Application,
+    app: Application
 }
 
 impl AppUI for AdwGUI {
-    fn run(&self) {
+    fn start(&self) {
         self.app.run();
     }
 
     fn get_source(&self) -> Box<dyn Source> {
-        todo!()
+        let window = self.app
+            .active_window()
+            .expect("Failed to find active window")
+            .dynamic_cast::<AppWindow>()
+            .expect("Failed to upcast Window");
+
+        Box::new(window.source_view())
     }
 
     fn get_console(&self) -> Box<dyn Console> {
@@ -52,10 +58,6 @@ impl AdwGUI {
         let app = Application::builder()
             .application_id(APP_ID)
             .build();
-
-        sourceview5::View::ensure_type();
-        sourceview5::Buffer::ensure_type();
-        sourceview5::Language::ensure_type();
 
         app.connect_startup(|_| AdwGUI::load_css());
         app.connect_activate(AdwGUI::build_ui);
