@@ -1,9 +1,8 @@
-use controller::app::App;
 use view::adw_gui::AdwGUI;
+use view::traits::AppUI;
 
 fn main() {
-    let gui = AdwGUI::new();
-    let app = App::new(Box::new(gui));
+    let app = AdwGUI::new();
 
     app.start();
 }

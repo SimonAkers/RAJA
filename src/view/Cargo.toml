@@ -6,6 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+model = { path = "../model" }
 adw = { package = "libadwaita", version = "0.2.0" }
 gtk = { package = "gtk4", version = "0.5.0", features = ["v4_8"] }
 sourceview5 = "0.5.0"

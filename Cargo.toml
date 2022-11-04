@@ -12,13 +12,11 @@ name = "raja"
 
 [workspace]
 members = [
-    "src/controller",
     "src/model",
     "src/view",
 ]
 
 [dependencies]
-controller = { path = "src/controller" }
 view = { path = "src/view" }
 
 [profile.release]
