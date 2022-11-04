@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+ Author: Ben West
+ Copyright (C) 2010 Ben West
+
+ This library is free software; you can redistribute it and/or
+ modify it under the terms of the GNU Library General Public
+ License as published by the Free Software Foundation; either
+ version 2 of the License, or (at your option) any later version.
+
+ This library is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ Library General Public License for more details.
+
+ You should have received a copy of the GNU Library General Public
+ License along with this library; if not, write to the
+ Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+ Boston, MA 02111-1307, USA.
+
+-->
+<!--
+	Somewhat copied and pasted from nasm.lang
+-->
+<language id="mal" _name="MAL" version="2.0" _section="Others">
+    <metadata>
+      <property name="mimetypes">text/mal</property>
+      <property name="globs">*.a;*.s;*.asm</property>
+      <property name="line-comment-start">#</property>
+    </metadata>
+
+    <styles>
+        <style id="comment"           	_name="Comment"             	map-to="def:comment"/>
+        <style id="error"             	_name="Error"               	map-to="def:error"/>
+        <style id="string"            	_name="String"              	map-to="def:string"/>
+        <style id="preprocessor"      	_name="Preprocessor"        	map-to="def:preprocessor"/>
+        <style id="opcode"            	_name="Opcode"              	map-to="def:keyword"/>
+        <style id="register"          	_name="Register"            	map-to="def:special-char"/>
+        <style id="type"              	_name="Data Type"           	map-to="def:type"/>
+        <style id="escaped-character" 	_name="Escaped Character"   	map-to="def:special-char"/>
+        <style id="decimal"           	_name="Decimal number"  	map-to="def:decimal"/>
+	<style id="label"		_name="Label"			map-to="def:identifier" />
+    </styles>
+    
+    <default-regex-options case-sensitive="false"/>
+
+    <definitions>
+        <define-regex id="escaped-character" extended="true">
+            \\(      # leading backslash
+            [\\\"\'] # escaped character
+            )
+        </define-regex>
+
+        <context id="mal">
+            <include>	
+		<context id="preprocessor" style-ref="preprocessor">
+			<prefix>^\.</prefix>
+			<keyword>data</keyword>
+			<keyword>text</keyword>
+		</context>
+
+                <context id="comment" style-ref="comment" end-at-line-end="true">
+                    <start>#</start>
+                    <include>
+                      <context ref="def:in-line-comment"/>
+                    </include>
+                </context>
+
+                <context id="string" style-ref="string" end-at-line-end="true">
+                    <start>"</start>
+                    <end>"</end>
+                    <include>
+                        <context id="escaped-characterw" style-ref="escaped-character">
+                            <match>\%{escaped-character}</match>
+                        </context>
+                    </include>
+                </context>
+                <context id="string2" style-ref="string" end-at-line-end="true">
+                    <start>'</start>
+                    <end>'</end>
+                    <include>
+                        <context id="escaped-characters" style-ref="escaped-character">
+                            <match>\%{escaped-character}</match>
+                        </context>
+                    </include>
+                </context>
+
+                <context id="decimal" style-ref="decimal">
+                    <match extended="true">
+                        (?&lt;![\w\.])
+                        [0-9]+
+                        (?![\w\.])
+                    </match>
+                </context>
+
+                <context id="registers" style-ref="register">			
+			<match extended="true">
+				(\$
+					(
+						\d|[12]\d|31|
+						(ra)|
+						([vk][01])|
+						(a[0-3t])|
+						(t[0-9])|
+						(s[0-7p])|
+						([gsf]p)|
+						(zero)|
+						(f\d|f[12]\d|f31)
+					)
+				)\b
+			</match>			
+                </context>
+
+		<context id="label" style-ref="label">
+			<match extended="true">
+				^\w+:
+			</match>
+		</context>
+
+                <!-- Opcodes -->
+		<context id="opcodes_simple" style-ref="opcode">
+			<!-- MAL Opcodes -->
+			<keyword>la</keyword>
+			<keyword>li</keyword>
+			<keyword>lw</keyword>
+			<keyword>lwcl</keyword>
+			<keyword>lwl</keyword>
+			<keyword>lwr</keyword>
+			<keyword>lb</keyword>
+			<keyword>lbu</keyword>
+			<keyword>lui</keyword>
+			<keyword>lh</keyword>
+			<keyword>lhu</keyword>
+			<keyword>ld</keyword>
+			<keyword>ulh</keyword>
+			<keyword>ulhu</keyword>
+			<keyword>ulw</keyword>
+			<keyword>ll</keyword>
+			<keyword>sw</keyword>
+			<keyword>swl</keyword>
+			<keyword>swr</keyword>
+			<keyword>swcl</keyword>
+			<keyword>sd</keyword>
+			<keyword>sdcl</keyword>
+			<keyword>sb</keyword>
+			<keyword>sh</keyword>
+			<keyword>ush</keyword>
+			<keyword>usw</keyword>
+			<keyword>sc</keyword>
+			<keyword>abs(\.[sd])?</keyword>
+			<keyword>add(\.[sd])?</keyword>
+			<keyword>addu</keyword>
+			<keyword>addi</keyword>
+			<keyword>addiu</keyword>
+			<keyword>sub(\.[sd])?</keyword>
+			<keyword>subu</keyword>
+			<keyword>mult</keyword>
+			<keyword>multu</keyword>
+			<keyword>mul\.[sd]</keyword>
+			<keyword>mulo</keyword>
+			<keyword>mulou</keyword>
+			<keyword>madd</keyword>
+			<keyword>maddu</keyword>
+			<keyword>msub</keyword>
+			<keyword>neg(\.[sd])?</keyword>
+			<keyword>negu</keyword>
+			<keyword>beq</keyword>
+			<keyword>div(\.[sd])?</keyword>
+			<keyword>divu</keyword>
+			<keyword>rem</keyword>
+			<keyword>remu</keyword>
+			<keyword>and</keyword>
+			<keyword>andi</keyword>
+			<keyword>or</keyword>
+			<keyword>ori</keyword>
+			<keyword>xor</keyword>
+			<keyword>nor</keyword>
+			<keyword>not</keyword>
+			<keyword>move</keyword>
+			<keyword>sll</keyword>
+			<keyword>sllv</keyword>
+			<keyword>srl</keyword>
+			<keyword>srlv</keyword>
+			<keyword>sra</keyword>
+			<keyword>srav</keyword>
+			<keyword>rol</keyword>
+			<keyword>ror</keyword>
+			<keyword>l\.[sd]</keyword>
+			<keyword>s\.[sd]</keyword>
+			<keyword>mov\.[sd]</keyword>
+			<keyword>c\.eq\.[sd]</keyword>
+			<keyword>c\.le\.[sd]</keyword>
+			<keyword>c\.lt\.[sd]</keyword>
+			<keyword>cvt\.s\.[wd]</keyword>
+			<keyword>cvt\.w\.[sd]</keyword>
+			<keyword>cvt\.d\.[sw]</keyword>
+			<keyword>mfhi</keyword>
+			<keyword>mflo</keyword>
+			<keyword>mthi</keyword>
+			<keyword>mtlo</keyword>
+			<keyword>mfc0</keyword>
+			<keyword>mtc0</keyword>
+			<keyword>mfc1</keyword>
+			<keyword>mtc1</keyword>
+			<keyword>b</keyword>
+			<keyword>slt</keyword>
+			<keyword>sltu</keyword>
+			<keyword>slti</keyword>
+			<keyword>sltiu</keyword>
+			<keyword>seq</keyword>
+			<keyword>sge</keyword>
+			<keyword>sgeu</keyword>
+			<keyword>sgt</keyword>
+			<keyword>sgtu</keyword>
+			<keyword>sle</keyword>
+			<keyword>sleu</keyword>
+			<keyword>sne</keyword>
+			<keyword>b</keyword>
+			<keyword>bc1f</keyword>
+			<keyword>bc1t</keyword>
+			<keyword>beq</keyword>
+			<keyword>bne</keyword>
+			<keyword>blt</keyword>
+			<keyword>bgt</keyword>
+			<keyword>ble</keyword>
+			<keyword>bge</keyword>
+			<keyword>bltz</keyword>
+			<keyword>bgtz</keyword>
+			<keyword>blez</keyword>
+			<keyword>bgez</keyword>
+			<keyword>bnez</keyword>
+			<keyword>beqz</keyword>
+			<keyword>j</keyword>
+			<keyword>jr</keyword>
+			<keyword>jal</keyword>
+			<keyword>jalr</keyword>
+			<keyword>getc</keyword>
+			<keyword>putc</keyword>
+			<keyword>puts</keyword>
+			<keyword>done</keyword>
+			<keyword>syscall</keyword>
+                </context>                               
+                
+                <context id="types" style-ref="type">
+			<prefix>\.</prefix>
+			<keyword>byte</keyword>
+			<keyword>word</keyword>
+			<keyword>asciiz</keyword>
+			<keyword>ascii</keyword>
+			<keyword>float</keyword>
+                </context>         
+            </include>
+        </context>
+        
+    </definitions>
+</language>
