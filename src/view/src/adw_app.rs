@@ -5,13 +5,16 @@ use adw::{Application, ColorScheme, StyleManager};
 use gtk::{CssProvider, StyleContext};
 use gtk::gdk::Display;
 
+use model::machine::Machine;
+
 use crate::traits::*;
 use crate::app_window::AppWindow;
 
 const APP_ID: &str = "net.shayes.raja";
 
 pub struct AdwApp {
-    app: Application
+    app: Application,
+    machine: Machine,
 }
 
 impl AppUI for AdwApp {
@@ -62,7 +65,7 @@ impl AdwApp {
         app.connect_startup(|_| AdwApp::load_css());
         app.connect_activate(AdwApp::build_ui);
 
-        Self { app }
+        Self { app, machine: Default::default() }
     }
 
     fn load_css() {
