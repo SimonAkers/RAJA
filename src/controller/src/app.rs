@@ -8,18 +8,15 @@ pub struct App {
 
 impl App {
     pub fn new(ui: Box<dyn AppUI>) -> Self {
-        // Create a new instance of App and connect the UI
-        let app = Self { ui, machine: Default::default() };
-        //app.connect_ui();
-
-        app
+        // Create a new instance of App
+        Self { ui, machine: Default::default() }
     }
 
     pub fn start(&self) {
         self.ui.start();
     }
 
-    fn connect_ui(&self) {
+    fn connect(&self) {
         let src = self.ui.get_source();
     }
 }
