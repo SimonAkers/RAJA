@@ -10,11 +10,11 @@ use crate::app_window::AppWindow;
 
 const APP_ID: &str = "net.shayes.raja";
 
-pub struct AdwGUI {
+pub struct AdwApp {
     app: Application
 }
 
-impl AppUI for AdwGUI {
+impl AppUI for AdwApp {
     fn start(&self) {
         self.app.run();
     }
@@ -53,14 +53,14 @@ impl Source for sourceview5::View {
     }
 }
 
-impl AdwGUI {
+impl AdwApp {
     pub fn new() -> Self {
         let app = Application::builder()
             .application_id(APP_ID)
             .build();
 
-        app.connect_startup(|_| AdwGUI::load_css());
-        app.connect_activate(AdwGUI::build_ui);
+        app.connect_startup(|_| AdwApp::load_css());
+        app.connect_activate(AdwApp::build_ui);
 
         Self { app }
     }

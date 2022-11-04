@@ -1,8 +1,8 @@
-use view::adw_gui::AdwGUI;
+use view::adw_app::AdwApp;
 use view::traits::AppUI;
 
 fn main() {
-    let app = AdwGUI::new();
+    let app = AdwApp::new();
 
     app.start();
 }
