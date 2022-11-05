@@ -9,6 +9,7 @@ use gtk::{CssProvider, StyleContext};
 use gtk::gdk::Display;
 
 use model::machine::Machine;
+use util::shared::Shared;
 
 use crate::traits::*;
 use crate::app_window::AppWindow;
@@ -21,23 +22,32 @@ pub struct AdwApp {
 }
 
 impl AppUI for AdwApp {
-    fn start(&mut self) {
+    fn launch() {
         let app = Application::builder()
             .application_id(APP_ID)
             .build();
 
+        // Create a shared instance of AdwApp
+        let adw_app = Shared::new(
+            Self { app: Some(app.clone()), machine: Default::default() }
+        );
+
+        // Connect the startup signal
         app.connect_startup(|_| AdwApp::load_css());
-        app.connect_activate(AdwApp::build_ui);
 
-        self.app = Some(app);
+        // Connect the activate signal
+        let _adw_app = adw_app.clone();
+        app.connect_activate(move |app| {
+            AdwApp::activate(app, &_adw_app);
+        });
 
-        let rc = Rc::new(RefCell::new(self));
-
-        rc.clone().borrow().app.as_ref().unwrap().run();
+        // Run the app
+        app.run();
     }
 
     fn get_source(&self) -> Box<dyn Source> {
-        let window = self.app.as_ref()
+        let window = self.app
+            .as_ref()
             .expect("Application not running")
             .active_window()
             .expect("Failed to find active window")
@@ -52,28 +62,13 @@ impl AppUI for AdwApp {
     }
 }
 
-impl Source for sourceview5::View {
-    /// Gets the text of the GtkSourceView
-    ///
-    /// # Returns
-    /// The text of the GtkSourceView as a String
-    fn get_text(&self) -> String {
-        // Get the bounds of the buffer
-        let (iter1, iter2) = self.buffer().bounds();
-
-        // Return the text within the buffer bounds
-        self.buffer().text(&iter1, &iter2, false).as_str().to_owned()
-    }
-
-    /// Clears the buffer of the GtkSourceView (sets it to the empty string)
-    fn clear(&self) {
-        self.buffer().set_text("");
-    }
-}
-
 impl AdwApp {
-    pub fn new() -> Self {
-        Self { app: None, machine: Default::default() }
+    fn activate(app: &Application, adw_app: &Shared<AdwApp>) {
+        AdwApp::build_ui(app);
+
+        // TODO: Connect UI to backend from here
+        // This does not panic which means everything is working as expected!
+        adw_app.borrow().get_source();
     }
 
     fn load_css() {
@@ -122,5 +117,24 @@ impl AdwApp {
         }
 
         srcview.set_buffer(Some(&buffer));
+    }
+}
+
+impl Source for sourceview5::View {
+    /// Gets the text of the GtkSourceView
+    ///
+    /// # Returns
+    /// The text of the GtkSourceView as a String
+    fn get_text(&self) -> String {
+        // Get the bounds of the buffer
+        let (iter1, iter2) = self.buffer().bounds();
+
+        // Return the text within the buffer bounds
+        self.buffer().text(&iter1, &iter2, false).as_str().to_owned()
+    }
+
+    /// Clears the buffer of the GtkSourceView (sets it to the empty string)
+    fn clear(&self) {
+        self.buffer().set_text("");
     }
 }
