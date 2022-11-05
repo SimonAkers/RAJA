@@ -1,3 +1,6 @@
+use std::cell::RefCell;
+use std::rc::Rc;
+
 use gtk::prelude::*;
 use sourceview5::prelude::*;
 
@@ -13,17 +16,29 @@ use crate::app_window::AppWindow;
 const APP_ID: &str = "net.shayes.raja";
 
 pub struct AdwApp {
-    app: Application,
+    app: Option<Application>,
     machine: Machine,
 }
 
 impl AppUI for AdwApp {
-    fn start(&self) {
-        self.app.run();
+    fn start(&mut self) {
+        let app = Application::builder()
+            .application_id(APP_ID)
+            .build();
+
+        app.connect_startup(|_| AdwApp::load_css());
+        app.connect_activate(AdwApp::build_ui);
+
+        self.app = Some(app);
+
+        let rc = Rc::new(RefCell::new(self));
+
+        rc.clone().borrow().app.as_ref().unwrap().run();
     }
 
     fn get_source(&self) -> Box<dyn Source> {
-        let window = self.app
+        let window = self.app.as_ref()
+            .expect("Application not running")
             .active_window()
             .expect("Failed to find active window")
             .dynamic_cast::<AppWindow>()
@@ -58,14 +73,7 @@ impl Source for sourceview5::View {
 
 impl AdwApp {
     pub fn new() -> Self {
-        let app = Application::builder()
-            .application_id(APP_ID)
-            .build();
-
-        app.connect_startup(|_| AdwApp::load_css());
-        app.connect_activate(AdwApp::build_ui);
-
-        Self { app, machine: Default::default() }
+        Self { app: None, machine: Default::default() }
     }
 
     fn load_css() {
