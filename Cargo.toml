@@ -14,6 +14,7 @@ name = "raja"
 members = [
     "src/model",
     "src/view",
+    "src/util",
 ]
 
 [dependencies]

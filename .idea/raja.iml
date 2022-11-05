@@ -12,6 +12,7 @@
       <sourceFolder url="file://$MODULE_DIR$/src/model/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/view/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/controller/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/src/util/src" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
       <excludeFolder url="file://$MODULE_DIR$/workspace/workspace/target" />
       <excludeFolder url="file://$MODULE_DIR$/workspace/target" />
