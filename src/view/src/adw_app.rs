@@ -1,3 +1,4 @@
+use std::borrow::Borrow;
 use std::time::Duration;
 use gtk::prelude::*;
 use sourceview5::prelude::*;
@@ -5,6 +6,7 @@ use sourceview5::prelude::*;
 use adw::{Application, ColorScheme, StyleManager};
 use gtk::{CssProvider, StyleContext};
 use gtk::gdk::Display;
+use model::assembler;
 
 use model::machine::Machine;
 use util::shared::Shared;
@@ -15,7 +17,7 @@ use crate::app_window::AppWindow;
 const APP_ID: &str = "net.shayes.raja";
 
 pub struct AdwApp {
-    app: Option<Application>,
+    app: Application,
     machine: Machine,
 }
 
@@ -27,7 +29,7 @@ impl AdwApp {
 
         // Create a shared instance of AdwApp
         let adw_app = Shared::new(
-            Self { app: Some(app.clone()), machine: Default::default() }
+            Self { app: app.clone(), machine: Default::default() }
         );
 
         // Connect the startup signal
@@ -47,12 +49,31 @@ impl AdwApp {
         let window = AdwApp::build_window(app);
 
         // TODO: Connect UI to backend from here
-        let app_ref = adw_app.borrow();
 
-        window.btn_run().connect_clicked(|_| {
-            glib::timeout_add(Duration::from_millis(100), || {
-                println!("Cycle");
-                Continue(true)
+        // Connect run button
+        let (_adw_app, _window) = (adw_app.clone(), window.clone());
+        window.btn_run().connect_clicked(move |_| {
+            let (adw_app, window) = (_adw_app.clone(), _window.clone());
+
+            let machine = &mut adw_app.borrow_mut().machine;
+
+            // Get the assembly code
+            let mut src = window.source_view().get_text();
+            src.push('\n');
+
+            // Flash the machine
+            let (mem, lbl) = assembler(src.as_str()).unwrap();
+            machine.flash(mem, lbl);
+
+            let adw_app = adw_app.clone();
+            glib::timeout_add_local(Duration::from_millis(100), move || {
+                let machine = &mut adw_app.borrow_mut().machine;
+
+                // Cycle while the machine is not done
+                match machine.cycle() {
+                    Ok(_) => Continue(true),
+                    Err(_) => { println!("Done"); Continue(false) },
+                }
             });
         });
 
