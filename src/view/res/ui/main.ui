@@ -64,7 +64,7 @@
                         <property name="spacing">12</property>
 
                         <child>
-                            <object class="GtkButton">
+                            <object class="GtkButton" id="btn_run">
                                 <property name="icon-name">media-playback-start-symbolic</property>
                                 <property name="tooltip-text">Run</property>
                             </object>

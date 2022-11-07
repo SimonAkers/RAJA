@@ -27,4 +27,8 @@ impl AppWindow {
     pub fn source_view(&self) -> sourceview5::View {
         self.imp().source_view.get()
     }
+
+    pub fn btn_run(&self) -> gtk::Button {
+        self.imp().btn_run.get()
+    }
 }

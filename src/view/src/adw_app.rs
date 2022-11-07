@@ -1,6 +1,4 @@
-use std::cell::RefCell;
-use std::rc::Rc;
-
+use std::time::Duration;
 use gtk::prelude::*;
 use sourceview5::prelude::*;
 
@@ -21,8 +19,8 @@ pub struct AdwApp {
     machine: Machine,
 }
 
-impl AppUI for AdwApp {
-    fn launch() {
+impl AdwApp {
+    pub fn launch() {
         let app = Application::builder()
             .application_id(APP_ID)
             .build();
@@ -45,30 +43,21 @@ impl AppUI for AdwApp {
         app.run();
     }
 
-    fn get_source(&self) -> Box<dyn Source> {
-        let window = self.app
-            .as_ref()
-            .expect("Application not running")
-            .active_window()
-            .expect("Failed to find active window")
-            .dynamic_cast::<AppWindow>()
-            .expect("Failed to upcast Window");
-
-        Box::new(window.source_view())
-    }
-
-    fn get_console(&self) -> Box<dyn Console> {
-        todo!()
-    }
-}
-
-impl AdwApp {
     fn activate(app: &Application, adw_app: &Shared<AdwApp>) {
-        AdwApp::build_ui(app);
+        let window = AdwApp::build_window(app);
 
         // TODO: Connect UI to backend from here
-        // This does not panic which means everything is working as expected!
-        adw_app.borrow().get_source();
+        let app_ref = adw_app.borrow();
+
+        window.btn_run().connect_clicked(|_| {
+            glib::timeout_add(Duration::from_millis(100), || {
+                println!("Cycle");
+                Continue(true)
+            });
+        });
+
+        // Show the window
+        window.show();
     }
 
     fn load_css() {
@@ -84,7 +73,7 @@ impl AdwApp {
         );
     }
 
-    fn build_ui(app: &Application) {
+    fn build_window(app: &Application) -> AppWindow {
         // Set the app color scheme to match the system (dark or light)
         StyleManager::default().set_color_scheme(Self::get_system_color_scheme());
 
@@ -93,8 +82,7 @@ impl AdwApp {
         // Style the source view
         Self::style_srcview(&window.source_view());
 
-        // Show the window
-        window.show();
+        window
     }
 
     /// Gets a color scheme based on the system's theme (i.e. dark or light mode).
