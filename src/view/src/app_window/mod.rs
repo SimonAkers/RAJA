@@ -31,4 +31,8 @@ impl AppWindow {
     pub fn btn_run(&self) -> gtk::Button {
         self.imp().btn_run.get()
     }
+
+    pub fn btn_build(&self) -> gtk::Button {
+        self.imp().btn_build.get()
+    }
 }

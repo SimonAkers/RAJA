@@ -14,6 +14,8 @@ pub struct AppWindowTemplate {
     pub source_view: TemplateChild<sourceview5::View>,
     #[template_child]
     pub btn_run: TemplateChild<gtk::Button>,
+    #[template_child]
+    pub btn_build: TemplateChild<gtk::Button>,
 }
 
 #[glib::object_subclass]

@@ -1,5 +1,7 @@
 use std::borrow::Borrow;
 use std::time::Duration;
+use debug_print::*;
+
 use gtk::prelude::*;
 use sourceview5::prelude::*;
 
@@ -50,6 +52,9 @@ impl AdwApp {
 
         // TODO: Connect UI to backend from here
 
+        // Connect build button
+        Self::connect_btn_build(adw_app.clone(), window.clone());
+
         // Connect run button
         Self::connect_btn_run(adw_app.clone(), window.clone());
 
@@ -57,17 +62,16 @@ impl AdwApp {
         window.show();
     }
 
+    fn connect_btn_build(adw_app: Shared<AdwApp>, window: AppWindow) {
+        window.btn_build().connect_clicked(move |_| {
+            debug_println!("BUILD BUTTON PRESSED");
+            Self::flash_machine(&adw_app, &window);
+        });
+    }
+
     fn connect_btn_run(adw_app: Shared<AdwApp>, window: AppWindow) {
         window.btn_run().connect_clicked(move |_| {
-            let machine = &mut adw_app.borrow_mut().machine;
-
-            // Get the assembly code
-            let mut src = window.source_view().get_text();
-            src.push('\n');
-
-            // Flash the machine
-            let (mem, lbl) = assembler(src.as_str()).unwrap();
-            machine.flash(mem, lbl);
+            Self::flash_machine(&adw_app, &window);
 
             let adw_app = adw_app.clone();
             glib::timeout_add_local(Duration::from_millis(100), move || {
@@ -76,10 +80,22 @@ impl AdwApp {
                 // Cycle while the machine is not done
                 match machine.cycle() {
                     Ok(_) => Continue(true),
-                    Err(_) => { println!("Done"); Continue(false) },
+                    Err(_) => { debug_println!("RUN FINISHED"); Continue(false) },
                 }
             });
         });
+    }
+
+    fn flash_machine(adw_app: &Shared<AdwApp>, window: &AppWindow) {
+        let machine = &mut adw_app.borrow_mut().machine;
+
+        // Get the assembly code
+        let mut src = window.source_view().get_text();
+        src.push('\n');
+
+        // Flash the machine
+        let (mem, lbl) = assembler(src.as_str()).unwrap();
+        machine.flash(mem, lbl);
     }
 
     fn load_css() {
