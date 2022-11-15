@@ -51,10 +51,14 @@ impl AdwApp {
         // TODO: Connect UI to backend from here
 
         // Connect run button
-        let (_adw_app, _window) = (adw_app.clone(), window.clone());
-        window.btn_run().connect_clicked(move |_| {
-            let (adw_app, window) = (_adw_app.clone(), _window.clone());
+        Self::connect_btn_run(adw_app.clone(), window.clone());
 
+        // Show the window
+        window.show();
+    }
+
+    fn connect_btn_run(adw_app: Shared<AdwApp>, window: AppWindow) {
+        window.btn_run().connect_clicked(move |_| {
             let machine = &mut adw_app.borrow_mut().machine;
 
             // Get the assembly code
@@ -76,9 +80,6 @@ impl AdwApp {
                 }
             });
         });
-
-        // Show the window
-        window.show();
     }
 
     fn load_css() {
