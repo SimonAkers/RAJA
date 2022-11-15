@@ -65,13 +65,13 @@ impl AdwApp {
     fn connect_btn_build(adw_app: Shared<AdwApp>, window: AppWindow) {
         window.btn_build().connect_clicked(move |_| {
             debug_println!("BUILD BUTTON PRESSED");
-            Self::flash_machine(&adw_app, &window);
+            Self::reset_flash_machine(&adw_app, &window);
         });
     }
 
     fn connect_btn_run(adw_app: Shared<AdwApp>, window: AppWindow) {
         window.btn_run().connect_clicked(move |_| {
-            Self::flash_machine(&adw_app, &window);
+            Self::reset_flash_machine(&adw_app, &window);
 
             let adw_app = adw_app.clone();
             glib::timeout_add_local(Duration::from_millis(100), move || {
@@ -86,12 +86,15 @@ impl AdwApp {
         });
     }
 
-    fn flash_machine(adw_app: &Shared<AdwApp>, window: &AppWindow) {
+    fn reset_flash_machine(adw_app: &Shared<AdwApp>, window: &AppWindow) {
         let machine = &mut adw_app.borrow_mut().machine;
 
         // Get the assembly code
         let mut src = window.source_view().get_text();
         src.push('\n');
+
+        // Reset the machine
+        machine.hard_reset();
 
         // Flash the machine
         let (mem, lbl) = assembler(src.as_str()).unwrap();
