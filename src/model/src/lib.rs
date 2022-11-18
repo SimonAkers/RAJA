@@ -6,7 +6,7 @@ pub mod machine;
 mod memory;
 mod pipeline;
 mod register;
-mod syscall;
+pub mod syscall;
 
 pub mod stages {
     pub mod writeback;

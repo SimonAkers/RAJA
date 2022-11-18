@@ -1,4 +1,5 @@
 use std::borrow::Borrow;
+use std::ops::ControlFlow;
 use std::time::Duration;
 use debug_print::*;
 
@@ -11,6 +12,8 @@ use gtk::gdk::Display;
 use model::assembler;
 
 use model::machine::Machine;
+use model::syscall::Syscall;
+
 use util::shared::Shared;
 
 use crate::traits::*;
@@ -77,10 +80,34 @@ impl AdwApp {
             glib::timeout_add_local(Duration::from_millis(100), move || {
                 let machine = &mut adw_app.borrow_mut().machine;
 
-                // Cycle while the machine is not done
+
+                // ===== BEGIN PRINT SYSCALL HANDLING =====
+                // TODO: Move print syscall code out of UI code!!!!!!!!!!!
+                // TODO: Optimize this, since it greatly slows down simulation
+                let mut print = String::new();
+                machine.handle_syscall(|syscall| match syscall {
+                    Syscall::Print(out) => ControlFlow::Break(print.push_str(&out)),
+                    Syscall::Error(out) => ControlFlow::Break({
+                        print.push_str(&format!("ERROR: {out}\n"));
+                    }),
+                    Syscall::Quit => ControlFlow::Break(()),
+                    _ => ControlFlow::Continue(()),
+                });
+
+                if print.len() > 0 {
+                    println!("{}", print);
+                }
+
+                // VERY BAD AND HACKY WAY TO EXIT!!!!!!
+                if print == "ERROR: program finished (ran into kernel)\n".to_string() {
+                    return Continue(false);
+                }
+                // ===== END PRINT SYSCALL HANDLING =====
+
+                // Cycle the machine
                 match machine.cycle() {
                     Ok(_) => Continue(true),
-                    Err(_) => { debug_println!("RUN FINISHED"); Continue(false) },
+                    Err(_) => { debug_println!("CYCLE FAILED"); Continue(false) },
                 }
             });
         });
@@ -94,7 +121,7 @@ impl AdwApp {
         src.push('\n');
 
         // Reset the machine
-        machine.hard_reset();
+        machine.reset();
 
         // Flash the machine
         let (mem, lbl) = assembler(src.as_str()).unwrap();
