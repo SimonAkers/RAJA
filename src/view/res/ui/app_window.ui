@@ -202,13 +202,15 @@
                                 <property name="vexpand">True</property>
 
                                 <property name="child">
-                                    <object class="GtkSourceView" id="console">
+                                    <object class="GtkConsole" id="console">
+                                        <property name="editable">False</property>
                                         <property name="hexpand">True</property>
                                         <property name="vexpand">True</property>
                                         <property name="top-margin">8</property>
                                         <property name="bottom-margin">8</property>
                                         <property name="left-margin">8</property>
                                         <property name="right-margin">8</property>
+                                        <!-- TODO: Fix CSS -->
                                         <property name="css-name">sourceview</property>
                                     </object>
                                 </property>

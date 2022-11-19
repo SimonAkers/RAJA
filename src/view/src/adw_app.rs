@@ -16,6 +16,7 @@ use model::syscall::Syscall;
 
 use util::shared::Shared;
 
+use crate::ensure;
 use crate::traits::*;
 use crate::app_window::AppWindow;
 
@@ -28,6 +29,9 @@ pub struct AdwApp {
 
 impl AdwApp {
     pub fn launch() {
+        // Ensure custom widgets are known to GTK
+        ensure::ensure_types();
+
         let app = Application::builder()
             .application_id(APP_ID)
             .build();
