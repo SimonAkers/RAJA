@@ -78,12 +78,14 @@ impl AdwApp {
 
     fn connect_btn_run(adw_app: Shared<AdwApp>, window: AppWindow) {
         window.btn_run().connect_clicked(move |_| {
+            debug_println!("[DEBUG] Assembling and running...");
+
             Self::reset_flash_machine(&adw_app, &window);
 
             let adw_app = adw_app.clone();
+            let window = window.clone();
             glib::timeout_add_local(Duration::from_millis(100), move || {
                 let machine = &mut adw_app.borrow_mut().machine;
-
 
                 // ===== BEGIN PRINT SYSCALL HANDLING =====
                 // TODO: Move print syscall code out of UI code!!!!!!!!!!!
@@ -99,7 +101,8 @@ impl AdwApp {
                 });
 
                 if print.len() > 0 {
-                    println!("{}", print);
+                    window.console().print(&*format!("{}", print));
+                    debug_println!("[CONSOLE] {}", print);
                 }
 
                 // VERY BAD AND HACKY WAY TO EXIT!!!!!!

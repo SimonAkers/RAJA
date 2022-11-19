@@ -5,6 +5,8 @@ use gtk::subclass::prelude::*;
 use gtk::CompositeTemplate;
 use glib::subclass::InitializingObject;
 
+use crate::gtk_console;
+
 #[derive(CompositeTemplate, Default)]
 #[template(file = "../../res/ui/app_window.ui")]
 pub struct AppWindowTemplate {
@@ -12,6 +14,8 @@ pub struct AppWindowTemplate {
     pub header_bar: TemplateChild<gtk::HeaderBar>,
     #[template_child]
     pub source_view: TemplateChild<sourceview5::View>,
+    #[template_child]
+    pub console: TemplateChild<gtk_console::GtkConsole>,
     #[template_child]
     pub btn_run: TemplateChild<gtk::Button>,
     #[template_child]
