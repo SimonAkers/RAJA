@@ -104,7 +104,7 @@ impl Machine {
     /// # Returns
     /// If the syscall has been fully handled in the closure it should return `ControlFlow::Break`
     /// IF the syscall needs to be handled at a later time then return `ControlFlow::Continue`
-    pub fn handle_syscall<F>(&mut self, f: F)
+    pub fn handle_syscall<F>(&mut self, f: F) -> ControlFlow<()>
     where
         F: FnOnce(&Syscall) -> ControlFlow<()>,
     {
@@ -112,8 +112,11 @@ impl Machine {
         if let Some(syscall) = &self.pending_syscall {
             if let ControlFlow::Break(_) = (f)(syscall) {
                 self.pending_syscall = None;
+                return ControlFlow::Break(());
             }
         }
+
+        ControlFlow::Continue(())
     }
 
     /// Checks if there is a pending syscall

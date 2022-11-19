@@ -4,6 +4,7 @@ use gtk::{gio, HeaderBar};
 use glib::Object;
 use glib::subclass::prelude::ObjectSubclassIsExt;
 use adw::Application;
+use crate::gtk_console;
 
 glib::wrapper! {
     pub struct AppWindow(ObjectSubclass<template::AppWindowTemplate>)
@@ -26,5 +27,17 @@ impl AppWindow {
 
     pub fn source_view(&self) -> sourceview5::View {
         self.imp().source_view.get()
+    }
+
+    pub fn console(&self) -> gtk_console::GtkConsole {
+        self.imp().console.get()
+    }
+
+    pub fn btn_run(&self) -> gtk::Button {
+        self.imp().btn_run.get()
+    }
+
+    pub fn btn_build(&self) -> gtk::Button {
+        self.imp().btn_build.get()
     }
 }

@@ -1,19 +1,40 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
 
-    <menu id='app-menu'>
+    <menu id='file_menu'>
         <section>
             <item>
-                <attribute name='label' translatable='yes'>File</attribute>
+                <attribute name='label' translatable='yes'>New</attribute>
                 <attribute name='action'>app.new</attribute>
             </item>
             <item>
-                <attribute name='label' translatable='yes'>View</attribute>
-                <attribute name='action'>app.about</attribute>
+                <attribute name='label' translatable='yes'>Open</attribute>
+                <attribute name='action'>app.open</attribute>
+            </item>
+        </section>
+    </menu>
+
+    <menu id='view_menu'>
+        <section>
+            <item>
+                <attribute name='label' translatable='yes'>Watches</attribute>
+                <attribute name='action'>app.watches</attribute>
             </item>
             <item>
-                <attribute name='label' translatable='yes'>_Quit</attribute>
-                <attribute name='action'>app.quit</attribute>
+                <attribute name='label' translatable='yes'>Memory</attribute>
+                <attribute name='action'>app.memory</attribute>
+            </item>
+            <item>
+                <attribute name='label' translatable='yes'>Toggle Stack View</attribute>
+                <attribute name='action'>app.stack</attribute>
+            </item>
+            <item>
+                <attribute name='label' translatable='yes'>Toggle Pipeline View</attribute>
+                <attribute name='action'>app.pipeline</attribute>
+            </item>
+            <item>
+                <attribute name='label' translatable='yes'>Toggle Register View</attribute>
+                <attribute name='action'>app.register</attribute>
             </item>
         </section>
     </menu>
@@ -37,6 +58,7 @@
                             </object>
                         </property>
 
+                        <!--
                         <child type="start">
                             <object class="GtkMenuButton">
                                 <property name="icon-name">open-menu-symbolic</property>
@@ -49,6 +71,7 @@
                                 </property>
                             </object>
                         </child>
+                        -->
                     </object>
                 </child>
 
@@ -64,7 +87,42 @@
                         <property name="spacing">12</property>
 
                         <child>
-                            <object class="GtkButton">
+                            <object class="GtkMenuButton" id="btn_file">
+                                <property name="label">File</property>
+
+                                <property name="popover">
+                                    <object class="GtkPopoverMenu">
+                                        <property name="menu-model">file_menu</property>
+                                    </object>
+                                </property>
+                            </object>
+                        </child>
+
+                        <child>
+                            <object class="GtkMenuButton" id="btn_view">
+                                <property name="label">View</property>
+
+                                <property name="popover">
+                                    <object class="GtkPopoverMenu">
+                                        <property name="menu-model">view_menu</property>
+                                    </object>
+                                </property>
+                            </object>
+                        </child>
+
+                        <child>
+                            <object class="GtkSeparator"> </object>
+                        </child>
+
+                        <child>
+                            <object class="GtkButton" id="btn_build">
+                                <property name="icon-name">applications-engineering-symbolic</property>
+                                <property name="tooltip-text">Build</property>
+                            </object>
+                        </child>
+
+                        <child>
+                            <object class="GtkButton" id="btn_run">
                                 <property name="icon-name">media-playback-start-symbolic</property>
                                 <property name="tooltip-text">Run</property>
                             </object>
@@ -144,14 +202,16 @@
                                 <property name="vexpand">True</property>
 
                                 <property name="child">
-                                    <object class="GtkSourceView" id="console">
+                                    <object class="GtkConsole" id="console">
+                                        <property name="editable">False</property>
+                                        <property name="monospace">True</property>
+
                                         <property name="hexpand">True</property>
                                         <property name="vexpand">True</property>
                                         <property name="top-margin">8</property>
                                         <property name="bottom-margin">8</property>
                                         <property name="left-margin">8</property>
                                         <property name="right-margin">8</property>
-                                        <property name="css-name">sourceview</property>
                                     </object>
                                 </property>
                             </object>

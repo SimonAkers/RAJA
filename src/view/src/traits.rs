@@ -1,6 +1,6 @@
 /// A trait defining required functionality for the application's UI.
 pub trait AppUI {
-    fn start(&self);
+    fn launch();
     fn get_source(&self) -> Box<dyn Source>;
     fn get_console(&self) -> Box<dyn Console>;
 }

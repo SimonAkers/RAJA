@@ -1,9 +1,5 @@
-use controller::app::App;
-use view::adw_gui::AdwGUI;
+use view::adw_app::AdwApp;
 
 fn main() {
-    let gui = AdwGUI::new();
-    let app = App::new(Box::new(gui));
-
-    app.start();
+    AdwApp::launch();
 }

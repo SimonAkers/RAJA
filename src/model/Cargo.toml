@@ -6,7 +6,6 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-view = { path = "../view" }
 futures = "0.3.19"
 thiserror = "1.0.29"
 anyhow = "1.0.45"
