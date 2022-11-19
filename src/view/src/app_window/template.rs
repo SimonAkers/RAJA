@@ -6,7 +6,7 @@ use gtk::CompositeTemplate;
 use glib::subclass::InitializingObject;
 
 #[derive(CompositeTemplate, Default)]
-#[template(file = "../../res/ui/main.ui")]
+#[template(file = "../../res/ui/app_window.ui")]
 pub struct AppWindowTemplate {
     #[template_child]
     pub header_bar: TemplateChild<gtk::HeaderBar>,
