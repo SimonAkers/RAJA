@@ -80,7 +80,11 @@ impl AdwApp {
         window.btn_run().connect_clicked(move |_| {
             debug_println!("[DEBUG] Assembling and running...");
 
+            // Reset and flash the assembly to the machine
             Self::reset_flash_machine(&adw_app, &window);
+
+            // Clear the console
+            window.console().clear();
 
             let adw_app = adw_app.clone();
             let window = window.clone();
