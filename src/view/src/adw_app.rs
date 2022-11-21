@@ -88,7 +88,7 @@ impl AdwApp {
 
             let adw_app = adw_app.clone();
             let window = window.clone();
-            glib::timeout_add_local(Duration::from_millis(100), move || {
+            glib::timeout_add_local(Duration::from_millis(1), move || {
                 let machine = &mut adw_app.borrow_mut().machine;
 
                 // ===== BEGIN PRINT SYSCALL HANDLING =====
