@@ -95,14 +95,17 @@ impl AdwApp {
                 // TODO: Move print syscall code out of UI code!!!!!!!!!!!
                 // TODO: Optimize this, since it greatly slows down simulation
                 let mut print = String::new();
-                machine.handle_syscall(|syscall| match syscall {
-                    Syscall::Print(out) => ControlFlow::Break(print.push_str(&out)),
-                    Syscall::Error(out) => ControlFlow::Break({
-                        print.push_str(&format!("ERROR: {out}\n"));
-                    }),
-                    Syscall::Quit => ControlFlow::Break(()),
-                    _ => ControlFlow::Continue(()),
-                });
+
+                if machine.pending_syscall() {
+                    machine.handle_syscall(|syscall| match syscall {
+                        Syscall::Print(out) => ControlFlow::Break(print.push_str(&out)),
+                        Syscall::Error(out) => ControlFlow::Break({
+                            print.push_str(&format!("ERROR: {out}\n"));
+                        }),
+                        Syscall::Quit => ControlFlow::Break(()),
+                        _ => ControlFlow::Continue(()),
+                    });
+                }
 
                 if print.len() > 0 {
                     window.console().print(&*format!("{}", print));
