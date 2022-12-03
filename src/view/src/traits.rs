@@ -12,6 +12,7 @@ pub trait Source {
 
 pub trait Console {
     fn print(&self, msg: &str);
+    fn print_err(&self, msg: &str);
     fn input(&self) -> Option<&str>;
     fn clear(&self);
 }
