@@ -1,7 +1,9 @@
 mod template;
 
+use std::borrow::Borrow;
 use glib::subclass::prelude::ObjectSubclassIsExt;
-use gtk::prelude::{TextBufferExt, TextViewExt};
+use gtk::prelude::{TextBufferExt, TextBufferExtManual, TextViewExt};
+use gtk::TextBuffer;
 use crate::traits::Console;
 
 glib::wrapper! {
@@ -17,11 +19,24 @@ impl Console for GtkConsole {
         self.scroll_to_iter(&mut self.buffer().end_iter(), 0.0, true, 0.0, 0.0);
     }
 
+    fn print_err(&self, msg: &str) {
+        let buffer = self.buffer();
+
+        self.print(msg);
+
+        let start_iter = buffer.iter_at_offset(buffer.char_count() - msg.len() as i32);
+        let end_iter = buffer.end_iter();
+
+        let tag = buffer.create_tag(None, &[("foreground", &"#FF3535")]);
+
+        buffer.apply_tag(&tag.unwrap(), &start_iter, &end_iter);
+    }
+
     fn input(&self) -> Option<&str> {
         todo!()
     }
 
     fn clear(&self) {
-        self.buffer().set_text("");
+        self.set_buffer(Some(&TextBuffer::default()));
     }
 }
