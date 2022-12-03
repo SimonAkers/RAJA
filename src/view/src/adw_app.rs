@@ -72,6 +72,7 @@ impl AdwApp {
     fn connect_btn_build(adw_app: Shared<AdwApp>, window: AppWindow) {
         window.btn_build().connect_clicked(move |_| {
             debug_println!("BUILD BUTTON PRESSED");
+            window.console().clear();
             Self::reset_flash_machine(&adw_app, &window);
         });
     }
@@ -80,11 +81,11 @@ impl AdwApp {
         window.btn_run().connect_clicked(move |_| {
             debug_println!("[DEBUG] Assembling and running...");
 
-            // Reset and flash the assembly to the machine
-            Self::reset_flash_machine(&adw_app, &window);
-
             // Clear the console
             window.console().clear();
+
+            // Reset and flash the assembly to the machine
+            Self::reset_flash_machine(&adw_app, &window);
 
             let adw_app = adw_app.clone();
             let window = window.clone();
@@ -93,7 +94,7 @@ impl AdwApp {
 
                 // ===== BEGIN PRINT SYSCALL HANDLING =====
                 // TODO: Move print syscall code out of UI code!!!!!!!!!!!
-                // TODO: Optimize this, since it greatly slows down simulation
+                // TODO: Optimize this, since it may be slowing down simulation
                 let mut print = String::new();
 
                 if machine.pending_syscall() {
@@ -113,6 +114,7 @@ impl AdwApp {
                 }
 
                 // VERY BAD AND HACKY WAY TO EXIT!!!!!!
+                // TODO: Exit if hit kernel but do not do it this way
                 if print == "ERROR: program finished (ran into kernel)\n".to_string() {
                     return Continue(false);
                 }
@@ -135,11 +137,13 @@ impl AdwApp {
         src.push('\n');
 
         // Reset the machine
-        machine.reset();
+        machine.hard_reset();
 
         // Flash the machine
-        let (mem, lbl) = assembler(src.as_str()).unwrap();
-        machine.flash(mem, lbl);
+        match assembler(src.as_str()) {
+            Ok((mem, lbl)) => machine.flash(mem, lbl),
+            Err(err) => window.console().print_err(&format!("{err}"))
+        };
     }
 
     fn load_css() {
