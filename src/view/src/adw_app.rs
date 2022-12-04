@@ -20,14 +20,17 @@ use crate::ensure;
 use crate::traits::*;
 use crate::app_window::AppWindow;
 
+/// The application's ID
 const APP_ID: &str = "net.shayes.raja";
 
+/// A struct representing the application with a GTK/Adwaita GUI.
 pub struct AdwApp {
     app: Application,
     machine: Machine,
 }
 
 impl AdwApp {
+    /// Launches the application.
     pub fn launch() {
         // Ensure custom widgets are known to GTK
         ensure::ensure_types();
@@ -54,6 +57,13 @@ impl AdwApp {
         app.run();
     }
 
+    /**
+    Called when the GUI is activated in order to connect the GUI to the backend.
+
+    # Arguments
+    - `app` - A borrowed reference to the application associated with the GUI.
+    - `adw_app` - A borrowed reference to a shared instance of AdwApp.
+     */
     fn activate(app: &Application, adw_app: &Shared<AdwApp>) {
         let window = AdwApp::build_window(app);
 
@@ -69,6 +79,13 @@ impl AdwApp {
         window.show();
     }
 
+    /**
+    Connects the "build" button to the simulator.
+
+    # Arguments
+    - `adw_app` - A reference to a shared instance of AdwApp.
+    - `window` - A reference to the app's window.
+    */
     fn connect_btn_build(adw_app: Shared<AdwApp>, window: AppWindow) {
         window.btn_build().connect_clicked(move |_| {
             debug_println!("BUILD BUTTON PRESSED");
@@ -77,6 +94,13 @@ impl AdwApp {
         });
     }
 
+    /**
+    Connects the "run" button to the simulator.
+
+    # Arguments
+    - `adw_app` - A reference to a shared instance of AdwApp.
+    - `window` - A reference to the app's window.
+     */
     fn connect_btn_run(adw_app: Shared<AdwApp>, window: AppWindow) {
         window.btn_run().connect_clicked(move |_| {
             debug_println!("[DEBUG] Assembling and running...");
@@ -97,17 +121,27 @@ impl AdwApp {
                 // TODO: Optimize this, since it may be slowing down simulation
                 let mut print = String::new();
 
+                // If there is a pending syscall
                 if machine.pending_syscall() {
+                    // Handle the syscall
                     machine.handle_syscall(|syscall| match syscall {
+                        // Handle a print syscall
                         Syscall::Print(out) => ControlFlow::Break(print.push_str(&out)),
+
+                        // Handle an error
                         Syscall::Error(out) => ControlFlow::Break({
                             print.push_str(&format!("ERROR: {out}\n"));
                         }),
+
+                        // Handle a quit syscall
+                        // TODO: Make this stop the simulator
                         Syscall::Quit => ControlFlow::Break(()),
+
                         _ => ControlFlow::Continue(()),
                     });
                 }
 
+                // If there is something to print
                 if print.len() > 0 {
                     window.console().print(&*format!("{}", print));
                     debug_println!("[CONSOLE] {}", print);
@@ -129,6 +163,13 @@ impl AdwApp {
         });
     }
 
+    /**
+    Resets the simulator, then assembles and flashes the source assembly.
+
+    # Arguments
+    - `adw_app` - A borrowed reference to a shared instance of AdwApp.
+    - `window` - A borrowed reference to the app's window.
+     */
     fn reset_flash_machine(adw_app: &Shared<AdwApp>, window: &AppWindow) {
         let machine = &mut adw_app.borrow_mut().machine;
 
@@ -146,6 +187,7 @@ impl AdwApp {
         };
     }
 
+    /// Loads the CSS for the GUI.
     fn load_css() {
         // Load the CSS file and add it to the provider
         let provider = CssProvider::new();
@@ -159,6 +201,14 @@ impl AdwApp {
         );
     }
 
+    /**
+    Builds an instance of AppWindow, applying appropriate styles.
+
+    # Arguments
+    - `app` - A borrowed reference to the application associated with the GUI.
+
+    Returns a new instance of AppWindow.
+     */
     fn build_window(app: &Application) -> AppWindow {
         // Set the app color scheme to match the system (dark or light)
         StyleManager::default().set_color_scheme(Self::get_system_color_scheme());
@@ -171,10 +221,7 @@ impl AdwApp {
         window
     }
 
-    /// Gets a color scheme based on the system's theme (i.e. dark or light mode).
-    ///
-    /// # Returns
-    /// A ColorScheme matching the system's theme (dark or light)
+    /// Returns a ColorScheme matching the system's theme (dark or light)
     fn get_system_color_scheme() -> ColorScheme {
         match dark_light::detect() {
             dark_light::Mode::Dark => ColorScheme::PreferDark,
@@ -194,11 +241,8 @@ impl AdwApp {
     }
 }
 
+/// See [Source][`crate::traits::Source`] for docs.
 impl Source for sourceview5::View {
-    /// Gets the text of the GtkSourceView
-    ///
-    /// # Returns
-    /// The text of the GtkSourceView as a String
     fn get_text(&self) -> String {
         // Get the bounds of the buffer
         let (iter1, iter2) = self.buffer().bounds();
@@ -207,7 +251,6 @@ impl Source for sourceview5::View {
         self.buffer().text(&iter1, &iter2, false).as_str().to_owned()
     }
 
-    /// Clears the buffer of the GtkSourceView (sets it to the empty string)
     fn clear(&self) {
         self.buffer().set_text("");
     }
