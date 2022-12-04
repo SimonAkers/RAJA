@@ -26,7 +26,6 @@ pub trait Console {
     Prints a message to the console.
 
     # Arguments
-
     - `msg` - The message to print.
      */
     fn print(&self, msg: &str);
@@ -35,7 +34,6 @@ pub trait Console {
     Prints an error message to the console.
 
     # Arguments
-
     - `msg` - The message to print.
      */
     fn print_err(&self, msg: &str);

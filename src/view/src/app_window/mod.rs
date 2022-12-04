@@ -22,8 +22,7 @@ impl AppWindow {
     Creates a new AppWindow.
 
     # Arguments
-
-    * `app` - The application that the AppWindow is associated with.
+    - `app` - The application that the AppWindow is associated with.
      */
     pub fn new(app: &Application) -> Self {
         // Create new window
