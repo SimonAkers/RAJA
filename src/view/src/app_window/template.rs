@@ -12,7 +12,7 @@ The template for [AppWindow][`crate::app_window::AppWindow`] \
 which represents an instance of the application window.
 
 This mostly consists of gtk-rs boilerplate and should not be constructed directly.
-*/
+ */
 #[derive(CompositeTemplate, Default)]
 #[template(file = "../../res/ui/app_window.ui")]
 pub struct AppWindowTemplate {
