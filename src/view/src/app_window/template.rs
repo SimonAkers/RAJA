@@ -7,6 +7,12 @@ use glib::subclass::InitializingObject;
 
 use crate::gtk_console;
 
+/**
+The template for [AppWindow][`crate::app_window::AppWindow`] \
+which represents an instance of the application window.
+
+This mostly consists of gtk-rs boilerplate and should not be constructed directly.
+*/
 #[derive(CompositeTemplate, Default)]
 #[template(file = "../../res/ui/app_window.ui")]
 pub struct AppWindowTemplate {
@@ -22,6 +28,7 @@ pub struct AppWindowTemplate {
     pub btn_build: TemplateChild<gtk::Button>,
 }
 
+/// gtk-rs boilerplate implementation
 #[glib::object_subclass]
 impl ObjectSubclass for AppWindowTemplate {
     // `NAME` needs to match `class` attribute of template
@@ -39,6 +46,7 @@ impl ObjectSubclass for AppWindowTemplate {
     }
 }
 
+/// gtk-rs boilerplate implementation
 impl ObjectImpl for AppWindowTemplate {
     fn constructed(&self) {
         self.parent_constructed();
