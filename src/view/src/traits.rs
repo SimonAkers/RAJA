@@ -1,4 +1,5 @@
 /// A trait defining required functionality for the application's UI.
+/// !!!!! CURRENTLY UNUSED !!!!!
 pub trait AppUI {
     /// Launches the application.
     fn launch();
