@@ -17,6 +17,7 @@ glib::wrapper! {
                     gtk::ConstraintTarget, gtk::Native, gtk::Root, gtk::ShortcutManager;
 }
 
+// TODO: Change convenience methods to be inlined OR macros
 impl AppWindow {
     /**
     Creates a new AppWindow.

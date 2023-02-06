@@ -175,6 +175,7 @@ impl AdwApp {
 
         // Get the assembly code
         let mut src = window.source_view().get_text();
+        // Ensure newline to prevent assembler error
         src.push('\n');
 
         // Reset the machine
