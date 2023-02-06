@@ -10,6 +10,7 @@ use crate::{
     Memory, Register, RegisterFile, SP,
 };
 use anyhow::Result;
+use crate::syscall_handler::SyscallHandlers;
 
 /// Represents an instance of a simulated MIPS computer.
 #[derive(Default)]
@@ -19,6 +20,7 @@ pub struct Machine {
     state: PipelineState,
     memory: Memory,
     symbols: LabelTable,
+    syscall_handler: Option<SyscallHandlers>,
     pending_syscall: Option<Syscall>,
 }
 
@@ -141,6 +143,8 @@ impl Machine {
             if let Some(syscall) = syscall {
                 self.pending_syscall = Some(syscall);
             }
+        } else {
+
         }
         Ok(())
     }

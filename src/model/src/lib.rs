@@ -7,6 +7,7 @@ mod memory;
 mod pipeline;
 mod register;
 pub mod syscall;
+pub mod syscall_handler;
 
 pub mod stages {
     pub mod writeback;
