@@ -10,6 +10,7 @@ use adw::{Application, ColorScheme, StyleManager};
 use gtk::{CssProvider, StyleContext};
 use gtk::gdk::Display;
 use model::assembler;
+use model::callback::Callback;
 
 use model::machine::Machine;
 use model::syscall::Syscall;
@@ -69,6 +70,8 @@ impl AdwApp {
 
         // TODO: Connect UI to backend from here
 
+        Self::register_callback(adw_app.clone(), window.clone());
+
         // Connect build button
         Self::connect_btn_build(adw_app.clone(), window.clone());
 
@@ -77,6 +80,37 @@ impl AdwApp {
 
         // Show the window
         window.show();
+    }
+
+    fn register_callback(adw_app: Shared<AdwApp>, window: AppWindow) {
+        let callback = Callback::new(Box::new(move |syscall| {
+            let mut print = String::new();
+
+            match syscall {
+
+                // Handle a print syscall
+                Syscall::Print(out) => ControlFlow::Break(print.push_str(&out)),
+
+                // Handle an error
+                Syscall::Error(out) => ControlFlow::Break({
+                    print.push_str(&format!("ERROR: {out}\n"));
+                }),
+
+                // Handle a quit syscall
+                // TODO: Make this stop the simulator
+                Syscall::Quit => ControlFlow::Break(()),
+
+                _ => ControlFlow::Continue(()),
+            };
+
+            if print.len() > 0 {
+                window.console().print(&*format!("{}", print));
+                debug_println!("[CONSOLE] {}", print);
+            }
+        }));
+
+        let machine = &mut adw_app.borrow_mut().machine;
+        machine.set_callback(callback);
     }
 
     /**
@@ -116,6 +150,17 @@ impl AdwApp {
             glib::timeout_add_local(Duration::from_millis(1), move || {
                 let machine = &mut adw_app.borrow_mut().machine;
 
+
+
+
+
+
+
+
+
+
+
+                /*
                 // ===== BEGIN PRINT SYSCALL HANDLING =====
                 // TODO: Move print syscall code out of UI code!!!!!!!!!!!
                 // TODO: Optimize this, since it may be slowing down simulation
@@ -153,11 +198,15 @@ impl AdwApp {
                     return Continue(false);
                 }
                 // ===== END PRINT SYSCALL HANDLING =====
+                 */
+
+
+
 
                 // Cycle the machine
                 match machine.cycle() {
                     Ok(_) => Continue(true),
-                    Err(_) => { debug_println!("CYCLE FAILED"); Continue(false) },
+                    Err(x) => { debug_println!("{}", x.to_string()); Continue(false) },
                 }
             });
         });

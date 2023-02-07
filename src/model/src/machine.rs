@@ -10,7 +10,7 @@ use crate::{
     Memory, Register, RegisterFile, SP,
 };
 use anyhow::Result;
-use crate::syscall_handler::SyscallHandlers;
+use crate::callback::Callback;
 
 /// Represents an instance of a simulated MIPS computer.
 #[derive(Default)]
@@ -20,8 +20,8 @@ pub struct Machine {
     state: PipelineState,
     memory: Memory,
     symbols: LabelTable,
-    syscall_handler: Option<SyscallHandlers>,
     pending_syscall: Option<Syscall>,
+    callback: Callback<Syscall>,
 }
 
 impl Machine {
@@ -144,9 +144,17 @@ impl Machine {
                 self.pending_syscall = Some(syscall);
             }
         } else {
-
+            let syscall = self.pending_syscall.as_ref().unwrap();
+            self.callback.call(&syscall);
+            self.pending_syscall = None;
         }
+
+        println!("cycle");
         Ok(())
+    }
+
+    pub fn set_callback(&mut self, callback: Callback<Syscall>) {
+        self.callback = callback;
     }
 }
 

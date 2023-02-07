@@ -1,10 +1,11 @@
 use crate::{Memory, RegisterFile, A0, V0};
 use anyhow::{bail, Context, Result};
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub enum Syscall {
     Print(String),
     Error(String),
+    #[default]
     Quit,
     ReadInt,
 }
