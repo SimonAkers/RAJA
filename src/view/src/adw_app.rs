@@ -94,14 +94,30 @@ impl AdwApp {
         let callbacks = machine.get_callbacks();
 
         // Print
+        let _window = window.clone();
         callbacks.insert(
             SyscallDiscriminants::Print,
             Callback::new(Box::new(move |info| {
                 match info {
                     None => (),
                     Some(message) => {
-                        window.console().print(&*format!("{}", message));
+                        _window.console().print(&*format!("{}", message));
                         debug_println!("[CONSOLE] {}", message);
+                    }
+                }
+            }))
+        );
+
+        // Error
+        let _window = window.clone();
+        callbacks.insert(
+            SyscallDiscriminants::Error,
+            Callback::new(Box::new(move |info| {
+                match info {
+                    None => (),
+                    Some(message) => {
+                        _window.console().print_err(&*format!("[ERROR] {}", message));
+                        debug_println!("[CONSOLE] [ERROR] {}", message);
                     }
                 }
             }))
@@ -141,64 +157,13 @@ impl AdwApp {
             Self::reset_flash_machine(&adw_app, &window);
 
             let adw_app = adw_app.clone();
-            let window = window.clone();
             glib::timeout_add_local(Duration::from_millis(1), move || {
                 let machine = &mut adw_app.borrow_mut().machine;
-
-
-
-
-
-
-
-
-
-
-
-                /*
-                // ===== BEGIN PRINT SYSCALL HANDLING =====
-                // TODO: Move print syscall code out of UI code!!!!!!!!!!!
-                // TODO: Optimize this, since it may be slowing down simulation
-                let mut print = String::new();
-
-                // If there is a pending syscall
-                if machine.pending_syscall() {
-                    // Handle the syscall
-                    machine.handle_syscall(|syscall| match syscall {
-                        // Handle a print syscall
-                        Syscall::Print(out) => ControlFlow::Break(print.push_str(&out)),
-
-                        // Handle an error
-                        Syscall::Error(out) => ControlFlow::Break({
-                            print.push_str(&format!("ERROR: {out}\n"));
-                        }),
-
-                        // Handle a quit syscall
-                        // TODO: Make this stop the simulator
-                        Syscall::Quit => ControlFlow::Break(()),
-
-                        _ => ControlFlow::Continue(()),
-                    });
-                }
-
-                // If there is something to print
-                if print.len() > 0 {
-                    window.console().print(&*format!("{}", print));
-                    debug_println!("[CONSOLE] {}", print);
-                }
-
-                // VERY BAD AND HACKY WAY TO EXIT!!!!!!
-                // TODO: Exit if hit kernel but do not do it this way
-                if print == "ERROR: program finished (ran into kernel)\n".to_string() {
-                    return Continue(false);
-                }
-                // ===== END PRINT SYSCALL HANDLING =====
-                 */
 
                 // Cycle the machine
                 match machine.cycle() {
                     Ok(_) => Continue(true),
-                    Err(x) => { debug_println!("{}", x.to_string()); Continue(false) },
+                    Err(x) => { debug_println!("Cycle Error: {}", x.to_string()); Continue(false) },
                 }
             });
         });
