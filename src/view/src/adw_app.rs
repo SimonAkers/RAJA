@@ -13,7 +13,7 @@ use model::assembler;
 use model::callback::Callback;
 
 use model::machine::Machine;
-use model::syscall::Syscall;
+use model::syscall::{Syscall, SyscallDiscriminants};
 
 use util::shared::Shared;
 
@@ -93,9 +93,9 @@ impl AdwApp {
         let machine = &mut adw_app.borrow_mut().machine;
         let callbacks = machine.get_callbacks();
 
-        // Print callback
+        // Print
         callbacks.insert(
-            Syscall::Print(String::new()).discriminant(),
+            SyscallDiscriminants::Print,
             Callback::new(Box::new(move |info| {
                 match info {
                     None => (),
@@ -194,9 +194,6 @@ impl AdwApp {
                 }
                 // ===== END PRINT SYSCALL HANDLING =====
                  */
-
-
-
 
                 // Cycle the machine
                 match machine.cycle() {

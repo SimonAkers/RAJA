@@ -13,6 +13,7 @@ use crate::{
 };
 use anyhow::Result;
 use crate::callback::Callback;
+use crate::syscall::SyscallDiscriminants;
 
 /// Represents an instance of a simulated MIPS computer.
 #[derive(Default)]
@@ -24,7 +25,7 @@ pub struct Machine {
     memory: Memory,
     symbols: LabelTable,
     pending_syscall: Option<Syscall>,
-    callbacks: HashMap<Discriminant<Syscall>, Callback>,
+    callbacks: HashMap<SyscallDiscriminants, Callback>,
 }
 
 impl Machine {
@@ -149,13 +150,13 @@ impl Machine {
         };
 
         // Call any registered callbacks
-        match self.callbacks.get_mut(&syscall.discriminant()) {
+        match self.callbacks.get_mut(&SyscallDiscriminants::from(syscall)) {
             None => (),
             Some(mut callback) => callback.call(info),
         }
     }
 
-    pub fn get_callbacks(&mut self) -> &mut HashMap<Discriminant<Syscall>, Callback> {
+    pub fn get_callbacks(&mut self) -> &mut HashMap<SyscallDiscriminants, Callback> {
         &mut self.callbacks
     }
 }
