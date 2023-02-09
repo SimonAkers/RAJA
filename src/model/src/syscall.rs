@@ -1,13 +1,20 @@
+use std::mem::{Discriminant, discriminant};
 use crate::{Memory, RegisterFile, A0, V0};
 use anyhow::{bail, Context, Result};
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone, Eq, PartialEq, Hash)]
 pub enum Syscall {
     Print(String),
     Error(String),
     #[default]
     Quit,
     ReadInt,
+}
+
+impl Syscall {
+    pub fn discriminant(&self) -> Discriminant<Self> {
+        discriminant(self)
+    }
 }
 
 pub fn resolve_syscall(reg_file: &mut RegisterFile, syscall: &Syscall, value: &str) -> Result<()> {

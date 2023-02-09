@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+use std::mem::Discriminant;
 use std::ops::ControlFlow;
 
 use crate::{
@@ -16,12 +18,13 @@ use crate::callback::Callback;
 #[derive(Default)]
 pub struct Machine {
     pc: u32,
+    running: bool,
     regs: RegisterFile,
     state: PipelineState,
     memory: Memory,
     symbols: LabelTable,
     pending_syscall: Option<Syscall>,
-    callback: Callback<Syscall>,
+    callbacks: HashMap<Discriminant<Syscall>, Callback>,
 }
 
 impl Machine {
@@ -101,26 +104,6 @@ impl Machine {
         Ok(())
     }
 
-    /// Handle a syscall in the application
-    ///
-    /// # Returns
-    /// If the syscall has been fully handled in the closure it should return `ControlFlow::Break`
-    /// IF the syscall needs to be handled at a later time then return `ControlFlow::Continue`
-    pub fn handle_syscall<F>(&mut self, f: F) -> ControlFlow<()>
-    where
-        F: FnOnce(&Syscall) -> ControlFlow<()>,
-    {
-        // if there is a pending syscall try to handle it
-        if let Some(syscall) = &self.pending_syscall {
-            if let ControlFlow::Break(_) = (f)(syscall) {
-                self.pending_syscall = None;
-                return ControlFlow::Break(());
-            }
-        }
-
-        ControlFlow::Continue(())
-    }
-
     /// Checks if there is a pending syscall
     ///
     /// # Returns
@@ -131,30 +114,49 @@ impl Machine {
 
     /// Step the machine forward 1 cpu cycle
     pub fn cycle(&mut self) -> Result<()> {
-        // do not cycle if we are waiting on a syscall
-        if self.pending_syscall.is_none() {
-            let (new_state, syscall) = pipeline::pipe_cycle(
-                &mut self.pc,
-                &mut self.regs,
-                &mut self.memory,
-                self.state.clone(),
-            )?;
-            self.state = new_state;
-            if let Some(syscall) = syscall {
-                self.pending_syscall = Some(syscall);
+        match self.pending_syscall.clone() {
+            None => {
+                let (new_state, syscall) = pipeline::pipe_cycle(
+                    &mut self.pc,
+                    &mut self.regs,
+                    &mut self.memory,
+                    self.state.clone(),
+                )?;
+
+                self.state = new_state;
+
+                if let Some(syscall) = syscall {
+                    self.pending_syscall = Some(syscall);
+                }
             }
-        } else {
-            let syscall = self.pending_syscall.as_ref().unwrap();
-            self.callback.call(&syscall);
-            self.pending_syscall = None;
+
+            Some(syscall) => {
+                self.handle_syscall(&syscall);
+                self.pending_syscall = None;
+            }
         }
 
-        println!("cycle");
         Ok(())
     }
 
-    pub fn set_callback(&mut self, callback: Callback<Syscall>) {
-        self.callback = callback;
+    fn handle_syscall(&mut self, syscall: &Syscall) {
+        // Handle calls internally and obtain any message to pass to callbacks
+        let info = match syscall {
+            Syscall::Print(message) => Some(message),
+            Syscall::Error(message) => Some(message),
+            Syscall::Quit => None,
+            Syscall::ReadInt => None,
+        };
+
+        // Call any registered callbacks
+        match self.callbacks.get_mut(&syscall.discriminant()) {
+            None => (),
+            Some(mut callback) => callback.call(info),
+        }
+    }
+
+    pub fn get_callbacks(&mut self) -> &mut HashMap<Discriminant<Syscall>, Callback> {
+        &mut self.callbacks
     }
 }
 

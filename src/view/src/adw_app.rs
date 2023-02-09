@@ -70,7 +70,7 @@ impl AdwApp {
 
         // TODO: Connect UI to backend from here
 
-        Self::register_callback(adw_app.clone(), window.clone());
+        Self::register_callbacks(adw_app.clone(), window.clone());
 
         // Connect build button
         Self::connect_btn_build(adw_app.clone(), window.clone());
@@ -82,35 +82,30 @@ impl AdwApp {
         window.show();
     }
 
-    fn register_callback(adw_app: Shared<AdwApp>, window: AppWindow) {
-        let callback = Callback::new(Box::new(move |syscall| {
-            let mut print = String::new();
+    /**
+    Registers functions to be called when the simulator handles system calls.
 
-            match syscall {
-
-                // Handle a print syscall
-                Syscall::Print(out) => ControlFlow::Break(print.push_str(&out)),
-
-                // Handle an error
-                Syscall::Error(out) => ControlFlow::Break({
-                    print.push_str(&format!("ERROR: {out}\n"));
-                }),
-
-                // Handle a quit syscall
-                // TODO: Make this stop the simulator
-                Syscall::Quit => ControlFlow::Break(()),
-
-                _ => ControlFlow::Continue(()),
-            };
-
-            if print.len() > 0 {
-                window.console().print(&*format!("{}", print));
-                debug_println!("[CONSOLE] {}", print);
-            }
-        }));
-
+    # Arguments
+    - `adw_app` - A reference to a shared instance of AdwApp.
+    - `window` - A reference to the app's window.
+     */
+    fn register_callbacks(adw_app: Shared<AdwApp>, window: AppWindow) {
         let machine = &mut adw_app.borrow_mut().machine;
-        machine.set_callback(callback);
+        let callbacks = machine.get_callbacks();
+
+        // Print callback
+        callbacks.insert(
+            Syscall::Print(String::new()).discriminant(),
+            Callback::new(Box::new(move |info| {
+                match info {
+                    None => (),
+                    Some(message) => {
+                        window.console().print(&*format!("{}", message));
+                        debug_println!("[CONSOLE] {}", message);
+                    }
+                }
+            }))
+        );
     }
 
     /**
