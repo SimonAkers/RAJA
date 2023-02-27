@@ -113,11 +113,15 @@ impl Machine {
         self.pending_syscall.is_some()
     }
 
-    /// Step the machine forward 1 cpu cycle
+    /**
+    Steps the machine forward 1 CPU cycle.
+
+    Returns ControlFlow::Break if the machine should stop cycling, otherwise ControlFlow::Continue.
+     */
     pub fn cycle(&mut self) -> ControlFlow<()> {
-        match self.pending_syscall.clone() {
+        return match self.pending_syscall.clone() {
             None => {
-                return match pipeline::pipe_cycle(
+                match pipeline::pipe_cycle(
                     &mut self.pc,
                     &mut self.regs,
                     &mut self.memory,
@@ -139,13 +143,19 @@ impl Machine {
 
             Some(syscall) => {
                 self.pending_syscall = None;
-                return self.handle_syscall(&syscall);
+                self.handle_syscall(&syscall)
             }
         }
-
-        ControlFlow::Continue(())
     }
 
+    /**
+    Handles a system call and returns a value indicating whether the machine should stop cycling.
+
+    # Arguments
+    - `syscall` - A borrowed reference to the system call to handle.
+
+    Returns ControlFlow::Break if the machine should stop cycling, otherwise ControlFlow::Continue.
+     */
     fn handle_syscall(&mut self, syscall: &Syscall) -> ControlFlow<()> {
         // Handle calls internally and obtain any message to pass to callbacks
         let (flow, info) = match syscall {
