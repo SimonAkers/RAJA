@@ -162,8 +162,8 @@ impl AdwApp {
 
                 // Cycle the machine
                 match machine.cycle() {
-                    Ok(_) => Continue(true),
-                    Err(x) => { debug_println!("Cycle Error: {}", x.to_string()); Continue(false) },
+                    ControlFlow::Continue(_) => Continue(true),
+                    ControlFlow::Break(_) => Continue(false)
                 }
             });
         });

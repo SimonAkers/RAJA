@@ -12,3 +12,6 @@ syscall
 
 la $a0, msg2
 syscall
+
+li $v0, 10
+syscall

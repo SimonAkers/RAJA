@@ -19,7 +19,7 @@ use crate::syscall::SyscallDiscriminants;
 #[derive(Default)]
 pub struct Machine {
     pc: u32,
-    running: bool,
+    active: bool,
     regs: RegisterFile,
     state: PipelineState,
     memory: Memory,
@@ -114,39 +114,45 @@ impl Machine {
     }
 
     /// Step the machine forward 1 cpu cycle
-    pub fn cycle(&mut self) -> Result<()> {
+    pub fn cycle(&mut self) -> ControlFlow<()> {
         match self.pending_syscall.clone() {
             None => {
-                let (new_state, syscall) = pipeline::pipe_cycle(
+                return match pipeline::pipe_cycle(
                     &mut self.pc,
                     &mut self.regs,
                     &mut self.memory,
                     self.state.clone(),
-                )?;
+                ) {
+                    Ok((new_state, syscall)) => {
+                        self.state = new_state;
 
-                self.state = new_state;
+                        if let Some(syscall) = syscall {
+                            self.pending_syscall = Some(syscall);
+                        }
 
-                if let Some(syscall) = syscall {
-                    self.pending_syscall = Some(syscall);
+                        ControlFlow::Continue(())
+                    }
+
+                    Err(_) => ControlFlow::Break(())
                 }
             }
 
             Some(syscall) => {
-                self.handle_syscall(&syscall);
                 self.pending_syscall = None;
+                return self.handle_syscall(&syscall);
             }
         }
 
-        Ok(())
+        ControlFlow::Continue(())
     }
 
-    fn handle_syscall(&mut self, syscall: &Syscall) {
+    fn handle_syscall(&mut self, syscall: &Syscall) -> ControlFlow<()> {
         // Handle calls internally and obtain any message to pass to callbacks
-        let info = match syscall {
-            Syscall::Print(message) => Some(message),
-            Syscall::Error(message) => Some(message),
-            Syscall::Quit => None,
-            Syscall::ReadInt => None,
+        let (flow, info) = match syscall {
+            Syscall::Print(message) => (ControlFlow::Continue(()), Some(message)),
+            Syscall::Error(message) => (ControlFlow::Break(()), Some(message)),
+            Syscall::Quit => (ControlFlow::Break(()), None),
+            Syscall::ReadInt => (ControlFlow::Break(()), None),
         };
 
         // Call any registered callbacks
@@ -154,6 +160,8 @@ impl Machine {
             None => (),
             Some(mut callback) => callback.call(info),
         }
+
+        flow
     }
 
     pub fn get_callbacks(&mut self) -> &mut HashMap<SyscallDiscriminants, Callback> {
