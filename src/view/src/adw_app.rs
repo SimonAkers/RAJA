@@ -7,7 +7,8 @@ use gtk::prelude::*;
 use sourceview5::prelude::*;
 
 use adw::{Application, ColorScheme, StyleManager};
-use gtk::{CssProvider, StyleContext};
+use gtk::{CssProvider, Dialog, Orientation, StyleContext};
+use gtk::builders::{BoxBuilder, DialogBuilder, EntryBuilder};
 use gtk::gdk::Display;
 use model::assembler;
 use model::callback::Callback;
@@ -128,7 +129,24 @@ impl AdwApp {
         callbacks.insert(
             SyscallDiscriminants::ReadInt,
             Callback::new(Box::new(move |_| {
+                // TODO: Replace temporary popup dialog with console input
+                let mut vbox = gtk::Box::new(Orientation::Vertical, 0);
 
+                vbox.append(&EntryBuilder::new()
+                    .height_request(48)
+                    .width_chars(48)
+                    .hexpand(true)
+                    .vexpand(true)
+                    .build()
+                );
+
+                let dialog = DialogBuilder::new()
+                    .child(&vbox)
+                    .transient_for(&_window)
+                    .title("Read Integer")
+                    .build();
+
+                dialog.show();
             }))
         );
     }
