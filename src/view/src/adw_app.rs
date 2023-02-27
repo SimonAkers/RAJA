@@ -122,6 +122,15 @@ impl AdwApp {
                 }
             }))
         );
+
+        // ReadInt
+        let _window = window.clone();
+        callbacks.insert(
+            SyscallDiscriminants::ReadInt,
+            Callback::new(Box::new(move |_| {
+
+            }))
+        );
     }
 
     /**
