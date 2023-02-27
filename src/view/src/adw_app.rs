@@ -13,7 +13,7 @@ use model::assembler;
 use model::callback::Callback;
 
 use model::machine::Machine;
-use model::syscall::{Syscall, SyscallDiscriminants};
+use model::syscall::SyscallDiscriminants;
 
 use util::shared::Shared;
 
@@ -156,16 +156,19 @@ impl AdwApp {
             // Reset and flash the assembly to the machine
             Self::reset_flash_machine(&adw_app, &window);
 
-            let adw_app = adw_app.clone();
-            glib::timeout_add_local(Duration::from_millis(1), move || {
-                let machine = &mut adw_app.borrow_mut().machine;
+            Self::start_simulator(adw_app.clone());
+        });
+    }
 
-                // Cycle the machine
-                match machine.cycle() {
-                    ControlFlow::Continue(_) => Continue(true),
-                    ControlFlow::Break(_) => Continue(false)
-                }
-            });
+    pub fn start_simulator(adw_app: Shared<AdwApp>) {
+        glib::timeout_add_local(Duration::from_millis(1), move || {
+            let machine = &mut adw_app.borrow_mut().machine;
+
+            // Cycle the machine
+            match machine.cycle() {
+                ControlFlow::Continue(_) => Continue(true),
+                ControlFlow::Break(_) => Continue(false)
+            }
         });
     }
 
