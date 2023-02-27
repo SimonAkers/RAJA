@@ -1,5 +1,4 @@
 use std::collections::HashMap;
-use std::mem::Discriminant;
 use std::ops::ControlFlow;
 
 use crate::{
@@ -12,20 +11,22 @@ use crate::{
     Memory, Register, RegisterFile, SP,
 };
 use anyhow::Result;
+use debug_print::debug_println;
 use crate::callback::Callback;
+use crate::machine_input::MachineInput;
 use crate::syscall::SyscallDiscriminants;
 
 /// Represents an instance of a simulated MIPS computer.
 #[derive(Default)]
 pub struct Machine {
     pc: u32,
-    active: bool,
     regs: RegisterFile,
     state: PipelineState,
     memory: Memory,
     symbols: LabelTable,
     pending_syscall: Option<Syscall>,
     callbacks: HashMap<SyscallDiscriminants, Callback>,
+    input: MachineInput,
 }
 
 impl Machine {
@@ -142,7 +143,6 @@ impl Machine {
             }
 
             Some(syscall) => {
-                self.pending_syscall = None;
                 self.handle_syscall(&syscall)
             }
         }
@@ -157,21 +157,57 @@ impl Machine {
     Returns ControlFlow::Break if the machine should stop cycling, otherwise ControlFlow::Continue.
      */
     fn handle_syscall(&mut self, syscall: &Syscall) -> ControlFlow<()> {
+        // Whether the syscall has been resolved (fully processed)
+        let mut resolved = true;
+        // Whether to run the callback for the given syscall
+        let mut run_callback = true;
+
         // Handle calls internally and obtain any message to pass to callbacks
         let (flow, info) = match syscall {
             Syscall::Print(message) => (ControlFlow::Continue(()), Some(message)),
             Syscall::Error(message) => (ControlFlow::Break(()), Some(message)),
             Syscall::Quit => (ControlFlow::Break(()), None),
-            Syscall::ReadInt => (ControlFlow::Break(()), None),
+            Syscall::ReadInt => {
+                match self.input.integer() {
+                    None => {
+                        // No integer is present, so stop cycling and mark syscall as unresolved
+                        // Callback should put an integer into the machine's input
+                        resolved = false;
+                        (ControlFlow::Break(()), None)
+                    }
+
+                    Some(integer) => {
+                        // TODO: Read integer into memory here
+                        debug_println!("[DEBUG] Read int: {}", integer);
+
+                        // Do not run callback since we already have data from frontend
+                        run_callback = false;
+
+                        // TODO: Do I need to flush input here?
+
+                        // Continue cycling after reading in integer
+                        (ControlFlow::Continue(()), None)
+                    }
+                }
+            },
         };
 
-        // Call any registered callbacks
-        match self.callbacks.get_mut(&SyscallDiscriminants::from(syscall)) {
-            None => (),
-            Some(mut callback) => callback.call(info),
+        if resolved {
+            self.pending_syscall = None;
+        }
+
+        if run_callback {
+            match self.callbacks.get_mut(&SyscallDiscriminants::from(syscall)) {
+                None => (),
+                Some(mut callback) => callback.call(info),
+            }
         }
 
         flow
+    }
+
+    pub fn input(&self) -> &MachineInput {
+        &self.input
     }
 
     pub fn get_callbacks(&mut self) -> &mut HashMap<SyscallDiscriminants, Callback> {
