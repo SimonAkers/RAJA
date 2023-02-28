@@ -3,7 +3,6 @@ mod template;
 use std::borrow::Borrow;
 use glib::subclass::prelude::ObjectSubclassIsExt;
 use gtk::prelude::{TextBufferExt, TextBufferExtManual, TextViewExt};
-use gtk::TextBuffer;
 use crate::traits::Console;
 
 glib::wrapper! {
@@ -50,7 +49,11 @@ impl Console for GtkConsole {
     }
 
     fn clear(&self) {
-        // Set the buffer to the default TextBuffer (i.e. reset it)
-        self.set_buffer(Some(&TextBuffer::default()));
+        let buffer = self.buffer();
+
+        // Remove all tags (e.g., for text color)
+        buffer.remove_all_tags(&buffer.start_iter(), &buffer.end_iter());
+        // Set the text to empty
+        buffer.set_text("");
     }
 }

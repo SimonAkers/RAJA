@@ -7,9 +7,10 @@ use gtk::prelude::*;
 use sourceview5::prelude::*;
 
 use adw::{Application, ColorScheme, StyleManager};
-use gtk::{CssProvider, Dialog, Orientation, StyleContext};
-use gtk::builders::{BoxBuilder, DialogBuilder, EntryBuilder};
-use gtk::gdk::Display;
+use glib::signal::Inhibit;
+use gtk::{CssProvider, EventControllerKey, Orientation, StyleContext};
+use gtk::builders::{DialogBuilder, EntryBuilder};
+use gtk::gdk::{Display, Key};
 use model::assembler;
 use model::callback::Callback;
 
@@ -79,6 +80,9 @@ impl AdwApp {
         // Connect run button
         Self::connect_btn_run(adw_app.clone(), window.clone());
 
+        // Connect the "enter" key to the console
+        Self::connect_console_confirm(adw_app.clone(), window.clone());
+
         // Show the window
         window.show();
     }
@@ -146,7 +150,9 @@ impl AdwApp {
                     .title("Read Integer")
                     .build();
 
-                dialog.show();
+                _window.console().set_editable(true);
+
+                //dialog.show();
             }))
         );
     }
@@ -185,6 +191,24 @@ impl AdwApp {
 
             Self::start_simulator(adw_app.clone());
         });
+    }
+
+    fn connect_console_confirm(adw_app: Shared<AdwApp>, window: AppWindow) {
+        let controller = EventControllerKey::new();
+
+        let _window = window.clone();
+        controller.connect_key_pressed(move |keyval, keycode, state, _| {
+            if keycode == Key::Return {
+                let console = _window.console();
+                console.set_editable(false);
+                // TODO: Pass entered value to simulator
+                //Self::start_simulator(adw_app.clone());
+            }
+
+            Inhibit(false)
+        });
+
+        window.console().add_controller(&controller);
     }
 
     pub fn start_simulator(adw_app: Shared<AdwApp>) {
