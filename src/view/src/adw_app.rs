@@ -1,27 +1,24 @@
 use std::borrow::Borrow;
 use std::ops::ControlFlow;
 use std::time::Duration;
-use debug_print::*;
 
+use adw::{Application, ColorScheme, StyleManager};
+use debug_print::*;
+use glib::signal::Inhibit;
+use gtk::{CssProvider, Dialog, Entry, EventControllerKey, Orientation, StyleContext};
+use gtk::gdk::{Display, Key};
 use gtk::prelude::*;
 use sourceview5::prelude::*;
 
-use adw::{Application, ColorScheme, StyleManager};
-use glib::signal::Inhibit;
-use gtk::{CssProvider, EventControllerKey, Orientation, StyleContext};
-use gtk::builders::{DialogBuilder, EntryBuilder};
-use gtk::gdk::{Display, Key};
 use model::assembler;
 use model::callback::Callback;
-
 use model::machine::Machine;
 use model::syscall::SyscallDiscriminants;
-
 use util::shared::Shared;
 
+use crate::app_window::AppWindow;
 use crate::ensure;
 use crate::traits::*;
-use crate::app_window::AppWindow;
 
 /// The application's ID
 const APP_ID: &str = "net.shayes.raja";
@@ -136,7 +133,7 @@ impl AdwApp {
                 // TODO: Replace temporary popup dialog with console input
                 let mut vbox = gtk::Box::new(Orientation::Vertical, 0);
 
-                vbox.append(&EntryBuilder::new()
+                vbox.append(&Entry::builder()
                     .height_request(48)
                     .width_chars(48)
                     .hexpand(true)
@@ -144,7 +141,7 @@ impl AdwApp {
                     .build()
                 );
 
-                let dialog = DialogBuilder::new()
+                let dialog = Dialog::builder()
                     .child(&vbox)
                     .transient_for(&_window)
                     .title("Read Integer")
@@ -208,7 +205,7 @@ impl AdwApp {
             Inhibit(false)
         });
 
-        window.console().add_controller(&controller);
+        window.console().add_controller(controller);
     }
 
     pub fn start_simulator(adw_app: Shared<AdwApp>) {
@@ -252,7 +249,7 @@ impl AdwApp {
     fn load_css() {
         // Load the CSS file and add it to the provider
         let provider = CssProvider::new();
-        provider.load_from_data(include_bytes!("../res/style.css"));
+        provider.load_from_data(include_str!("../res/style.css"));
 
         // Add the provider to the default screen
         StyleContext::add_provider_for_display(

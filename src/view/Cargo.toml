@@ -8,9 +8,9 @@ edition = "2021"
 [dependencies]
 model = { path = "../model" }
 util = { path = "../util" }
-adw = { package = "libadwaita", version = "0.2.0" }
-gtk = { package = "gtk4", version = "0.5.0", features = ["v4_8"] }
-sourceview5 = "0.5.0"
-glib = "0.16.2"
+adw = { package = "libadwaita", version = "0.3.1" }
+gtk = { package = "gtk4", version = "0.6.2", features = ["v4_8"] }
+sourceview5 = "0.6.0"
+glib = "0.17.0"
 dark-light = "0.2.3"
 debug_print = "1.0.0"
