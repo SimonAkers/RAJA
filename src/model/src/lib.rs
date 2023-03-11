@@ -8,6 +8,9 @@ mod pipeline;
 mod register;
 pub mod syscall;
 
+pub mod callback;
+pub mod machine_input;
+
 pub mod stages {
     pub mod writeback;
     pub use writeback::writeback;

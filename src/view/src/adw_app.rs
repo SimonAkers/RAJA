@@ -7,12 +7,15 @@ use gtk::prelude::*;
 use sourceview5::prelude::*;
 
 use adw::{Application, ColorScheme, StyleManager};
-use gtk::{CssProvider, StyleContext};
-use gtk::gdk::Display;
+use glib::signal::Inhibit;
+use gtk::{CssProvider, EventControllerKey, Orientation, StyleContext};
+use gtk::builders::{DialogBuilder, EntryBuilder};
+use gtk::gdk::{Display, Key};
 use model::assembler;
+use model::callback::Callback;
 
 use model::machine::Machine;
-use model::syscall::Syscall;
+use model::syscall::SyscallDiscriminants;
 
 use util::shared::Shared;
 
@@ -69,14 +72,89 @@ impl AdwApp {
 
         // TODO: Connect UI to backend from here
 
+        Self::register_callbacks(adw_app.clone(), window.clone());
+
         // Connect build button
         Self::connect_btn_build(adw_app.clone(), window.clone());
 
         // Connect run button
         Self::connect_btn_run(adw_app.clone(), window.clone());
 
+        // Connect the "enter" key to the console
+        Self::connect_console_confirm(adw_app.clone(), window.clone());
+
         // Show the window
         window.show();
+    }
+
+    /**
+    Registers functions to be called when the simulator handles system calls.
+
+    # Arguments
+    - `adw_app` - A reference to a shared instance of AdwApp.
+    - `window` - A reference to the app's window.
+     */
+    fn register_callbacks(adw_app: Shared<AdwApp>, window: AppWindow) {
+        let machine = &mut adw_app.borrow_mut().machine;
+        let callbacks = machine.get_callbacks();
+
+        // Print
+        let _window = window.clone();
+        callbacks.insert(
+            SyscallDiscriminants::Print,
+            Callback::new(Box::new(move |info| {
+                match info {
+                    None => (),
+                    Some(message) => {
+                        _window.console().print(&*format!("{}", message));
+                        debug_println!("[CONSOLE] {}", message);
+                    }
+                }
+            }))
+        );
+
+        // Error
+        let _window = window.clone();
+        callbacks.insert(
+            SyscallDiscriminants::Error,
+            Callback::new(Box::new(move |info| {
+                match info {
+                    None => (),
+                    Some(message) => {
+                        _window.console().print_err(&*format!("[ERROR] {}", message));
+                        debug_println!("[CONSOLE] [ERROR] {}", message);
+                    }
+                }
+            }))
+        );
+
+        // ReadInt
+        let _window = window.clone();
+        callbacks.insert(
+            SyscallDiscriminants::ReadInt,
+            Callback::new(Box::new(move |_| {
+                // TODO: Replace temporary popup dialog with console input
+                let mut vbox = gtk::Box::new(Orientation::Vertical, 0);
+
+                vbox.append(&EntryBuilder::new()
+                    .height_request(48)
+                    .width_chars(48)
+                    .hexpand(true)
+                    .vexpand(true)
+                    .build()
+                );
+
+                let dialog = DialogBuilder::new()
+                    .child(&vbox)
+                    .transient_for(&_window)
+                    .title("Read Integer")
+                    .build();
+
+                _window.console().set_editable(true);
+
+                //dialog.show();
+            }))
+        );
     }
 
     /**
@@ -111,55 +189,37 @@ impl AdwApp {
             // Reset and flash the assembly to the machine
             Self::reset_flash_machine(&adw_app, &window);
 
-            let adw_app = adw_app.clone();
-            let window = window.clone();
-            glib::timeout_add_local(Duration::from_millis(1), move || {
-                let machine = &mut adw_app.borrow_mut().machine;
+            Self::start_simulator(adw_app.clone());
+        });
+    }
 
-                // ===== BEGIN PRINT SYSCALL HANDLING =====
-                // TODO: Move print syscall code out of UI code!!!!!!!!!!!
-                // TODO: Optimize this, since it may be slowing down simulation
-                let mut print = String::new();
+    fn connect_console_confirm(adw_app: Shared<AdwApp>, window: AppWindow) {
+        let controller = EventControllerKey::new();
 
-                // If there is a pending syscall
-                if machine.pending_syscall() {
-                    // Handle the syscall
-                    machine.handle_syscall(|syscall| match syscall {
-                        // Handle a print syscall
-                        Syscall::Print(out) => ControlFlow::Break(print.push_str(&out)),
+        let _window = window.clone();
+        controller.connect_key_pressed(move |keyval, keycode, state, _| {
+            if keycode == Key::Return {
+                let console = _window.console();
+                console.set_editable(false);
+                // TODO: Pass entered value to simulator
+                //Self::start_simulator(adw_app.clone());
+            }
 
-                        // Handle an error
-                        Syscall::Error(out) => ControlFlow::Break({
-                            print.push_str(&format!("ERROR: {out}\n"));
-                        }),
+            Inhibit(false)
+        });
 
-                        // Handle a quit syscall
-                        // TODO: Make this stop the simulator
-                        Syscall::Quit => ControlFlow::Break(()),
+        window.console().add_controller(&controller);
+    }
 
-                        _ => ControlFlow::Continue(()),
-                    });
-                }
+    pub fn start_simulator(adw_app: Shared<AdwApp>) {
+        glib::timeout_add_local(Duration::from_millis(1), move || {
+            let machine = &mut adw_app.borrow_mut().machine;
 
-                // If there is something to print
-                if print.len() > 0 {
-                    window.console().print(&*format!("{}", print));
-                    debug_println!("[CONSOLE] {}", print);
-                }
-
-                // VERY BAD AND HACKY WAY TO EXIT!!!!!!
-                // TODO: Exit if hit kernel but do not do it this way
-                if print == "ERROR: program finished (ran into kernel)\n".to_string() {
-                    return Continue(false);
-                }
-                // ===== END PRINT SYSCALL HANDLING =====
-
-                // Cycle the machine
-                match machine.cycle() {
-                    Ok(_) => Continue(true),
-                    Err(_) => { debug_println!("CYCLE FAILED"); Continue(false) },
-                }
-            });
+            // Cycle the machine
+            match machine.cycle() {
+                ControlFlow::Continue(_) => Continue(true),
+                ControlFlow::Break(_) => Continue(false)
+            }
         });
     }
 

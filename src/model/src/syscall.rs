@@ -1,10 +1,13 @@
 use crate::{Memory, RegisterFile, A0, V0};
 use anyhow::{bail, Context, Result};
+use strum_macros::EnumDiscriminants;
 
-#[derive(Debug)]
+#[derive(Debug, Default, Clone, EnumDiscriminants)]
+#[strum_discriminants(derive(Hash))]
 pub enum Syscall {
     Print(String),
     Error(String),
+    #[default]
     Quit,
     ReadInt,
 }

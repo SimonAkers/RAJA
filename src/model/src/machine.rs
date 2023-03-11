@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::ops::ControlFlow;
 
 use crate::{
@@ -10,6 +11,10 @@ use crate::{
     Memory, Register, RegisterFile, SP,
 };
 use anyhow::Result;
+use debug_print::debug_println;
+use crate::callback::Callback;
+use crate::machine_input::MachineInput;
+use crate::syscall::SyscallDiscriminants;
 
 /// Represents an instance of a simulated MIPS computer.
 #[derive(Default)]
@@ -20,6 +25,8 @@ pub struct Machine {
     memory: Memory,
     symbols: LabelTable,
     pending_syscall: Option<Syscall>,
+    callbacks: HashMap<SyscallDiscriminants, Callback>,
+    input: MachineInput,
 }
 
 impl Machine {
@@ -99,26 +106,6 @@ impl Machine {
         Ok(())
     }
 
-    /// Handle a syscall in the application
-    ///
-    /// # Returns
-    /// If the syscall has been fully handled in the closure it should return `ControlFlow::Break`
-    /// IF the syscall needs to be handled at a later time then return `ControlFlow::Continue`
-    pub fn handle_syscall<F>(&mut self, f: F) -> ControlFlow<()>
-    where
-        F: FnOnce(&Syscall) -> ControlFlow<()>,
-    {
-        // if there is a pending syscall try to handle it
-        if let Some(syscall) = &self.pending_syscall {
-            if let ControlFlow::Break(_) = (f)(syscall) {
-                self.pending_syscall = None;
-                return ControlFlow::Break(());
-            }
-        }
-
-        ControlFlow::Continue(())
-    }
-
     /// Checks if there is a pending syscall
     ///
     /// # Returns
@@ -127,22 +114,104 @@ impl Machine {
         self.pending_syscall.is_some()
     }
 
-    /// Step the machine forward 1 cpu cycle
-    pub fn cycle(&mut self) -> Result<()> {
-        // do not cycle if we are waiting on a syscall
-        if self.pending_syscall.is_none() {
-            let (new_state, syscall) = pipeline::pipe_cycle(
-                &mut self.pc,
-                &mut self.regs,
-                &mut self.memory,
-                self.state.clone(),
-            )?;
-            self.state = new_state;
-            if let Some(syscall) = syscall {
-                self.pending_syscall = Some(syscall);
+    /**
+    Steps the machine forward 1 CPU cycle.
+
+    Returns ControlFlow::Break if the machine should stop cycling, otherwise ControlFlow::Continue.
+     */
+    pub fn cycle(&mut self) -> ControlFlow<()> {
+        return match self.pending_syscall.clone() {
+            None => {
+                match pipeline::pipe_cycle(
+                    &mut self.pc,
+                    &mut self.regs,
+                    &mut self.memory,
+                    self.state.clone(),
+                ) {
+                    Ok((new_state, syscall)) => {
+                        self.state = new_state;
+
+                        if let Some(syscall) = syscall {
+                            self.pending_syscall = Some(syscall);
+                        }
+
+                        ControlFlow::Continue(())
+                    }
+
+                    Err(_) => ControlFlow::Break(())
+                }
+            }
+
+            Some(syscall) => {
+                self.handle_syscall(&syscall)
             }
         }
-        Ok(())
+    }
+
+    /**
+    Handles a system call and returns a value indicating whether the machine should stop cycling.
+
+    # Arguments
+    - `syscall` - A borrowed reference to the system call to handle.
+
+    Returns ControlFlow::Break if the machine should stop cycling, otherwise ControlFlow::Continue.
+     */
+    fn handle_syscall(&mut self, syscall: &Syscall) -> ControlFlow<()> {
+        // Whether the syscall has been resolved (fully processed)
+        let mut resolved = true;
+        // Whether to run the callback for the given syscall
+        let mut run_callback = true;
+
+        // Handle calls internally and obtain any message to pass to callbacks
+        let (flow, info) = match syscall {
+            Syscall::Print(message) => (ControlFlow::Continue(()), Some(message)),
+            Syscall::Error(message) => (ControlFlow::Break(()), Some(message)),
+            Syscall::Quit => (ControlFlow::Break(()), None),
+            Syscall::ReadInt => {
+                match self.input.integer() {
+                    None => {
+                        // No integer is present, so stop cycling and mark syscall as unresolved
+                        // Callback should put an integer into the machine's input
+                        resolved = false;
+                        (ControlFlow::Break(()), None)
+                    }
+
+                    Some(integer) => {
+                        // TODO: Read integer into memory here
+                        debug_println!("[DEBUG] Read int: {}", integer);
+
+                        // Do not run callback since we already have data from frontend
+                        run_callback = false;
+
+                        // TODO: Do I need to flush input here?
+
+                        // Continue cycling after reading in integer
+                        (ControlFlow::Continue(()), None)
+                    }
+                }
+            },
+        };
+
+        if resolved {
+            self.pending_syscall = None;
+        }
+
+        if run_callback {
+            match self.callbacks.get_mut(&SyscallDiscriminants::from(syscall)) {
+                None => (),
+                Some(mut callback) => callback.call(info),
+            }
+        }
+
+        flow
+    }
+
+    pub fn input(&self) -> &MachineInput {
+        &self.input
+    }
+
+    pub fn get_callbacks(&mut self) -> &mut HashMap<SyscallDiscriminants, Callback> {
+        &mut self.callbacks
     }
 }
 
