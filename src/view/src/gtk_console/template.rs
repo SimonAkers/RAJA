@@ -1,5 +1,8 @@
+use std::borrow::BorrowMut;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
+
+use crate::gtk_console::buffer_tags::*;
 
 /**
 The template for [GtkConsole][`crate::gtk_console::GtkConsole`] \
@@ -19,6 +22,20 @@ impl ObjectSubclass for GtkConsoleTemplate {
     type ParentType = gtk::TextView;
 }
 
-impl ObjectImpl for GtkConsoleTemplate {}
+impl ObjectImpl for GtkConsoleTemplate {
+    fn constructed(&self) {
+        self.parent_constructed();
+
+        // Get a reference to the console's text buffer
+        let mut buffer = self.obj().borrow_mut().buffer();
+
+        // Create a tag used to prevent the user from editing certain text
+        buffer.create_tag(Some(TAG_PROTECTED_TEXT), &[("editable", &false)]);
+
+        // Create a tag used to highlight error text in red
+        buffer.create_tag(Some(TAG_ERROR_TEXT), &[("foreground", &"#FF3535")]);
+    }
+}
+
 impl WidgetImpl for GtkConsoleTemplate {}
 impl TextViewImpl for GtkConsoleTemplate {}

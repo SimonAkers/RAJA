@@ -1,8 +1,11 @@
 mod template;
+mod buffer_tags;
 
 use std::borrow::Borrow;
 use glib::subclass::prelude::ObjectSubclassIsExt;
 use gtk::prelude::{TextBufferExt, TextBufferExtManual, TextViewExt};
+
+use crate::gtk_console::buffer_tags::*;
 use crate::traits::Console;
 
 glib::wrapper! {
@@ -16,6 +19,33 @@ glib::wrapper! {
     pub struct GtkConsole(ObjectSubclass<template::GtkConsoleTemplate>)
         @extends gtk::TextView, gtk::Widget,
         @implements gtk::Accessible, gtk::Actionable, gtk::Buildable, gtk::ConstraintTarget;
+}
+
+impl GtkConsole {
+    /**
+    Enables or disables user input at the end of the console.
+
+    # Arguments
+    - `allow` - Whether to enable (true) or disable (false) user input.
+    */
+    pub fn allow_user_input(&mut self, allow: bool) {
+        // Get a reference to the buffer and its bounds
+        let mut buffer = self.buffer();
+        let start = buffer.start_iter();
+        let end = buffer.end_iter();
+
+        // Set the TextView to be editable or not
+        self.set_editable(allow);
+
+        if allow {
+            // Prevent user from editing pre-existing text
+            buffer.apply_tag_by_name(TAG_PROTECTED_TEXT, &start, &end);
+        } else {
+            // Remove the tag while user input is disabled to avoid possible interferences
+            // (this may be unnecessary)
+            buffer.remove_tag_by_name(TAG_PROTECTED_TEXT, &start, &end);
+        }
+    }
 }
 
 /// See [Console][`crate::traits::Console`] for docs.
@@ -38,10 +68,8 @@ impl Console for GtkConsole {
         let start_iter = buffer.iter_at_offset(buffer.char_count() - msg.len() as i32);
         let end_iter = buffer.end_iter();
 
-        // Create a tag with a foreground color
-        let tag = buffer.create_tag(None, &[("foreground", &"#FF3535")]);
-        // Apply the tag to color the message
-        buffer.apply_tag(&tag.unwrap(), &start_iter, &end_iter);
+        // Apply a tag to style error text (color it)
+        buffer.apply_tag_by_name(TAG_ERROR_TEXT, &start_iter, &end_iter);
     }
 
     fn input(&self) -> Option<&str> {

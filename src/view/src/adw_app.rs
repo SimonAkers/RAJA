@@ -5,7 +5,7 @@ use std::time::Duration;
 use adw::{Application, ColorScheme, StyleManager};
 use debug_print::*;
 use glib::signal::Inhibit;
-use gtk::{CssProvider, Dialog, Entry, EventControllerKey, Orientation, StyleContext};
+use gtk::{CssProvider, Dialog, Entry, EventControllerKey, Orientation, StyleContext, TextIter, TextTag};
 use gtk::gdk::{Display, Key};
 use gtk::prelude::*;
 use sourceview5::prelude::*;
@@ -130,26 +130,7 @@ impl AdwApp {
         callbacks.insert(
             SyscallDiscriminants::ReadInt,
             Callback::new(Box::new(move |_| {
-                // TODO: Replace temporary popup dialog with console input
-                let mut vbox = gtk::Box::new(Orientation::Vertical, 0);
-
-                vbox.append(&Entry::builder()
-                    .height_request(48)
-                    .width_chars(48)
-                    .hexpand(true)
-                    .vexpand(true)
-                    .build()
-                );
-
-                let dialog = Dialog::builder()
-                    .child(&vbox)
-                    .transient_for(&_window)
-                    .title("Read Integer")
-                    .build();
-
-                _window.console().set_editable(true);
-
-                //dialog.show();
+                _window.console().allow_user_input(true);
             }))
         );
     }
@@ -196,8 +177,8 @@ impl AdwApp {
         let _window = window.clone();
         controller.connect_key_pressed(move |keyval, keycode, state, _| {
             if keycode == Key::Return {
-                let console = _window.console();
-                console.set_editable(false);
+                let mut console = _window.console();
+                console.allow_user_input(false);
                 // TODO: Pass entered value to simulator
                 //Self::start_simulator(adw_app.clone());
             }
