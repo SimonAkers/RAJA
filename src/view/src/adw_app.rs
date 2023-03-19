@@ -180,11 +180,13 @@ impl AdwApp {
                 let mut console = _window.console();
 
                 if console.user_input_started() {
+                    let machine = &mut adw_app.borrow_mut().machine;
+
                     console.end_user_input();
 
-                    println!("{}", console.input());
-                    // TODO: Pass entered value to simulator
-                    //Self::start_simulator(adw_app.clone());
+                    machine.set_input(Some(console.input()));
+
+                    Self::start_simulator(adw_app.clone());
                 }
             }
 

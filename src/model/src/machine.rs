@@ -1,19 +1,14 @@
 use std::collections::HashMap;
 use std::ops::ControlFlow;
+use std::u32;
 
-use crate::{
-    parser::{
-        self,
-        model::{LabelTable, Line, Segment, Segments, STACK_BASE, TEXT_BASE},
-    },
-    pipeline::{self, PipelineState},
-    syscall::{resolve_syscall, Syscall},
-    Memory, Register, RegisterFile, SP,
-};
 use anyhow::Result;
-use debug_print::debug_println;
+
+use crate::{Memory, parser::{
+    self,
+    model::{LabelTable, Line, Segment, Segments, STACK_BASE, TEXT_BASE},
+}, pipeline::{self, PipelineState}, Register, register, RegisterFile, SP, syscall::{resolve_syscall, Syscall}};
 use crate::callback::Callback;
-use crate::machine_input::MachineInput;
 use crate::syscall::SyscallDiscriminants;
 
 /// Represents an instance of a simulated MIPS computer.
@@ -26,7 +21,7 @@ pub struct Machine {
     symbols: LabelTable,
     pending_syscall: Option<Syscall>,
     callbacks: HashMap<SyscallDiscriminants, Callback>,
-    input: MachineInput,
+    input: Option<String>,
 }
 
 impl Machine {
@@ -168,7 +163,7 @@ impl Machine {
             Syscall::Error(message) => (ControlFlow::Break(()), Some(message)),
             Syscall::Quit => (ControlFlow::Break(()), None),
             Syscall::ReadInt => {
-                match self.input.integer() {
+                match &self.input {
                     None => {
                         // No integer is present, so stop cycling and mark syscall as unresolved
                         // Callback should put an integer into the machine's input
@@ -176,14 +171,20 @@ impl Machine {
                         (ControlFlow::Break(()), None)
                     }
 
-                    Some(integer) => {
-                        // TODO: Read integer into memory here
-                        debug_println!("[DEBUG] Read int: {}", integer);
+                    Some(input) => {
+                        let integer = match input.parse::<u32>() {
+                            Ok(integer) => integer,
+                            Err(_) => 0 // TODO: Handle error properly
+                        };
+
+                        self.regs.write_register(register::V0, integer);
+
+                        self.input = None;
 
                         // Do not run callback since we already have data from frontend
                         run_callback = false;
-
-                        // TODO: Do I need to flush input here?
+                        // Mark syscall as resolved
+                        resolved = true;
 
                         // Continue cycling after reading in integer
                         (ControlFlow::Continue(()), None)
@@ -206,8 +207,8 @@ impl Machine {
         flow
     }
 
-    pub fn input(&self) -> &MachineInput {
-        &self.input
+    pub fn set_input(&mut self, input: Option<String>) {
+        self.input = input;
     }
 
     pub fn get_callbacks(&mut self) -> &mut HashMap<SyscallDiscriminants, Callback> {
