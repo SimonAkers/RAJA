@@ -2,7 +2,7 @@ use std::borrow::BorrowMut;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
 
-use crate::gtk_console::buffer_tags::*;
+use crate::gtk_console::constants::*;
 
 /**
 The template for [GtkConsole][`crate::gtk_console::GtkConsole`] \
