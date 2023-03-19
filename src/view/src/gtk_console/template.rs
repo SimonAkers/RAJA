@@ -1,4 +1,5 @@
 use std::borrow::BorrowMut;
+use std::cell::Cell;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
 
@@ -11,7 +12,9 @@ which represents a console widget.
 This mostly consists of gtk-rs boilerplate and should not be constructed directly.
  */
 #[derive(Default)]
-pub struct GtkConsoleTemplate;
+pub struct GtkConsoleTemplate {
+    pub user_input_started: Cell<bool>
+}
 
 /// gtk-rs boilerplate implementation
 #[glib::object_subclass]
@@ -34,6 +37,12 @@ impl ObjectImpl for GtkConsoleTemplate {
 
         // Create a tag used to highlight error text in red
         buffer.create_tag(Some(TAG_ERROR_TEXT), &[("foreground", &"#FF3535")]);
+
+        // Create a mark used to determine the beginning of user input
+        buffer.create_mark(Some(MARK_START_USER_INPUT), &buffer.start_iter(), true);
+
+        // Create a mark used to determine the end of user input
+        buffer.create_mark(Some(MARK_END_USER_INPUT), &buffer.start_iter(), false);
     }
 }
 

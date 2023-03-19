@@ -1,11 +1,11 @@
 mod template;
-mod buffer_tags;
+mod constants;
 
-use std::borrow::Borrow;
+use std::borrow::{Borrow, BorrowMut};
 use glib::subclass::prelude::ObjectSubclassIsExt;
 use gtk::prelude::{TextBufferExt, TextBufferExtManual, TextViewExt};
 
-use crate::gtk_console::buffer_tags::*;
+use crate::gtk_console::constants::*;
 use crate::traits::Console;
 
 glib::wrapper! {
@@ -22,29 +22,38 @@ glib::wrapper! {
 }
 
 impl GtkConsole {
-    /**
-    Enables or disables user input at the end of the console.
-
-    # Arguments
-    - `allow` - Whether to enable (true) or disable (false) user input.
-    */
-    pub fn allow_user_input(&mut self, allow: bool) {
-        // Get a reference to the buffer and its bounds
+    pub fn start_user_input(&mut self) {
         let mut buffer = self.buffer();
-        let start = buffer.start_iter();
-        let end = buffer.end_iter();
+        let (start, end) = buffer.bounds();
 
-        // Set the TextView to be editable or not
-        self.set_editable(allow);
+        // Mark the beginning of the user's input
+        buffer.move_mark_by_name(MARK_START_USER_INPUT, &end);
+        // Prevent user from editing pre-existing text
+        buffer.apply_tag_by_name(TAG_PROTECTED_TEXT, &start, &end);
 
-        if allow {
-            // Prevent user from editing pre-existing text
-            buffer.apply_tag_by_name(TAG_PROTECTED_TEXT, &start, &end);
-        } else {
-            // Remove the tag while user input is disabled to avoid possible interferences
-            // (this may be unnecessary)
-            buffer.remove_tag_by_name(TAG_PROTECTED_TEXT, &start, &end);
-        }
+        self.set_editable(true);
+        self.set_user_input_started(true);
+    }
+
+    pub fn end_user_input(&mut self) {
+        let mut buffer = self.buffer();
+        let (start, end) = buffer.bounds();
+
+        // Mark the end of the user's input
+        buffer.move_mark_by_name(MARK_END_USER_INPUT, &end);
+        // Remove tag while user input is disabled
+        buffer.remove_tag_by_name(TAG_PROTECTED_TEXT, &start, &end);
+
+        self.set_editable(false);
+        self.set_user_input_started(false);
+    }
+
+    pub fn user_input_started(&self) -> bool {
+        self.imp().user_input_started.get()
+    }
+
+    fn set_user_input_started(&mut self, user_input_started: bool) {
+        self.imp().user_input_started.set(user_input_started);
     }
 }
 
@@ -72,8 +81,19 @@ impl Console for GtkConsole {
         buffer.apply_tag_by_name(TAG_ERROR_TEXT, &start_iter, &end_iter);
     }
 
-    fn input(&self) -> Option<&str> {
-        todo!()
+    fn input(&self) -> String {
+        let buffer = self.buffer();
+
+        // Get the marks surrounding the user input
+        let start_mark = buffer.mark(MARK_START_USER_INPUT).unwrap();
+        let end_mark = buffer.mark(MARK_END_USER_INPUT).unwrap();
+
+        // Get the iters at those marks
+        let start = buffer.iter_at_mark(&start_mark);
+        let end = buffer.iter_at_mark(&end_mark);
+
+        // Return the text within those iters
+        buffer.text(&start, &end, true).to_string()
     }
 
     fn clear(&self) {

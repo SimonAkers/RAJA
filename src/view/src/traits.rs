@@ -43,7 +43,7 @@ pub trait Console {
 
     Returns an Option containing the user's input as a &str, or None.
      */
-    fn input(&self) -> Option<&str>;
+    fn input(&self) -> String;
 
     /**
     Clears the output of the console.

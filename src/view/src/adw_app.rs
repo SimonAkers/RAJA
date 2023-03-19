@@ -5,7 +5,7 @@ use std::time::Duration;
 use adw::{Application, ColorScheme, StyleManager};
 use debug_print::*;
 use glib::signal::Inhibit;
-use gtk::{CssProvider, Dialog, Entry, EventControllerKey, Orientation, StyleContext, TextIter, TextTag};
+use gtk::{CssProvider, EventControllerKey, StyleContext};
 use gtk::gdk::{Display, Key};
 use gtk::prelude::*;
 use sourceview5::prelude::*;
@@ -130,7 +130,7 @@ impl AdwApp {
         callbacks.insert(
             SyscallDiscriminants::ReadInt,
             Callback::new(Box::new(move |_| {
-                _window.console().allow_user_input(true);
+                _window.console().start_user_input();
             }))
         );
     }
@@ -178,9 +178,14 @@ impl AdwApp {
         controller.connect_key_pressed(move |keyval, keycode, state, _| {
             if keycode == Key::Return {
                 let mut console = _window.console();
-                console.allow_user_input(false);
-                // TODO: Pass entered value to simulator
-                //Self::start_simulator(adw_app.clone());
+
+                if console.user_input_started() {
+                    console.end_user_input();
+
+                    println!("{}", console.input());
+                    // TODO: Pass entered value to simulator
+                    //Self::start_simulator(adw_app.clone());
+                }
             }
 
             Inhibit(false)
