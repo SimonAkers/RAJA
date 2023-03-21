@@ -1,5 +1,7 @@
 use std::borrow::BorrowMut;
 use std::cell::Cell;
+
+use gtk::{EventControllerFocus, GestureClick};
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
 
@@ -25,6 +27,30 @@ impl ObjectSubclass for GtkConsoleTemplate {
     type ParentType = gtk::TextView;
 }
 
+impl GtkConsoleTemplate {
+    fn connect_click_handler(&self) {
+        let controller = GestureClick::new();
+
+        let console = self.obj().clone();
+        controller.connect_pressed(move |_, _, _, _| {
+            console.set_cursor_visible(true);
+        });
+
+        self.obj().add_controller(controller);
+    }
+
+    fn connect_focus_handler(&self) {
+        let controller = EventControllerFocus::new();
+
+        let console = self.obj().clone();
+        controller.connect_enter(move |_| {
+            console.set_cursor_visible(true);
+        });
+
+        self.obj().add_controller(controller);
+    }
+}
+
 impl ObjectImpl for GtkConsoleTemplate {
     fn constructed(&self) {
         self.parent_constructed();
@@ -43,6 +69,10 @@ impl ObjectImpl for GtkConsoleTemplate {
 
         // Create a mark used to determine the end of user input
         buffer.create_mark(Some(MARK_END_USER_INPUT), &buffer.start_iter(), false);
+
+        // Connect handlers to ensure that the cursor is visible when needed
+        self.connect_click_handler();
+        self.connect_focus_handler();
     }
 }
 

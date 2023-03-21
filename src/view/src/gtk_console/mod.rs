@@ -48,6 +48,8 @@ impl GtkConsole {
 
         self.set_editable(false);
         self.imp().user_input_started.set(false);
+
+        self.set_cursor_visible(false);
     }
 
     pub fn user_input_started(&self) -> bool {
