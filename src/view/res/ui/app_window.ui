@@ -161,8 +161,10 @@
                 <child>
                     <object class="GtkPaned">
                         <property name="orientation">vertical</property>
-
                         <property name="position">400</property>
+
+                        <property name="shrink-start-child">False</property>
+                        <property name="shrink-end-child">False</property>
 
                         <property name="start-child">
                             <object class="GtkScrolledWindow">
@@ -170,6 +172,8 @@
                                 <property name="margin-bottom">12</property>
                                 <property name="margin-start">12</property>
                                 <property name="margin-end">12</property>
+
+                                <property name="height-request">100</property>
 
                                 <property name="child">
                                     <object class="GtkSourceView" id="source_view">
@@ -198,8 +202,8 @@
                                 <property name="margin-bottom">12</property>
                                 <property name="margin-start">12</property>
                                 <property name="margin-end">12</property>
-                                <property name="hexpand">True</property>
-                                <property name="vexpand">True</property>
+
+                                <property name="height-request">100</property>
 
                                 <property name="child">
                                     <object class="GtkConsole" id="console">
