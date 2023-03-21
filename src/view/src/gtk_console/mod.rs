@@ -3,7 +3,7 @@ mod constants;
 
 use std::borrow::{Borrow, BorrowMut};
 use glib::subclass::prelude::ObjectSubclassIsExt;
-use gtk::prelude::{TextBufferExt, TextBufferExtManual, TextViewExt};
+use gtk::prelude::{TextBufferExt, TextBufferExtManual, TextViewExt, WidgetExt};
 
 use crate::gtk_console::constants::*;
 use crate::traits::Console;
@@ -32,7 +32,9 @@ impl GtkConsole {
         buffer.apply_tag_by_name(TAG_PROTECTED_TEXT, &start, &end);
 
         self.set_editable(true);
-        self.set_user_input_started(true);
+        self.imp().user_input_started.set(true);
+
+        self.grab_focus();
     }
 
     pub fn end_user_input(&mut self) {
@@ -45,15 +47,11 @@ impl GtkConsole {
         buffer.remove_tag_by_name(TAG_PROTECTED_TEXT, &start, &end);
 
         self.set_editable(false);
-        self.set_user_input_started(false);
+        self.imp().user_input_started.set(false);
     }
 
     pub fn user_input_started(&self) -> bool {
         self.imp().user_input_started.get()
-    }
-
-    fn set_user_input_started(&mut self, user_input_started: bool) {
-        self.imp().user_input_started.set(user_input_started);
     }
 }
 
