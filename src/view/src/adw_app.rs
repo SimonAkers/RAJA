@@ -3,11 +3,13 @@ use std::ops::ControlFlow;
 use std::time::Duration;
 
 use adw::{Application, ColorScheme, StyleManager};
+use dark_light::Mode;
 use debug_print::*;
 use glib::signal::Inhibit;
 use gtk::{CssProvider, EventControllerKey, StyleContext};
 use gtk::gdk::{Display, Key};
 use gtk::prelude::*;
+use sourceview5::StyleSchemeManager;
 use sourceview5::prelude::*;
 
 use model::assembler;
@@ -257,7 +259,12 @@ impl AdwApp {
      */
     fn build_window(app: &Application) -> AppWindow {
         // Set the app color scheme to match the system (dark or light)
-        StyleManager::default().set_color_scheme(Self::get_system_color_scheme());
+        StyleManager::default().set_color_scheme(
+            match dark_light::detect() {
+                Mode::Dark => ColorScheme::PreferDark,
+                Mode::Light => ColorScheme::PreferLight,
+            }
+        );
 
         let window = AppWindow::new(app);
 
@@ -267,17 +274,17 @@ impl AdwApp {
         window
     }
 
-    /// Returns a ColorScheme matching the system's theme (dark or light)
-    fn get_system_color_scheme() -> ColorScheme {
-        match dark_light::detect() {
-            dark_light::Mode::Dark => ColorScheme::PreferDark,
-            dark_light::Mode::Light => ColorScheme::PreferLight,
-        }
-    }
-
     /// Styles a GtkSourceView as the MIPS code view
     fn style_srcview(srcview: &sourceview5::View) {
         let buffer = sourceview5::Buffer::new(None);
+
+        // Set the style scheme based on the system theme
+        buffer.set_style_scheme(
+            match dark_light::detect() {
+                Mode::Dark => StyleSchemeManager::default().scheme("Adwaita-dark"),
+                Mode::Light => StyleSchemeManager::default().scheme("Adwaita"),
+            }.as_ref()
+        );
 
         if let Some(ref language) = sourceview5::LanguageManager::new().language("mal") {
             buffer.set_language(Some(language));
