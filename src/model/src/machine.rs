@@ -51,6 +51,8 @@ impl Machine {
         self.pc = TEXT_BASE;
         self.state = PipelineState::default();
         self.regs = RegisterFile::default();
+        self.pending_syscall = None;
+        self.input = None;
     }
 
     /// Fully resets this machine including memory contents and registers
