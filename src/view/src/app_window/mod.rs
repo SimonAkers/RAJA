@@ -4,7 +4,7 @@ use gtk::{gio, HeaderBar};
 use glib::Object;
 use glib::subclass::prelude::ObjectSubclassIsExt;
 use adw::Application;
-use crate::gtk_console;
+use crate::gtk_console::GtkConsole;
 
 glib::wrapper! {
     /**
@@ -17,7 +17,16 @@ glib::wrapper! {
                     gtk::ConstraintTarget, gtk::Native, gtk::Root, gtk::ShortcutManager;
 }
 
-// TODO: Change convenience methods to be inlined OR macros
+/// Macro for generating widget convenience getter
+macro_rules! widget {
+    ($widget:ident, $t:ty) => {
+        #[inline(always)]
+        pub fn $widget(&self) -> $t {
+            self.imp().$widget.get()
+        }
+    }
+}
+
 impl AppWindow {
     /**
     Creates a new AppWindow.
@@ -32,28 +41,10 @@ impl AppWindow {
             .build()
     }
 
-    /// Returns the window's header bar.
-    pub fn header_bar(&self) -> HeaderBar {
-        self.imp().header_bar.get()
-    }
-
-    /// Returns the window's source view.
-    pub fn source_view(&self) -> sourceview5::View {
-        self.imp().source_view.get()
-    }
-
-    /// Returns the window's console.
-    pub fn console(&self) -> gtk_console::GtkConsole {
-        self.imp().console.get()
-    }
-
-    /// Returns the window's run button.
-    pub fn btn_run(&self) -> gtk::Button {
-        self.imp().btn_run.get()
-    }
-
-    /// Returns the window's build button.
-    pub fn btn_build(&self) -> gtk::Button {
-        self.imp().btn_build.get()
-    }
+    // TODO: Further abstract these macro calls into a derive macro
+    widget!(header_bar, HeaderBar);
+    widget!(source_view, sourceview5::View);
+    widget!(console, GtkConsole);
+    widget!(btn_run, gtk::Button);
+    widget!(btn_build, gtk::Button);
 }
