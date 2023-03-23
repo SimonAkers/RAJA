@@ -1,4 +1,5 @@
 use std::borrow::Borrow;
+use std::fs;
 use std::ops::ControlFlow;
 use std::time::Duration;
 
@@ -6,11 +7,12 @@ use adw::{Application, ColorScheme, StyleManager};
 use dark_light::Mode;
 use debug_print::*;
 use glib::signal::Inhibit;
-use gtk::{CssProvider, EventControllerKey, StyleContext};
+use gtk::{CssProvider, EventControllerKey, FileDialog, FileFilter, StyleContext};
 use gtk::gdk::{Display, Key};
+use gtk::gio::{Cancellable, SimpleAction};
 use gtk::prelude::*;
-use sourceview5::StyleSchemeManager;
 use sourceview5::prelude::*;
+use sourceview5::StyleSchemeManager;
 
 use model::assembler;
 use model::callback::Callback;
@@ -79,11 +81,14 @@ impl AdwApp {
         // Connect run button
         Self::connect_btn_run(adw_app.clone(), window.clone());
 
+        // Connect the file buttons
+        Self::connect_btn_file(window.clone());
+
         // Connect the "enter" key to the console
         Self::connect_console_confirm(adw_app.clone(), window.clone());
 
         // Show the window
-        window.show();
+        window.present();
     }
 
     /**
@@ -173,6 +178,43 @@ impl AdwApp {
         });
     }
 
+    fn connect_btn_file(window: AppWindow) {
+        let action = SimpleAction::new("file-open", None);
+
+        let _window = window.clone();
+        action.connect_activate(move |_, _| {
+            let filter = FileFilter::new();
+            filter.add_pattern("*.s");
+            filter.add_pattern("*.asm");
+            let dialog = FileDialog::builder()
+                .title("Open File")
+                .default_filter(&filter)
+                .build();
+
+            let window = _window.clone();
+            dialog.open(Some(&_window), Cancellable::NONE, move |result| {
+                let file = match result {
+                    Ok(file) => file,
+                    Err(_) => return
+                };
+
+                let path = match file.path() {
+                    Some(path) => path,
+                    None => return
+                };
+
+                match fs::read_to_string(path) {
+                    Ok(contents) => {
+                        window.source_view().set_text(contents.replace("\r", ""));
+                    }
+                    Err(_) => {}
+                }
+            })
+        });
+
+        window.add_action(&action);
+    }
+
     fn connect_console_confirm(adw_app: Shared<AdwApp>, window: AppWindow) {
         let controller = EventControllerKey::new();
 
@@ -221,7 +263,7 @@ impl AdwApp {
         let machine = &mut adw_app.borrow_mut().machine;
 
         // Get the assembly code
-        let mut src = window.source_view().get_text();
+        let mut src = window.source_view().text();
         // Ensure newline to prevent assembler error
         src.push('\n');
 
@@ -296,12 +338,16 @@ impl AdwApp {
 
 /// See [Source][`crate::traits::Source`] for docs.
 impl Source for sourceview5::View {
-    fn get_text(&self) -> String {
+    fn text(&self) -> String {
         // Get the bounds of the buffer
         let (iter1, iter2) = self.buffer().bounds();
 
         // Return the text within the buffer bounds
         self.buffer().text(&iter1, &iter2, false).as_str().to_owned()
+    }
+
+    fn set_text(&self, text: String) {
+        self.buffer().set_text(&text);
     }
 
     fn clear(&self) {

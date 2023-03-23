@@ -5,11 +5,11 @@
         <section>
             <item>
                 <attribute name='label' translatable='yes'>New</attribute>
-                <attribute name='action'>app.new</attribute>
+                <attribute name='action'>win.file-new</attribute>
             </item>
             <item>
                 <attribute name='label' translatable='yes'>Open</attribute>
-                <attribute name='action'>app.open</attribute>
+                <attribute name='action'>win.file-open</attribute>
             </item>
         </section>
     </menu>
@@ -91,7 +91,7 @@
                                 <property name="label">File</property>
 
                                 <property name="popover">
-                                    <object class="GtkPopoverMenu">
+                                    <object class="GtkPopoverMenu" id="btn_file_popover">
                                         <property name="halign">start</property>
                                         <property name="menu-model">file_menu</property>
                                     </object>

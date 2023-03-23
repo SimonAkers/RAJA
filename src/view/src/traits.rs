@@ -14,7 +14,9 @@ pub trait AppUI {
 /// A trait defining required functionality for a source of MIPS assembly code.
 pub trait Source {
     /// Returns the text contained within the source as a String.
-    fn get_text(&self) -> String;
+    fn text(&self) -> String;
+
+    fn set_text(&self, text: String);
 
     /// Clears the contents of the source.
     fn clear(&self);

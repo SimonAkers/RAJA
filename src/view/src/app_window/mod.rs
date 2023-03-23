@@ -47,4 +47,5 @@ impl AppWindow {
     widget!(console, GtkConsole);
     widget!(btn_run, gtk::Button);
     widget!(btn_build, gtk::Button);
+    widget!(btn_file, gtk::MenuButton);
 }
