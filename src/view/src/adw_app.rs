@@ -7,7 +7,7 @@ use adw::{Application, ColorScheme, StyleManager};
 use dark_light::Mode;
 use debug_print::*;
 use glib::signal::Inhibit;
-use gtk::{CssProvider, EventControllerKey, FileDialog, FileFilter, StyleContext};
+use gtk::{AlertDialog, CssProvider, EventControllerKey, FileDialog, FileFilter, StyleContext};
 use gtk::gdk::{Display, Key};
 use gtk::gio::{Cancellable, SimpleAction};
 use gtk::prelude::*;
@@ -71,16 +71,12 @@ impl AdwApp {
     fn activate(app: &Application, adw_app: &Shared<AdwApp>) {
         let window = AdwApp::build_window(app);
 
-        // TODO: Connect UI to backend from here
-
         Self::register_callbacks(adw_app.clone(), window.clone());
 
         // Connect build button
         Self::connect_btn_build(adw_app.clone(), window.clone());
-
         // Connect run button
         Self::connect_btn_run(adw_app.clone(), window.clone());
-
         // Connect the file buttons
         Self::connect_btn_file(window.clone());
 
@@ -133,6 +129,7 @@ impl AdwApp {
         );
 
         // ReadInt
+        // TODO: Make read syscalls more generic
         let _window = window.clone();
         callbacks.insert(
             SyscallDiscriminants::ReadInt,
@@ -179,10 +176,45 @@ impl AdwApp {
     }
 
     fn connect_btn_file(window: AppWindow) {
+        Self::connect_btn_file_new(window.clone());
+        Self::connect_btn_file_open(window.clone());
+    }
+
+    fn connect_btn_file_new(window: AppWindow) {
+        let action = SimpleAction::new("file-new", None);
+
+        let _window = window.clone();
+        action.connect_activate(move |_, _| {
+            let alert = AlertDialog::builder()
+                .message("WARNING")
+                .detail("This will erase everything in the editor!\nAre you sure you want to continue?")
+                .buttons(["Yes", "No"])
+                .build();
+
+            let window = _window.clone();
+            alert.choose(Some(&_window), Cancellable::NONE, move |result| {
+                match result {
+                    Ok(index) => {
+                        // If "yes" button was clicked
+                        if index == 0 {
+                            window.source_view().clear();
+                            window.console().clear();
+                        }
+                    }
+                    Err(_) => ()
+                }
+            });
+        });
+
+        window.add_action(&action);
+    }
+
+    fn connect_btn_file_open(window: AppWindow) {
         let action = SimpleAction::new("file-open", None);
 
         let _window = window.clone();
         action.connect_activate(move |_, _| {
+            // TODO: Investigate why this filter does not work
             let filter = FileFilter::new();
             filter.add_pattern("*.s");
             filter.add_pattern("*.asm");
@@ -193,16 +225,19 @@ impl AdwApp {
 
             let window = _window.clone();
             dialog.open(Some(&_window), Cancellable::NONE, move |result| {
+                // Get the file
                 let file = match result {
                     Ok(file) => file,
                     Err(_) => return
                 };
 
+                // Get the path of the file
                 let path = match file.path() {
                     Some(path) => path,
                     None => return
                 };
 
+                // Read the file into the editor
                 match fs::read_to_string(path) {
                     Ok(contents) => {
                         window.source_view().set_text(contents);
@@ -226,14 +261,16 @@ impl AdwApp {
                 if console.user_input_started() {
                     let machine = &mut adw_app.borrow_mut().machine;
 
+                    // End user input and pass it to the machine
                     console.end_user_input();
-
                     machine.set_input(Some(console.input()));
 
+                    // Continue the simulator
                     Self::start_simulator(adw_app.clone());
                 }
             }
 
+            // Do not inhibit other callbacks registered to key events
             Inhibit(false)
         });
 
