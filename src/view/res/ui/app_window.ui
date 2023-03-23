@@ -92,6 +92,7 @@
 
                                 <property name="popover">
                                     <object class="GtkPopoverMenu">
+                                        <property name="halign">start</property>
                                         <property name="menu-model">file_menu</property>
                                     </object>
                                 </property>
@@ -104,6 +105,7 @@
 
                                 <property name="popover">
                                     <object class="GtkPopoverMenu">
+                                        <property name="halign">start</property>
                                         <property name="menu-model">view_menu</property>
                                     </object>
                                 </property>
