@@ -205,7 +205,7 @@ impl AdwApp {
 
                 match fs::read_to_string(path) {
                     Ok(contents) => {
-                        window.source_view().set_text(contents.replace("\r", ""));
+                        window.source_view().set_text(contents);
                     }
                     Err(_) => {}
                 }
@@ -264,14 +264,12 @@ impl AdwApp {
 
         // Get the assembly code
         let mut src = window.source_view().text();
-        // Ensure newline to prevent assembler error
-        src.push('\n');
 
         // Reset the machine
         machine.hard_reset();
 
         // Flash the machine
-        match assembler(src.as_str()) {
+        match assembler(src) {
             Ok((mem, lbl)) => machine.flash(mem, lbl),
             Err(err) => window.console().print_err(&format!("{err}"))
         };

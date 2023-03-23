@@ -219,9 +219,14 @@ impl Machine {
 }
 
 /// Method that create a memory instance from a script file
-pub fn assembler(script: &str) -> Result<(Memory, LabelTable)> {
+pub fn assembler(mut script: String) -> Result<(Memory, LabelTable)> {
+    // Replace CRLF line endings
+    script = script.replace("\r\n", "\n");
+    // Ensure newline to prevent assembler error
+    script.push('\n');
+
     // parse assembly
-    let lines = parser::parse_string(script)?;
+    let lines = parser::parse_string(&script)?;
     let labels = parser::compute_labels(&lines);
 
     // for each line in the parsed assembly assemble that line and add the result to a vec
