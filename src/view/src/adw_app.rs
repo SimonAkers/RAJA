@@ -77,8 +77,11 @@ impl AdwApp {
         Self::connect_btn_build(adw_app.clone(), window.clone());
         // Connect run button
         Self::connect_btn_run(adw_app.clone(), window.clone());
+
         // Connect the file buttons
-        Self::connect_btn_file(window.clone());
+        Self::connect_file_new(window.clone());
+        Self::connect_file_open(window.clone());
+        Self::connect_file_save_as(window.clone());
 
         // Connect the "enter" key to the console
         Self::connect_console_confirm(adw_app.clone(), window.clone());
@@ -175,12 +178,7 @@ impl AdwApp {
         });
     }
 
-    fn connect_btn_file(window: AppWindow) {
-        Self::connect_btn_file_new(window.clone());
-        Self::connect_btn_file_open(window.clone());
-    }
-
-    fn connect_btn_file_new(window: AppWindow) {
+    fn connect_file_new(window: AppWindow) {
         let action = SimpleAction::new("file-new", None);
 
         let _window = window.clone();
@@ -209,7 +207,7 @@ impl AdwApp {
         window.add_action(&action);
     }
 
-    fn connect_btn_file_open(window: AppWindow) {
+    fn connect_file_open(window: AppWindow) {
         let action = SimpleAction::new("file-open", None);
 
         let _window = window.clone();
@@ -243,6 +241,52 @@ impl AdwApp {
                         window.source_view().set_text(contents);
                     }
                     Err(_) => {}
+                }
+            })
+        });
+
+        window.add_action(&action);
+    }
+
+    fn connect_file_save_as(window: AppWindow) {
+        let action = SimpleAction::new("file-save-as", None);
+
+        let _window = window.clone();
+        action.connect_activate(move |_, _| {
+            let window = _window.clone();
+
+            let dialog = FileDialog::builder()
+                .title("Save As")
+                .build();
+
+            dialog.save(Some(&_window), Cancellable::NONE, move |result| {
+                // Get the file
+                let file = match result {
+                    Ok(file) => file,
+                    Err(_) => return
+                };
+
+                // Get the path of the file
+                let path = match file.path() {
+                    Some(path) => path,
+                    None => return
+                };
+
+                // Get the contents to write
+                let contents = window.source_view().text();
+
+                // Write to the file
+                match fs::write(path, contents) {
+                    Ok(_) => {}
+                    Err(err) => {
+                        // Alert the user if failed
+                        AlertDialog::builder()
+                            .message("ERROR: Failed to save")
+                            .detail(err.to_string())
+                            .buttons(["Ok"])
+                            .build()
+                            .show(Some(&window));
+                    }
                 }
             })
         });

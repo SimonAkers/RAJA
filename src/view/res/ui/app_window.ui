@@ -11,6 +11,10 @@
                 <attribute name='label' translatable='yes'>Open</attribute>
                 <attribute name='action'>win.file-open</attribute>
             </item>
+            <item>
+                <attribute name='label' translatable='yes'>Save As</attribute>
+                <attribute name='action'>win.file-save-as</attribute>
+            </item>
         </section>
     </menu>
 
