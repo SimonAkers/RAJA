@@ -1,3 +1,5 @@
+use std::borrow::Borrow;
+use std::hash::Hash;
 use indexmap::IndexMap;
 
 /** An ordered list of MIPS integer register names */
@@ -34,8 +36,8 @@ impl<T> RegisterFile<T> {
     - `name` - The name of the register.
     - `value` - The value to store in the register.
      */
-    pub fn set_value(&mut self, register_name: String, value: T) {
-        self.registers.insert(register_name, value);
+    pub fn set_value<S: Into<String>>(&mut self, register_name: S, value: T) {
+        self.registers.insert(register_name.into(), value);
     }
 
     /**
@@ -48,8 +50,8 @@ impl<T> RegisterFile<T> {
     - An Option containing the value held by the register, or None if there is no
     value to obtain.
      */
-    pub fn value(&self, name: String) -> Option<&T> {
-        self.registers.get(&name)
+    pub fn value<S: Into<String> + Hash + Eq>(&self, name: S) -> Option<&T> {
+        self.registers.get(&name.into())
     }
 
     /**
@@ -77,8 +79,8 @@ impl<T: Default> RegisterFile<T> {
     # Arguments
     - `name` - The name of the register to set to default.
      */
-    pub fn set_default(&mut self, name: String) {
-        self.registers.insert(name, T::default());
+    pub fn set_default<S: Into<String>>(&mut self, name: S) {
+        self.registers.insert(name.into(), T::default());
     }
 
     /**
@@ -90,8 +92,8 @@ impl<T: Default> RegisterFile<T> {
     # Returns
     - The value of a given register or the default value if there is no value to obtain.
      */
-    pub fn value_or_default(&self, name: String) -> T where T: Clone {
-        match self.value(name) {
+    pub fn value_or_default<S: Into<String> + Hash + Eq>(&self, name: S) -> T where T: Clone {
+        match self.value(name.into()) {
             None => T::default(),
             Some(value) => value.clone(),
         }
@@ -126,7 +128,7 @@ impl<T: Default> From<Vec<&str>> for RegisterFile<T> {
 
         // Add an empty register for each register name
         for name in names {
-            reg_file.set_default(name.into());
+            reg_file.set_default(name);
         }
 
         reg_file
@@ -152,5 +154,6 @@ impl Default for RegisterFile<f32> {
 fn test() {
     let f = RegisterFile::<i32>::default();
 
-    f.value_or_default("test".into());
+    f.value_or_default("This works!");
+    f.value_or_default("This also works!".to_string());
 }
