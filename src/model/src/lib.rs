@@ -10,7 +10,7 @@ pub mod syscall;
 
 pub mod callback;
 pub mod machine_input;
-mod registers;
+mod register_file;
 
 pub mod stages {
     pub mod writeback;
