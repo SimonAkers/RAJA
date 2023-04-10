@@ -1,5 +1,5 @@
-use std::borrow::Borrow;
 use std::hash::Hash;
+
 use indexmap::IndexMap;
 
 /** An ordered list of MIPS integer register names */
