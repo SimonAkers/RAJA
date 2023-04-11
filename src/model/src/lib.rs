@@ -9,7 +9,6 @@ mod register;
 pub mod syscall;
 
 pub mod callback;
-pub mod machine_input;
 mod register_file;
 
 pub mod stages {
