@@ -5,7 +5,6 @@ pub mod app;
 pub mod machine;
 mod memory;
 mod pipeline;
-mod old_register;
 pub mod syscall;
 
 pub mod callback;
@@ -40,6 +39,7 @@ pub mod stages {
 pub use parser::*;
 pub use machine::*;
 pub use memory::*;
+pub use register::*;
 pub use register_file::*;
 
 // ----------------------------------------------------------------------------

@@ -42,8 +42,8 @@ pub fn decode(reg_file: &mut RegisterFile<u32>, input: IfId) -> Result<IdEx> {
     let rd: Register = rd.into();
 
     // read rs and rt
-    let read_rs = reg_file.read_register(rs);
-    let read_rt = reg_file.read_register(rt);
+    let read_rs = reg_file.value_or_default(rs);
+    let read_rt = reg_file.value_or_default(rt);
 
     // handle controls
     let reg_dst; // determines destination register (0: rt, 1: rd)

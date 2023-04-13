@@ -1,7 +1,7 @@
 use std::hash::Hash;
 
 use indexmap::IndexMap;
-use crate::register::Register;
+use crate::Register;
 
 /** An ordered list of MIPS integer register names */
 pub const INT_REGS_ORDERED: &[&str] = &[
@@ -42,9 +42,11 @@ impl<T> RegisterFile<T> {
             R: Into<Register>,
             V: Into<T>,
     {
-        match self.registers.get_index(register.into().id()) {
-            None => (),
-            Some(reg_info) => self.registers.insert(reg_info.0.into(), value.into())
+        match self.registers.get_index(register.into().into()) {
+            None => {}
+            Some(reg_info) => {
+                self.registers.insert(reg_info.0.into(), value.into());
+            }
         }
     }
 

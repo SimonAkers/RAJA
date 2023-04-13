@@ -1,9 +1,11 @@
+use std::fmt;
 use std::str::FromStr;
 use strum::IntoEnumIterator;
 use strum_macros::{EnumIter, EnumString};
 use crate::register::Register::UNKNOWN;
 
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq, Hash, EnumString, EnumIter)]
+#[strum(serialize_all = "mixed_case")]
 pub enum Register {
     ZERO = 0,
     AT = 1,
@@ -42,8 +44,14 @@ pub enum Register {
 }
 
 impl Register {
-    pub fn id(&self) -> usize {
-        *self as usize
+    pub fn id(&self) -> u32 {
+        *self as u32
+    }
+}
+
+impl fmt::Display for Register {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        fmt::Debug::fmt(self, f)
     }
 }
 
@@ -56,20 +64,32 @@ impl From<String> for Register {
     }
 }
 
+impl From<Register> for String {
+    fn from(value: Register) -> Self {
+        value.to_string().to_lowercase()
+    }
+}
+
+impl From<Register> for u32 {
+    fn from(value: Register) -> Self {
+        value.id()
+    }
+}
+
+impl From<Register> for usize {
+    fn from(value: Register) -> Self {
+        value.id() as usize
+    }
+}
+
 impl From<u32> for Register {
     fn from(value: u32) -> Self {
         for reg in Register::iter() {
-            if reg.id() as u32 == value {
+            if reg.id() == value {
                 return reg;
             }
         }
 
         UNKNOWN
-    }
-}
-
-impl From<Register> for String {
-    fn from(value: Register) -> Self {
-        value.into()
     }
 }

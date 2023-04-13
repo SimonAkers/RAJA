@@ -25,9 +25,9 @@ pub struct PipelineOutput {
 pub fn writeback(reg_file: &mut RegisterFile<u32>, input: MemWb) -> PipelineOutput {
     if input.reg_write {
         if input.mem_to_reg {
-            reg_file.write_register(input.write_register, input.mem_data);
+            reg_file.set_value(input.write_register, input.mem_data);
         } else {
-            reg_file.write_register(input.write_register, input.alu_data);
+            reg_file.set_value(input.write_register, input.alu_data);
         }
     }
     PipelineOutput {

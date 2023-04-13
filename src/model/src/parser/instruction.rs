@@ -65,8 +65,8 @@ pub fn j_type(input: &str, op: Opcode) -> ParserOutput {
 /// Parse JR instruction
 pub fn jr_type(input: &str, op: Opcode) -> ParserOutput {
     let (input, rs) = context("Expected register", parser::register)(input)?;
-    let rt = 0;
-    let rd = 0;
+    let rt = ZERO;
+    let rd = ZERO;
     Ok((
         input,
         Line::Instruction(vec![
