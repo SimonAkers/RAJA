@@ -46,8 +46,8 @@ pub enum Register {
 }
 
 impl Register {
-    pub fn value(&self) -> i32 {
-        *self as i32
+    pub fn value(&self) -> u32 {
+        *self as u32
     }
 }
 
@@ -60,8 +60,8 @@ impl From<String> for Register {
     }
 }
 
-impl From<i32> for Register {
-    fn from(value: i32) -> Self {
+impl From<u32> for Register {
+    fn from(value: u32) -> Self {
         for reg in Register::iter() {
             if reg.value() == value {
                 return reg;
@@ -112,8 +112,12 @@ impl<T> RegisterFile<T> {
     - `name` - The name of the register.
     - `value` - The value to store in the register.
      */
-    pub fn set_value<S: Into<String>>(&mut self, register_name: S, value: T) {
-        self.registers.insert(register_name.into(), value);
+    pub fn set_value<S, V>(&mut self, register_name: S, value: V)
+        where
+            S: Into<String>,
+            V: Into<T>,
+    {
+        self.registers.insert(register_name.into(), value.into());
     }
 
     /**
@@ -142,6 +146,10 @@ impl<T> RegisterFile<T> {
      */
     pub fn value_by_index(&self, index: usize) -> Option<(&String, &T)> {
         self.registers.get_index(index)
+    }
+
+    pub fn map(&self) -> &IndexMap<String, T> {
+        &self.registers
     }
 }
 
@@ -211,11 +219,26 @@ impl<T: Default> From<Vec<&str>> for RegisterFile<T> {
     }
 }
 
-/** Implementation of Default for RegisterFile<i32>. */
-impl Default for RegisterFile<i32> {
-    fn default() -> Self {
+impl RegisterFile<u32> {
+    pub fn integer() -> Self {
         // Create a RegisterFile from the list of integer register names
         RegisterFile::from(INT_REGS_ORDERED.to_vec())
+    }
+
+    pub fn float() -> Self {
+        // Create a RegisterFile from the list of floating point register names
+        RegisterFile::from(FLOAT_REGS_ORDERED.to_vec())
+    }
+}
+
+impl Default for RegisterFile<u32> {
+    fn default() -> Self {
+        let mut names: Vec<&str> = Vec::new();
+
+        names.append(&mut INT_REGS_ORDERED.to_vec());
+        names.append(&mut FLOAT_REGS_ORDERED.to_vec());
+
+        RegisterFile::from(names)
     }
 }
 

@@ -10,6 +10,7 @@ pub mod syscall;
 
 pub mod callback;
 mod register_file;
+mod data_types;
 
 pub mod stages {
     pub mod writeback;
