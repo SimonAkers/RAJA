@@ -1,82 +1,7 @@
 use std::hash::Hash;
-use std::str::FromStr;
 
 use indexmap::IndexMap;
-use strum::IntoEnumIterator;
-use strum_macros::{EnumIter, EnumString};
-
-use crate::register_file::Register::*;
-
-#[derive(Clone, Copy, Debug, Default, Eq, PartialEq, Hash, EnumString, EnumIter)]
-pub enum Register {
-    ZERO = 0,
-    AT = 1,
-    V0 = 2,
-    V1 = 3,
-    A0 = 4,
-    A1 = 5,
-    A2 = 6,
-    A3 = 7,
-    T0 = 8,
-    T1 = 9,
-    T2 = 10,
-    T3 = 11,
-    T4 = 12,
-    T5 = 13,
-    T6 = 14,
-    T7 = 15,
-    S0 = 16,
-    S1 = 17,
-    S2 = 18,
-    S3 = 19,
-    S4 = 20,
-    S5 = 21,
-    S6 = 22,
-    S7 = 23,
-    T8 = 24,
-    T9 = 25,
-    K0 = 26,
-    K1 = 27,
-    GP = 28,
-    SP = 29,
-    FP = 30,
-    RA = 31,
-    #[default]
-    UNKNOWN = 999,
-}
-
-impl Register {
-    pub fn value(&self) -> u32 {
-        *self as u32
-    }
-}
-
-impl From<String> for Register {
-    fn from(value: String) -> Self {
-        match Register::from_str(value.as_str()) {
-            Ok(register) => register,
-            Err(_) => UNKNOWN,
-        }
-    }
-}
-
-impl From<u32> for Register {
-    fn from(value: u32) -> Self {
-        for reg in Register::iter() {
-            if reg.value() == value {
-                return reg;
-            }
-        }
-
-        UNKNOWN
-    }
-}
-
-impl From<Register> for String {
-    fn from(value: Register) -> Self {
-        value.into()
-    }
-}
+use crate::register::Register;
 
 /** An ordered list of MIPS integer register names */
 pub const INT_REGS_ORDERED: &[&str] = &[
@@ -109,15 +34,18 @@ impl<T> RegisterFile<T> {
     Sets the value of a given register.
 
     # Arguments
-    - `name` - The name of the register.
+    - `register` - The register to set.
     - `value` - The value to store in the register.
      */
-    pub fn set_value<S, V>(&mut self, register_name: S, value: V)
+    pub fn set_value<R, V>(&mut self, register: R, value: V)
         where
-            S: Into<String>,
+            R: Into<Register>,
             V: Into<T>,
     {
-        self.registers.insert(register_name.into(), value.into());
+        match self.registers.get_index(register.into().id()) {
+            None => (),
+            Some(reg_info) => self.registers.insert(reg_info.0.into(), value.into())
+        }
     }
 
     /**

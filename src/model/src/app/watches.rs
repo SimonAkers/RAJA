@@ -33,6 +33,7 @@ pub struct Watch {
     val: u32,
 }
 
+/*
 impl Watch {
     /// Read the contents of this watch
     pub fn read(&self, vm: &Machine) -> u32 {
@@ -51,6 +52,7 @@ impl Watch {
         Ok(())
     }
 }
+ */
 
 /// Displays a single watch and allows it and its contents to be mutated
 pub struct WatchView<'a> {

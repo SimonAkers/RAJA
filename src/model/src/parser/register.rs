@@ -8,8 +8,9 @@ use nom::{
 };
 
 use crate::Register;
+use crate::register::Register;
 
-pub fn register_name(input: &str) -> IResult<&str, Register, VerboseError<&str>> {
+pub fn register_name(input: &str) -> IResult<&str, u32, VerboseError<&str>> {
     context(
         "Unknown register",
         map_res(
@@ -19,7 +20,7 @@ pub fn register_name(input: &str) -> IResult<&str, Register, VerboseError<&str>>
     )(input)
 }
 
-pub fn register(input: &str) -> IResult<&str, Register, VerboseError<&str>> {
+pub fn register(input: &str) -> IResult<&str, u32, VerboseError<&str>> {
     let (input, _) = context("Expected '$' to prepend register", tag("$"))(input)?;
     let (input, reg) = register_name(input)?;
     Ok((input, reg))

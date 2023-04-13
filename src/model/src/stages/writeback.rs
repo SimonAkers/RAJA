@@ -22,7 +22,7 @@ pub struct PipelineOutput {
 }
 
 /// Writeback pipeline stage
-pub fn writeback(reg_file: &mut RegisterFile, input: MemWb) -> PipelineOutput {
+pub fn writeback(reg_file: &mut RegisterFile<u32>, input: MemWb) -> PipelineOutput {
     if input.reg_write {
         if input.mem_to_reg {
             reg_file.write_register(input.write_register, input.mem_data);

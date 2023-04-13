@@ -45,15 +45,15 @@ impl Imm {
 pub enum Instruction {
     R {
         op: Opcode,
-        rd: Register,
-        rs: Register,
-        rt: Register,
+        rd: u32,
+        rs: u32,
+        rt: u32,
         shamt: u32,
     },
     I {
         op: Opcode,
-        rt: Register,
-        rs: Register,
+        rt: u32,
+        rs: u32,
         imm: Imm,
     },
     J {
@@ -80,9 +80,9 @@ impl Instruction {
                 shamt,
             } => (
                 (field(op.value(), 0, 6)
-                    | field(rd.value(), 11, 6)
-                    | field(rt.value(), 16, 6)
-                    | field(rs.value(), 21, 6)
+                    | field(rd.into(), 11, 6)
+                    | field(rt.into(), 16, 6)
+                    | field(rs.into(), 21, 6)
                     | field(*shamt, 6, 5))
                 .to_le_bytes()
                 .to_vec(),
@@ -91,8 +91,8 @@ impl Instruction {
             Instruction::I { op, rt, rs, imm } => (
                 (field(op.value(), 26, 6)
                     | field(imm.asm(labels, pc), 0, 16)
-                    | field(rt.value(), 16, 5)
-                    | field(rs.value(), 21, 5))
+                    | field(rt.into(), 16, 5)
+                    | field(rs.into(), 21, 5))
                 .to_le_bytes()
                 .to_vec(),
                 4,

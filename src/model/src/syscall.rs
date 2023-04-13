@@ -1,4 +1,4 @@
-use crate::{Memory, RegisterFile, A0, V0};
+use crate::{Memory, RegisterFile, Register::{A0, V0}};
 use anyhow::{bail, Context, Result};
 use strum_macros::EnumDiscriminants;
 
@@ -12,7 +12,7 @@ pub enum Syscall {
     ReadInt,
 }
 
-pub fn resolve_syscall(reg_file: &mut RegisterFile, syscall: &Syscall, value: &str) -> Result<()> {
+pub fn resolve_syscall(reg_file: &mut RegisterFile<u32>, syscall: &Syscall, value: &str) -> Result<()> {
     match syscall {
         Syscall::ReadInt => {
             let buffer = value.trim();
@@ -27,7 +27,7 @@ pub fn resolve_syscall(reg_file: &mut RegisterFile, syscall: &Syscall, value: &s
     Ok(())
 }
 
-pub fn handle_syscall(reg_file: &mut RegisterFile, mem: &mut Memory) -> Result<Syscall> {
+pub fn handle_syscall(reg_file: &mut RegisterFile<u32>, mem: &mut Memory) -> Result<Syscall> {
     // Handle syscall instructions
     let v0 = reg_file.read_register(V0);
     match v0 {

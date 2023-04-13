@@ -12,7 +12,7 @@ pub struct IfId {
 }
 
 /// Decodes and instruction
-pub fn decode(reg_file: &mut RegisterFile, input: IfId) -> Result<IdEx> {
+pub fn decode(reg_file: &mut RegisterFile<u32>, input: IfId) -> Result<IdEx> {
     // instruction masks
     let fn_mask = 0b00000000000000000000000000111111;
     let sh_mask = 0b00000000000000000000011111000000;
