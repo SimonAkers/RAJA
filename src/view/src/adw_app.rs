@@ -178,11 +178,18 @@ impl AdwApp {
         });
     }
 
-    fn connect_file_new(window: AppWindow) {
-        let action = SimpleAction::new("file-new", None);
+    fn connect_simple_action<F>(window: AppWindow, action_name: &str, f: F) where
+        F: Fn(&SimpleAction, Option<&glib::Variant>) + 'static
+    {
+        let action = SimpleAction::new(action_name, None);
+        action.connect_activate(f);
+        window.add_action(&action);
+    }
 
+    fn connect_file_new(window: AppWindow) {
         let _window = window.clone();
-        action.connect_activate(move |_, _| {
+
+        Self::connect_simple_action(window, "file-new", move |_, _| {
             let alert = AlertDialog::builder()
                 .message("WARNING")
                 .detail("This will erase everything in the editor!\nAre you sure you want to continue?")
@@ -203,15 +210,10 @@ impl AdwApp {
                 }
             });
         });
-
-        window.add_action(&action);
     }
 
     fn connect_file_open(window: AppWindow) {
-        let action = SimpleAction::new("file-open", None);
-
-        let _window = window.clone();
-        action.connect_activate(move |_, _| {
+        Self::connect_simple_action(window.clone(), "file-open", move |_, _| {
             // TODO: Investigate why this filter does not work
             let filter = FileFilter::new();
             filter.add_pattern("*.s");
@@ -221,8 +223,8 @@ impl AdwApp {
                 .default_filter(&filter)
                 .build();
 
-            let window = _window.clone();
-            dialog.open(Some(&_window), Cancellable::NONE, move |result| {
+            let _window = window.clone();
+            dialog.open(Some(&window), Cancellable::NONE, move |result| {
                 // Get the file
                 let file = match result {
                     Ok(file) => file,
@@ -238,28 +240,22 @@ impl AdwApp {
                 // Read the file into the editor
                 match fs::read_to_string(path) {
                     Ok(contents) => {
-                        window.source_view().set_text(contents);
+                        _window.source_view().set_text(contents);
                     }
                     Err(_) => {}
                 }
             })
         });
-
-        window.add_action(&action);
     }
 
     fn connect_file_save_as(window: AppWindow) {
-        let action = SimpleAction::new("file-save-as", None);
-
-        let _window = window.clone();
-        action.connect_activate(move |_, _| {
-            let window = _window.clone();
-
+        Self::connect_simple_action(window.clone(), "file-save-as", move |_, _| {
             let dialog = FileDialog::builder()
                 .title("Save As")
                 .build();
 
-            dialog.save(Some(&_window), Cancellable::NONE, move |result| {
+            let _window = window.clone();
+            dialog.save(Some(&window), Cancellable::NONE, move |result| {
                 // Get the file
                 let file = match result {
                     Ok(file) => file,
@@ -273,7 +269,7 @@ impl AdwApp {
                 };
 
                 // Get the contents to write
-                let contents = window.source_view().text();
+                let contents = _window.source_view().text();
 
                 // Write to the file
                 match fs::write(path, contents) {
@@ -285,13 +281,11 @@ impl AdwApp {
                             .detail(err.to_string())
                             .buttons(["Ok"])
                             .build()
-                            .show(Some(&window));
+                            .show(Some(&_window));
                     }
                 }
             })
         });
-
-        window.add_action(&action);
     }
 
     fn connect_console_confirm(adw_app: Shared<AdwApp>, window: AppWindow) {
