@@ -16,13 +16,9 @@ syscall
 # Move input to another register
 move $t0, $v0
 
-# Print newline
-la $a0, nl
-li $v0, 4
-syscall
-
 # Print result message prefix
 la $a0, result
+li $v0, 4
 syscall
 
 # Print integer

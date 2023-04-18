@@ -34,6 +34,7 @@ impl GtkConsole {
         self.set_editable(true);
         self.imp().user_input_started.set(true);
 
+        self.set_cursor_visible(true);
         self.grab_focus();
     }
 

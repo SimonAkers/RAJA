@@ -305,8 +305,11 @@ impl AdwApp {
                 if console.user_input_started() {
                     let machine = &mut adw_app.borrow_mut().machine;
 
-                    // End user input and pass it to the machine
+                    // End user input
                     console.end_user_input();
+                    console.print("\n");
+
+                    // Pass input to the machine
                     machine.set_input(Some(console.input()));
 
                     // Continue the simulator

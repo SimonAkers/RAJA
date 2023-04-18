@@ -68,7 +68,7 @@ impl ObjectImpl for GtkConsoleTemplate {
         buffer.create_mark(Some(MARK_START_USER_INPUT), &buffer.start_iter(), true);
 
         // Create a mark used to determine the end of user input
-        buffer.create_mark(Some(MARK_END_USER_INPUT), &buffer.start_iter(), false);
+        buffer.create_mark(Some(MARK_END_USER_INPUT), &buffer.start_iter(), true);
 
         // Connect handlers to ensure that the cursor is visible when needed
         self.connect_click_handler();
