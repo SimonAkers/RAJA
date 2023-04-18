@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::num::ParseIntError;
 use std::ops::ControlFlow;
 use std::u32;
 
@@ -181,7 +182,12 @@ impl Machine {
                     Some(input) => {
                         let integer = match input.parse::<u32>() {
                             Ok(integer) => integer,
-                            Err(_) => 0 // TODO: Handle error properly
+                            Err(_) => {
+                                match input.parse::<i32>() {
+                                    Ok(integer) => integer as u32,
+                                    Err(_) => 0, // TODO: Handle error properly
+                                }
+                            },
                         };
 
                         self.regs.set_value(Register::V0, integer);
