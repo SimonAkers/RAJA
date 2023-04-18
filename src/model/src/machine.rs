@@ -7,7 +7,10 @@ use anyhow::Result;
 use crate::{Memory, parser::{
     self,
     model::{LabelTable, Line, Segment, Segments, STACK_BASE, TEXT_BASE},
-}, pipeline::{self, PipelineState}, Register, register, RegisterFile, SP, syscall::{resolve_syscall, Syscall}};
+}, pipeline::{self, PipelineState}, syscall::{resolve_syscall, Syscall}};
+
+use crate::{RegisterFile, Register};
+
 use crate::callback::Callback;
 use crate::syscall::SyscallDiscriminants;
 
@@ -15,7 +18,7 @@ use crate::syscall::SyscallDiscriminants;
 #[derive(Default)]
 pub struct Machine {
     pc: u32,
-    regs: RegisterFile,
+    regs: RegisterFile<u32>,
     state: PipelineState,
     memory: Memory,
     symbols: LabelTable,
@@ -25,6 +28,7 @@ pub struct Machine {
 }
 
 impl Machine {
+    /*
     /// Fetch a readonly view of this machines registers
     pub fn register(&self, reg: Register) -> u32 {
         self.regs.read_register(reg)
@@ -33,6 +37,7 @@ impl Machine {
     pub fn register_mut(&mut self, reg: Register) -> &mut u32 {
         self.regs.get_mut(reg)
     }
+     */
 
     pub fn read_word(&self, addr: u32) -> Result<u32> {
         self.memory.get(addr)
@@ -86,7 +91,7 @@ impl Machine {
 
     /// Get the current contents of the stack
     pub fn stack(&mut self) -> Vec<(u32, u32)> {
-        let sp = self.regs.read_register(SP) / 4;
+        let sp = self.regs.value_or_default(Register::SP) / 4;
         let mut stack = vec![];
         for i in sp..STACK_BASE / 4 {
             let addr = i * 4;
@@ -179,7 +184,7 @@ impl Machine {
                             Err(_) => 0 // TODO: Handle error properly
                         };
 
-                        self.regs.write_register(register::V0, integer);
+                        self.regs.set_value(Register::V0, integer);
 
                         self.input = None;
 

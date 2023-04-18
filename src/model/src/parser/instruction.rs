@@ -8,10 +8,9 @@ use nom::{
     IResult,
 };
 
-use crate::{
-    parser::{self, model::Opcode},
-    AT, ZERO,
-};
+use crate::parser::{self, model::Opcode};
+
+use crate::Register::{AT, ZERO};
 
 use super::{
     int,
@@ -23,7 +22,7 @@ fn immediate(input: &str) -> IResult<&str, Imm, VerboseError<&str>> {
     preceded(
         space0,
         alt((
-            map(parser::int, |x: i64| Imm::Value(x)),
+            map(int, |x: i64| Imm::Value(x)),
             map(identifier, |x: &str| Imm::Label(x.to_string())),
         )),
     )(input)
@@ -37,7 +36,7 @@ fn symbol(input: &str) -> IResult<&str, Symbol, VerboseError<&str>> {
     preceded(
         space0,
         alt((
-            map(parser::int, |x: u32| Symbol::Address(x)),
+            map(int, |x: u32| Symbol::Address(x)),
             map(identifier, |x: &str| Symbol::Label(x.to_string())),
         )),
     )(input)

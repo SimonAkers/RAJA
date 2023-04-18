@@ -3,7 +3,7 @@ use crate::stages::execute::IdEx;
 use crate::stages::inputs::*;
 use crate::stages::writeback::PipelineOutput;
 use crate::syscall::{handle_syscall, Syscall};
-use crate::{Memory, Register, RegisterFile, ZERO};
+use crate::{Memory, Register, RegisterFile};
 
 use anyhow::Result;
 
@@ -11,11 +11,11 @@ use anyhow::Result;
 ///
 /// Eventually this should pipeline data instead of doing an entire instruction each cycle but that
 /// can't be done until we fix all the data and control hazard issues.
-pub fn _single_cycle(pc: &mut u32, regs: &mut RegisterFile, mem: &mut Memory) -> Option<Syscall> {
+pub fn _single_cycle(pc: &mut u32, regs: &mut RegisterFile<u32>, mem: &mut Memory) -> Option<Syscall> {
     // should never forward
     let fwd_unit = ForwardingUnit {
-        ex_mem: (false, ZERO, 0),
-        mem_wb: (false, ZERO, 0),
+        ex_mem: (false, Register::ZERO, 0),
+        mem_wb: (false, Register::ZERO, 0),
     };
 
     let if_id = stages::fetch(pc, mem);
@@ -56,7 +56,7 @@ pub struct ForwardingUnit {
 /// Pass that state back into this function to continue stepping the machine forward
 pub fn pipe_cycle(
     pc: &mut u32,
-    regs: &mut RegisterFile,
+    regs: &mut RegisterFile<u32>,
     mem: &mut Memory,
     state: PipelineState,
 ) -> Result<(PipelineState, Option<Syscall>)> {
