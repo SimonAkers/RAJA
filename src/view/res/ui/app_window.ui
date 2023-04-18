@@ -1,5 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
+    <menu id='primary_menu'>
+        <section>
+            <item>
+                <attribute name='label' translatable='yes'>Font</attribute>
+                <attribute name='action'>win.font</attribute>
+            </item>
+        </section>
+    </menu>
 
     <menu id='file_menu'>
         <section>
@@ -62,20 +70,22 @@
                             </object>
                         </property>
 
-                        <!--
+
                         <child type="start">
                             <object class="GtkMenuButton">
                                 <property name="icon-name">open-menu-symbolic</property>
                                 <property name="has-frame">TRUE</property>
+                                <property name="primary">TRUE</property>
 
                                 <property name="popover">
                                     <object class="GtkPopoverMenu">
-                                        <property name="menu-model">app-menu</property>
+                                        <property name="halign">start</property>
+                                        <property name="menu-model">primary_menu</property>
                                     </object>
                                 </property>
                             </object>
                         </child>
-                        -->
+
                     </object>
                 </child>
 

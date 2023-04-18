@@ -7,7 +7,8 @@ use adw::{Application, ColorScheme, StyleManager};
 use dark_light::Mode;
 use debug_print::*;
 use glib::signal::Inhibit;
-use gtk::{AlertDialog, CssProvider, EventControllerKey, FileDialog, FileFilter, StyleContext};
+use gtk::{AlertDialog, CssProvider, EventControllerKey, FileDialog, FileFilter, FontDialog, StyleContext};
+use gtk::builders::FontDialogBuilder;
 use gtk::gdk::{Display, Key};
 use gtk::gio::{Cancellable, SimpleAction};
 use gtk::prelude::*;
@@ -77,6 +78,10 @@ impl AdwApp {
         Self::connect_btn_build(adw_app.clone(), window.clone());
         // Connect run button
         Self::connect_btn_run(adw_app.clone(), window.clone());
+
+        // Connect font button
+        // TODO: Move this to a "settings" window
+        Self::connect_font(window.clone());
 
         // Connect the file buttons
         Self::connect_file_new(window.clone());
@@ -186,24 +191,30 @@ impl AdwApp {
         window.add_action(&action);
     }
 
-    fn connect_file_new(window: AppWindow) {
-        let _window = window.clone();
+    fn connect_font(window: AppWindow) {
+        Self::connect_simple_action(window.clone(), "font", move |_, _| {
+            FontDialog::new().choose_font(Some(&window), None, Cancellable::NONE, |font| {
+                
+            })
+        });
+    }
 
-        Self::connect_simple_action(window, "file-new", move |_, _| {
+    fn connect_file_new(window: AppWindow) {
+        Self::connect_simple_action(window.clone(), "file-new", move |_, _| {
             let alert = AlertDialog::builder()
                 .message("WARNING")
                 .detail("This will erase everything in the editor!\nAre you sure you want to continue?")
                 .buttons(["Yes", "No"])
                 .build();
 
-            let window = _window.clone();
-            alert.choose(Some(&_window), Cancellable::NONE, move |result| {
+            let _window = window.clone();
+            alert.choose(Some(&window), Cancellable::NONE, move |result| {
                 match result {
                     Ok(index) => {
                         // If "yes" button was clicked
                         if index == 0 {
-                            window.source_view().clear();
-                            window.console().clear();
+                            _window.source_view().clear();
+                            _window.console().clear();
                         }
                     }
                     Err(_) => ()
