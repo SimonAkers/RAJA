@@ -20,6 +20,7 @@ use crate::syscall::SyscallDiscriminants;
 pub struct Machine {
     pc: u32,
     regs: RegisterFile<u32>,
+    regs_float: RegisterFile<f32>,
     state: PipelineState,
     memory: Memory,
     symbols: LabelTable,

@@ -1,6 +1,7 @@
 use std::hash::Hash;
 
 use indexmap::IndexMap;
+use crate::model::STACK_BASE;
 use crate::Register;
 
 /** An ordered list of MIPS integer register names */
@@ -153,7 +154,10 @@ impl<T: Default> From<Vec<&str>> for RegisterFile<T> {
 impl Default for RegisterFile<u32> {
     fn default() -> Self {
         // Create a RegisterFile from the list of integer register names
-        RegisterFile::from(INT_REGS_ORDERED.to_vec())
+        let mut reg_file = RegisterFile::from(INT_REGS_ORDERED.to_vec());
+        reg_file.set_value(Register::SP, STACK_BASE);
+
+        reg_file
     }
 }
 

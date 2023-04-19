@@ -86,6 +86,7 @@ pub fn opcode_name(input: u32) -> Option<&'static str> {
             0x26 => Some("xor"),
             0x27 => Some("nor"),
             0x2a => Some("slt"),
+            0b110000 => Some("add.s"),
             _ => None,
         },
         Opcode::Op(op) => match op {
@@ -154,6 +155,9 @@ pub fn opcode(input: &str) -> IResult<&str, InstructionParser, VerboseError<&str
                 ".asciiz" => Ok(InstructionParser::pseudo(asciiz_lit)),
                 ".text" => Ok(InstructionParser::pseudo(|i| segment(i, Segment::Text))),
                 ".data" => Ok(InstructionParser::pseudo(|i| segment(i, Segment::Data))),
+
+                "add.s" => Ok(InstructionParser::new(Opcode::Funct(0b110000), r_type)),
+                "li.s" => Ok(InstructionParser::pseudo(li_ins)),
                 _ => Err(()),
             },
         ),
