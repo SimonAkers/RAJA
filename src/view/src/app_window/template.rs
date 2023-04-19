@@ -26,6 +26,8 @@ pub struct AppWindowTemplate {
     pub btn_run: TemplateChild<gtk::Button>,
     #[template_child]
     pub btn_build: TemplateChild<gtk::Button>,
+    #[template_child]
+    pub btn_settings: TemplateChild<gtk::Button>,
 }
 
 /// gtk-rs boilerplate implementation

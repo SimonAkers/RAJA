@@ -81,7 +81,7 @@ impl AdwApp {
 
         // Connect font button
         // TODO: Move this to a "settings" window
-        Self::connect_font(window.clone());
+        Self::connect_btn_settings(window.clone());
 
         // Connect the file buttons
         Self::connect_file_new(window.clone());
@@ -183,20 +183,20 @@ impl AdwApp {
         });
     }
 
+    fn connect_btn_settings(window: AppWindow) {
+        window.btn_settings().connect_clicked(move |_| {
+            FontDialog::new().choose_font(Some(&window), None, Cancellable::NONE, |font| {
+
+            })
+        });
+    }
+
     fn connect_simple_action<F>(window: AppWindow, action_name: &str, f: F) where
         F: Fn(&SimpleAction, Option<&glib::Variant>) + 'static
     {
         let action = SimpleAction::new(action_name, None);
         action.connect_activate(f);
         window.add_action(&action);
-    }
-
-    fn connect_font(window: AppWindow) {
-        Self::connect_simple_action(window.clone(), "font", move |_, _| {
-            FontDialog::new().choose_font(Some(&window), None, Cancellable::NONE, |font| {
-                
-            })
-        });
     }
 
     fn connect_file_new(window: AppWindow) {
