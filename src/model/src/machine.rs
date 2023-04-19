@@ -20,7 +20,6 @@ use crate::syscall::SyscallDiscriminants;
 pub struct Machine {
     pc: u32,
     regs: RegisterFile<u32>,
-    regs_float: RegisterFile<f32>,
     state: PipelineState,
     memory: Memory,
     symbols: LabelTable,
@@ -205,6 +204,8 @@ impl Machine {
                     }
                 }
             },
+            Syscall::ReadFloat => (ControlFlow::Break(()), None),
+            _ => (ControlFlow::Break(()), None)
         };
 
         if resolved {
@@ -212,9 +213,22 @@ impl Machine {
         }
 
         if run_callback {
-            match self.callbacks.get_mut(&SyscallDiscriminants::from(syscall)) {
-                None => (),
-                Some(mut callback) => callback.call(info),
+            match syscall {
+                // Execute read callbacks
+                Syscall::ReadInt | Syscall::ReadFloat => {
+                    match self.callbacks.get_mut(&SyscallDiscriminants::ReadAny) {
+                        None => (),
+                        Some(mut callback) => callback.call(info),
+                    }
+                },
+
+                // Execute other callbacks
+                _ => {
+                    match self.callbacks.get_mut(&SyscallDiscriminants::from(syscall)) {
+                        None => (),
+                        Some(mut callback) => callback.call(info),
+                    }
+                }
             }
         }
 

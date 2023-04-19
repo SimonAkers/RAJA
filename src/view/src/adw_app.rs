@@ -136,11 +136,11 @@ impl AdwApp {
             }))
         );
 
-        // ReadInt
+        // ReadAny
         // TODO: Make read syscalls more generic
         let _window = window.clone();
         callbacks.insert(
-            SyscallDiscriminants::ReadInt,
+            SyscallDiscriminants::ReadAny,
             Callback::new(Box::new(move |_| {
                 _window.console().start_user_input();
             }))

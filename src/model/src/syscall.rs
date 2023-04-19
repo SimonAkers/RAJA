@@ -9,7 +9,9 @@ pub enum Syscall {
     Error(String),
     #[default]
     Quit,
+    ReadAny,
     ReadInt,
+    ReadFloat,
 }
 
 pub fn resolve_syscall(reg_file: &mut RegisterFile<u32>, syscall: &Syscall, value: &str) -> Result<()> {
@@ -22,6 +24,14 @@ pub fn resolve_syscall(reg_file: &mut RegisterFile<u32>, syscall: &Syscall, valu
                 as u32;
 
             reg_file.set_value(Register::V0, val);
+        },
+
+        Syscall::ReadFloat => {
+            let buffer = value.trim();
+            let val = buffer
+                .parse::<f32>()
+                .with_context(|| format!("Attempting to parse '{}'", buffer))?
+                as u32;
         }
         _ => {}
     }
@@ -36,6 +46,11 @@ pub fn handle_syscall(reg_file: &mut RegisterFile<u32>, mem: &mut Memory) -> Res
             // print int
             let arg = reg_file.value_or_default(Register::A0);
             Ok(Syscall::Print(format!("{}", arg as i32)))
+        }
+        2 => {
+            // print float
+            let arg = reg_file.value_or_default(Register::F12);
+            Ok(Syscall::Print(format!("{}", f32::from_bits(arg))))
         }
         4 => {
             // print string
@@ -53,7 +68,9 @@ pub fn handle_syscall(reg_file: &mut RegisterFile<u32>, mem: &mut Memory) -> Res
             let s = String::from_utf8(buffer)?;
             Ok(Syscall::Print(format!("{}", s)))
         }
+
         5 => Ok(Syscall::ReadInt),
+        6 => Ok(Syscall::ReadFloat),
         10 => Ok(Syscall::Quit),
 
         11 => {

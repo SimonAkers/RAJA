@@ -1,24 +1,9 @@
 use std::hash::Hash;
 
 use indexmap::IndexMap;
+use strum::IntoEnumIterator;
 use crate::model::STACK_BASE;
 use crate::Register;
-
-/** An ordered list of MIPS integer register names */
-pub const INT_REGS_ORDERED: &[&str] = &[
-    "zero", "at", "v0", "v1", "a0", "a1", "a2", "a3",
-    "t0", "t1", "t2", "t3", "t4", "t5", "t6", "t7",
-    "s0", "s1", "s2", "s3", "s4", "s5", "s6", "s7",
-    "t8", "t9", "k0", "k1", "gp", "sp", "fp", "ra",
-];
-
-/** An ordered list of MIPS floating point register names */
-pub const FLOAT_REGS_ORDERED: &[&str] = &[
-    "f0", "f1", "f2", "f3", "f4", "f5", "f6", "f7",
-    "f8", "f9", "f10", "f11", "f12", "f13", "f14", "f15",
-    "f16", "f17", "f18", "f19", "f20", "f21", "f22", "f23",
-    "f24", "f25", "f26", "f27", "f28", "f29", "f30", "f31",
-];
 
 /**
 A struct wrapping the IndexMap type, representing a register file for storing generic types.
@@ -134,16 +119,16 @@ impl<T: Default> RegisterFile<T> {
 }
 
 /**
-Implementation of From<Vec<&str>> for types that implement Default. This allows a RegisterFile
+Implementation of From<Vec<S: Into<String>> for types that implement Default. This allows a RegisterFile
 to be constructed from an ordered list of register names.
  */
-impl<T: Default> From<Vec<&str>> for RegisterFile<T> {
-    fn from(names: Vec<&str>) -> Self {
+impl<T: Default, S: Into<String>> From<Vec<S>> for RegisterFile<T> {
+    fn from(names: Vec<S>) -> Self {
         let mut reg_file = Self { registers: IndexMap::new() };
 
         // Add an empty register for each register name
         for name in names {
-            reg_file.set_default(name);
+            reg_file.set_default(name.into());
         }
 
         reg_file
@@ -153,18 +138,16 @@ impl<T: Default> From<Vec<&str>> for RegisterFile<T> {
 /** Implementation of Default for RegisterFile<u32>. */
 impl Default for RegisterFile<u32> {
     fn default() -> Self {
-        // Create a RegisterFile from the list of integer register names
-        let mut reg_file = RegisterFile::from(INT_REGS_ORDERED.to_vec());
+        let mut names: Vec<String> = Vec::new();
+
+        for reg in Register::iter() {
+            names.push(reg.to_string().to_lowercase());
+        }
+
+        // Create a RegisterFile from the list of register names
+        let mut reg_file = RegisterFile::from(names);
         reg_file.set_value(Register::SP, STACK_BASE);
 
         reg_file
-    }
-}
-
-/** Implementation of Default for RegisterFile<f32>. */
-impl Default for RegisterFile<f32> {
-    fn default() -> Self {
-        // Create a RegisterFile from the list of floating point register names
-        RegisterFile::from(FLOAT_REGS_ORDERED.to_vec())
     }
 }

@@ -182,7 +182,7 @@ pub fn alu(a: u32, b: u32, op: (bool, bool, u8)) -> Result<u32> {
         ALU_SLL => a.overflowing_shl(b).0,
         ALU_XOR => a ^ b,
 
-        ALU_ADD_S => ((a as f32) + (b as f32)) as u32,
+        ALU_ADD_S => (f32::from_bits(a) + f32::from_bits(b)).to_bits(),
 
         // Rust uses signedness to select between logical and arithmetic right shifts
         ALU_SRL => a.overflowing_shr(b).0,
