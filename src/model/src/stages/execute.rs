@@ -61,6 +61,7 @@ pub fn execute(input: IdEx, fwd_unit: ForwardingUnit) -> Result<ExMem> {
                 0x0c => (false, false, ALU_ADD), // syscall
                 0x06 => (false, false, ALU_SRL), // srlv
                 0x26 => (false, false, ALU_XOR), // xor
+                0x30 => (false, false, ALU_ADD_S),
                 0x00 => {
                     // sll
                     use_shamt = true;
@@ -158,6 +159,7 @@ pub mod alu_signals {
     pub const ALU_SRA: u8 = 6;
     pub const ALU_UPPER: u8 = 7;
     pub const ALU_XOR: u8 = 8;
+    pub const ALU_ADD_S: u8 = 9;
 }
 use alu_signals::*;
 
@@ -179,6 +181,8 @@ pub fn alu(a: u32, b: u32, op: (bool, bool, u8)) -> Result<u32> {
         ALU_ADD => arith_a.overflowing_add(arith_b).0,
         ALU_SLL => a.overflowing_shl(b).0,
         ALU_XOR => a ^ b,
+
+        ALU_ADD_S => ((a as f32) + (b as f32)) as u32,
 
         // Rust uses signedness to select between logical and arithmetic right shifts
         ALU_SRL => a.overflowing_shr(b).0,
