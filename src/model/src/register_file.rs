@@ -149,26 +149,11 @@ impl<T: Default> From<Vec<&str>> for RegisterFile<T> {
     }
 }
 
-impl RegisterFile<u32> {
-    pub fn integer() -> Self {
-        // Create a RegisterFile from the list of integer register names
-        RegisterFile::from(INT_REGS_ORDERED.to_vec())
-    }
-
-    pub fn float() -> Self {
-        // Create a RegisterFile from the list of floating point register names
-        RegisterFile::from(FLOAT_REGS_ORDERED.to_vec())
-    }
-}
-
+/** Implementation of Default for RegisterFile<u32>. */
 impl Default for RegisterFile<u32> {
     fn default() -> Self {
-        let mut names: Vec<&str> = Vec::new();
-
-        names.append(&mut INT_REGS_ORDERED.to_vec());
-        names.append(&mut FLOAT_REGS_ORDERED.to_vec());
-
-        RegisterFile::from(names)
+        // Create a RegisterFile from the list of integer register names
+        RegisterFile::from(INT_REGS_ORDERED.to_vec())
     }
 }
 
