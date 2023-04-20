@@ -20,18 +20,19 @@ pub fn resolve_syscall(reg_file: &mut RegisterFile<u32>, syscall: &Syscall, valu
             let buffer = value.trim();
             let val = buffer
                 .parse::<i32>()
-                .with_context(|| format!("Attempting to parse '{}'", buffer))?
-                as u32;
+                .with_context(|| format!("Attempting to parse '{}'", buffer))?;
 
-            reg_file.set_value(Register::V0, val);
+            reg_file.set_value(Register::V0, val as u32);
         },
 
         Syscall::ReadFloat => {
             let buffer = value.trim();
+
             let val = buffer
                 .parse::<f32>()
-                .with_context(|| format!("Attempting to parse '{}'", buffer))?
-                as u32;
+                .with_context(|| format!("Attempting to parse '{}'", buffer))?;
+
+            reg_file.set_value(Register::F0, val.to_bits());
         }
         _ => {}
     }
@@ -50,6 +51,7 @@ pub fn handle_syscall(reg_file: &mut RegisterFile<u32>, mem: &mut Memory) -> Res
         2 => {
             // print float
             let arg = reg_file.value_or_default(Register::F12);
+            println!("\n{} {}\n", arg, f32::from_bits(arg));
             Ok(Syscall::Print(format!("{}", f32::from_bits(arg))))
         }
         4 => {

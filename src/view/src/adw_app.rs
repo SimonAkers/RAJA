@@ -319,6 +319,7 @@ impl AdwApp {
 
                     // Continue the simulator
                     Self::start_simulator(adw_app.clone());
+                    println!("we made it?");
                 }
             }
 

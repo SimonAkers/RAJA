@@ -1,5 +1,4 @@
 use std::collections::HashMap;
-use std::num::ParseIntError;
 use std::ops::ControlFlow;
 use std::u32;
 
@@ -104,7 +103,7 @@ impl Machine {
     pub fn resolve_input(&mut self, input: &str) -> Result<()> {
         if let Some(syscall) = &self.pending_syscall {
             resolve_syscall(&mut self.regs, syscall, input)?;
-            self.pending_syscall = None;
+            self.input = None;
         }
         Ok(())
     }
@@ -141,7 +140,11 @@ impl Machine {
                         ControlFlow::Continue(())
                     }
 
-                    Err(_) => ControlFlow::Break(())
+                    Err(err) => {
+                        println!("{}", err.backtrace());
+                        println!("{}", err.to_string());
+                        ControlFlow::Break(())
+                    }
                 }
             }
 
@@ -170,41 +173,35 @@ impl Machine {
             Syscall::Print(message) => (ControlFlow::Continue(()), Some(message)),
             Syscall::Error(message) => (ControlFlow::Break(()), Some(message)),
             Syscall::Quit => (ControlFlow::Break(()), None),
-            Syscall::ReadInt => {
-                match &self.input {
+
+            // TODO: Consolidate to some function to make more readable
+            Syscall::ReadInt | Syscall::ReadFloat => {
+                match &self.input.clone() {
                     None => {
-                        // No integer is present, so stop cycling and mark syscall as unresolved
-                        // Callback should put an integer into the machine's input
+                        // No value is present, so stop cycling and mark syscall as unresolved
+                        // Callback should put a value into the machine's input
                         resolved = false;
                         (ControlFlow::Break(()), None)
                     }
 
                     Some(input) => {
-                        let integer = match input.parse::<u32>() {
-                            Ok(integer) => integer,
-                            Err(_) => {
-                                match input.parse::<i32>() {
-                                    Ok(integer) => integer as u32,
-                                    Err(_) => 0, // TODO: Handle error properly
-                                }
-                            },
-                        };
+                        match self.resolve_input(input) {
+                            Ok(_) => {
+                                // Do not run callback since we already have data from frontend
+                                run_callback = false;
 
-                        self.regs.set_value(Register::V0, integer);
-
-                        self.input = None;
-
-                        // Do not run callback since we already have data from frontend
-                        run_callback = false;
-                        // Mark syscall as resolved
-                        resolved = true;
-
-                        // Continue cycling after reading in integer
-                        (ControlFlow::Continue(()), None)
+                                // Continue cycling after reading in value
+                                (ControlFlow::Continue(()), None)
+                            }
+                            Err(e) => {
+                                println!("{}", e.to_string());
+                                (ControlFlow::Break(()), None)
+                            }
+                        }
                     }
                 }
             },
-            Syscall::ReadFloat => (ControlFlow::Break(()), None),
+
             _ => (ControlFlow::Break(()), None)
         };
 

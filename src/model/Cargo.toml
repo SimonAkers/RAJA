@@ -8,7 +8,7 @@ edition = "2021"
 [dependencies]
 futures = "0.3.19"
 thiserror = "1.0.29"
-anyhow = "1.0.45"
+anyhow = { version = "1.0.45", features = ["backtrace"] }
 clap = "2.33.3"
 nom = "7.1.0"
 num = "0.4.0"
