@@ -61,7 +61,11 @@ pub fn execute(input: IdEx, fwd_unit: ForwardingUnit) -> Result<ExMem> {
                 0x0c => (false, false, ALU_ADD), // syscall
                 0x06 => (false, false, ALU_SRL), // srlv
                 0x26 => (false, false, ALU_XOR), // xor
-                0x30 => (false, false, ALU_ADD_S),
+                0x11 => {
+                    // add.s
+                    use_shamt = true;
+                    (false, false, ALU_ADD_S)
+                }
                 0x00 => {
                     // sll
                     use_shamt = true;

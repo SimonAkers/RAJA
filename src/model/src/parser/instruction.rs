@@ -246,7 +246,7 @@ pub fn multi_branch(input: &str, less_than: bool, equal: bool) -> ParserOutput {
     ))
 }
 
-/// Parses a move pseudoinstruction
+/// Parses a move pseudo instruction
 pub fn move_ins(input: &str) -> ParserOutput {
     let (input, rd) = context("Expected destination register", parser::register)(input)?;
     let (input, rs) = context(
@@ -261,6 +261,25 @@ pub fn move_ins(input: &str) -> ParserOutput {
             rs,
             rt: ZERO,
             shamt: 0,
+        }]),
+    ))
+}
+
+/// Parses a mov.s pseudo instruction
+pub fn mov_s_ins(input: &str) -> ParserOutput {
+    let (input, rd) = context("Expected destination register", parser::register)(input)?;
+    let (input, rs) = context(
+        "Expected source register",
+        preceded(separator, parser::register),
+    )(input)?;
+    Ok((
+        input,
+        Line::Instruction(vec![Instruction::R {
+            op: Opcode::Funct(0x11), // add.s
+            rd,
+            rs,
+            rt: ZERO,
+            shamt: 0x10,
         }]),
     ))
 }

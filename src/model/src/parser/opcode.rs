@@ -8,6 +8,7 @@ use super::model::{Line, Opcode, Segment};
 use nom::combinator::fail;
 use nom::error::{context, VerboseError};
 use nom::{bytes::complete::take_till, combinator::map_res, IResult};
+use crate::parser::instruction::mov_s_ins;
 
 type InsParser = fn(&str, Opcode) -> IResult<&str, Line, VerboseError<&str>>;
 
@@ -86,7 +87,9 @@ pub fn opcode_name(input: u32) -> Option<&'static str> {
             0x26 => Some("xor"),
             0x27 => Some("nor"),
             0x2a => Some("slt"),
-            0b110000 => Some("add.s"),
+
+            0x11 => Some("add.s"),
+
             _ => None,
         },
         Opcode::Op(op) => match op {
@@ -156,7 +159,9 @@ pub fn opcode(input: &str) -> IResult<&str, InstructionParser, VerboseError<&str
                 ".text" => Ok(InstructionParser::pseudo(|i| segment(i, Segment::Text))),
                 ".data" => Ok(InstructionParser::pseudo(|i| segment(i, Segment::Data))),
 
-                "add.s" => Ok(InstructionParser::new(Opcode::Funct(0b110000), r_type)),
+                "add.s" => Ok(InstructionParser::new(Opcode::Funct(0x11), r_type)),
+
+                "mov.s" => Ok(InstructionParser::pseudo(mov_s_ins)),
                 "li.s" => Ok(InstructionParser::pseudo(li_ins)),
                 _ => Err(()),
             },

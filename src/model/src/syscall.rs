@@ -51,7 +51,6 @@ pub fn handle_syscall(reg_file: &mut RegisterFile<u32>, mem: &mut Memory) -> Res
         2 => {
             // print float
             let arg = reg_file.value_or_default(Register::F12);
-            println!("\n{} {}\n", arg, f32::from_bits(arg));
             Ok(Syscall::Print(format!("{}", f32::from_bits(arg))))
         }
         4 => {

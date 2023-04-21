@@ -14,7 +14,7 @@ li $v0, 6
 syscall
 
 # Move input to another register
-move $f12, $f0
+mov.s $f12, $f0
 
 # Print result message prefix
 la $a0, result

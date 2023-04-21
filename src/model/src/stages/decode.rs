@@ -3,6 +3,7 @@ use crate::{
     Register, RegisterFile,
 };
 use anyhow::{bail, Result};
+use crate::Register::ZERO;
 
 // Struct representing this stages inputs
 #[derive(Debug, Default, Clone)]
@@ -23,10 +24,12 @@ pub fn decode(reg_file: &mut RegisterFile<u32>, input: IfId) -> Result<IdEx> {
     let j_mask = 0b00000011111111111111111111111111;
     let imm_mask = fn_mask | sh_mask | rd_mask;
 
+    //println!("Instruction: {:032b}", input.instruction);
+
     // Use masks to get the field values
-    let rd = (input.instruction & rd_mask) >> 11;
-    let rt = (input.instruction & rt_mask) >> 16;
-    let rs = (input.instruction & rs_mask) >> 21;
+    let mut rd = (input.instruction & rd_mask) >> 11;
+    let mut rt = (input.instruction & rt_mask) >> 16;
+    let mut rs = (input.instruction & rs_mask) >> 21;
     let funct = input.instruction & fn_mask;
     let shamt = (input.instruction & sh_mask) >> 6;
     let op = (input.instruction & op_mask) >> 26;
@@ -36,10 +39,32 @@ pub fn decode(reg_file: &mut RegisterFile<u32>, input: IfId) -> Result<IdEx> {
     // sign extend the imm value
     imm = ((imm << 16) as i32 >> 16) as u32;
 
+    // DEBUG
+    if funct == 0x20 || funct == 0x11 {
+        println!("{rd} {rs} {rt}");
+    }
+
+    // select float registers if floating point funct
+    if funct == 0x11 {
+        rd += 32;
+        rt += 32;
+        rs += 32;
+    }
+
+    // DEBUG
+    if funct == 0x20 || funct == 0x11 {
+        println!("{rd} {rs} {rt}");
+    }
+
     // make registers typed
     let rs: Register = rs.into();
     let rt: Register = rt.into();
     let rd: Register = rd.into();
+
+    // DEBUG
+    if funct == 0x20 || funct == 0x11 {
+        println!("{rd} {rs} {rt}");
+    }
 
     // read rs and rt
     let read_rs = reg_file.value_or_default(rs);
