@@ -278,7 +278,7 @@ pub fn mov_s_ins(input: &str) -> ParserOutput {
             op: Opcode::Funct(0x11), // add.s
             rd,
             rs,
-            rt: ZERO,
+            rt: rs,
             shamt: 0x10,
         }]),
     ))
