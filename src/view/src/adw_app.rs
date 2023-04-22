@@ -23,6 +23,7 @@ use util::shared::Shared;
 
 use crate::app_window::AppWindow;
 use crate::ensure;
+use crate::register_view::RegisterView;
 use crate::traits::*;
 
 /// The application's ID
@@ -87,6 +88,9 @@ impl AdwApp {
         Self::connect_file_new(window.clone());
         Self::connect_file_open(window.clone());
         Self::connect_file_save_as(window.clone());
+
+        // Connect the view buttons
+        Self::connect_view_register(window.clone());
 
         // Connect the "enter" key to the console
         Self::connect_console_confirm(adw_app.clone(), window.clone());
@@ -299,6 +303,20 @@ impl AdwApp {
         });
     }
 
+    fn connect_view_register(window: AppWindow) {
+        Self::connect_simple_action(window.clone(), "register", move |_, _| {
+            let reg_view = RegisterView::new();
+
+            let reg_win = gtk::Window::builder()
+                .title("Registers")
+                .child(&reg_view)
+                .transient_for(&window)
+                .build();
+
+            reg_win.present();
+        });
+    }
+
     fn connect_console_confirm(adw_app: Shared<AdwApp>, window: AppWindow) {
         let controller = EventControllerKey::new();
 
@@ -319,7 +337,6 @@ impl AdwApp {
 
                     // Continue the simulator
                     Self::start_simulator(adw_app.clone());
-                    println!("we made it?");
                 }
             }
 

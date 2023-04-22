@@ -39,16 +39,16 @@
                 <attribute name='action'>app.memory</attribute>
             </item>
             <item>
-                <attribute name='label' translatable='yes'>Toggle Stack View</attribute>
+                <attribute name='label' translatable='yes'>Stack View</attribute>
                 <attribute name='action'>app.stack</attribute>
             </item>
             <item>
-                <attribute name='label' translatable='yes'>Toggle Pipeline View</attribute>
+                <attribute name='label' translatable='yes'>Pipeline View</attribute>
                 <attribute name='action'>app.pipeline</attribute>
             </item>
             <item>
-                <attribute name='label' translatable='yes'>Toggle Register View</attribute>
-                <attribute name='action'>app.register</attribute>
+                <attribute name='label' translatable='yes'>Register View</attribute>
+                <attribute name='action'>win.register</attribute>
             </item>
         </section>
     </menu>
