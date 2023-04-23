@@ -12,11 +12,10 @@ use crate::widget;
 
 glib::wrapper! {
     /**
-    A custom widget which represents a graphical console for text I/O.
+    A custom widget which represents a view of register data.
 
     # See also:
-    - [GtkConsoleTemplate][`crate::gtk_console::template::GtkConsoleTemplate`]
-    - [Console][`crate::traits::Console`]
+    - [RegisterView][`crate::register_view::template::RegisterView`]
      */
     pub struct RegisterView(ObjectSubclass<template::RegisterViewTemplate>)
         @extends gtk::Box, gtk::Widget,

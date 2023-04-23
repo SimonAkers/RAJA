@@ -5,7 +5,7 @@ use gtk::subclass::prelude::*;
 
 /**
 The template for [RegisterView][`crate::register_view::RegisterView`] \
-which represents a console widget.
+which is a widget for viewing register data.
 
 This mostly consists of gtk-rs boilerplate and should not be constructed directly.
  */
@@ -37,6 +37,7 @@ impl ObjectImpl for RegisterViewTemplate {
     fn constructed(&self) {
         self.parent_constructed();
 
+        // DEBUG
         for i in 1..100 {
             self.obj().list_box().append(&gtk::Label::new(Some(&format!("Row {i}"))));
         }

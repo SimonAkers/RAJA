@@ -8,8 +8,8 @@ use glib::subclass::InitializingObject;
 use crate::gtk_console;
 
 /**
-The template for [AppWindow][`crate::app_window::AppWindow`] \
-which represents an instance of the application window.
+The template for [MainView][`crate::main_view::MainView`] \
+which represents the main (center) view of the application.
 
 This mostly consists of gtk-rs boilerplate and should not be constructed directly.
  */
