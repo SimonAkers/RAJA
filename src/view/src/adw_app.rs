@@ -305,6 +305,7 @@ impl AdwApp {
 
     fn connect_view_register(window: AppWindow) {
         Self::connect_simple_action(window.clone(), "register", move |_, _| {
+            /*
             let reg_view = RegisterView::new();
 
             let reg_win = gtk::Window::builder()
@@ -314,6 +315,8 @@ impl AdwApp {
                 .build();
 
             reg_win.present();
+
+             */
         });
     }
 

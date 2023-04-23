@@ -8,6 +8,7 @@ use gtk::prelude::*;
 
 use gtk::prelude::BoxExt;
 use model::RegisterFile;
+use crate::widget;
 
 glib::wrapper! {
     /**
@@ -23,29 +24,5 @@ glib::wrapper! {
 }
 
 impl RegisterView {
-    pub fn new() -> Self {
-
-        let list = ListBox::new();
-        list.set_hexpand(true);
-        list.set_vexpand(true);
-        list.set_selection_mode(SelectionMode::None);
-
-        for i in 1..100 {
-            list.append(&gtk::Label::new(Some(&format!("Row {i}"))));
-        }
-
-        let obj: RegisterView = Object::builder().build();
-        obj.set_hexpand(true);
-        obj.set_vexpand(true);
-
-        obj.append(
-        &ScrolledWindow::builder()
-            .height_request(300)
-            .width_request(200)
-            .child(&list)
-            .build()
-        );
-
-        obj
-    }
+    widget!(list_box, ListBox);
 }

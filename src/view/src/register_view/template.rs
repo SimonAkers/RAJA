@@ -1,6 +1,5 @@
-use std::borrow::BorrowMut;
-use std::cell::Cell;
-
+use gtk::ListBox;
+use gtk::CompositeTemplate;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
 
@@ -10,9 +9,11 @@ which represents a console widget.
 
 This mostly consists of gtk-rs boilerplate and should not be constructed directly.
  */
-#[derive(Default)]
+#[derive(CompositeTemplate, Default)]
+#[template(file = "template.ui")]
 pub struct RegisterViewTemplate {
-
+    #[template_child]
+    pub list_box: TemplateChild<ListBox>
 }
 
 /// gtk-rs boilerplate implementation
@@ -24,10 +25,15 @@ impl ObjectSubclass for RegisterViewTemplate {
     type ParentType = gtk::Box;
 }
 
-impl RegisterViewTemplate {
+impl ObjectImpl for RegisterViewTemplate {
+    fn constructed(&self) {
+        self.parent_constructed();
 
+        for i in 1..100 {
+            self.list_box.append(&gtk::Label::new(Some(&format!("Row {i}"))));
+        }
+    }
 }
 
-impl ObjectImpl for RegisterViewTemplate {}
 impl WidgetImpl for RegisterViewTemplate {}
 impl BoxImpl for RegisterViewTemplate {}

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+    <template class="RegisterView" parent="GtkBox">
+        <property name="hexpand">true</property>
+        <property name="vexpand">true</property>
+
+        <child>
+            <object class="GtkScrolledWindow">
+                <child>
+                    <object class="GtkListBox" id="list_box">
+                        <property name="hexpand">true</property>
+                        <property name="vexpand">true</property>
+                        <property name="selection_mode">0</property>
+                    </object>
+                </child>
+            </object>
+        </child>
+    </template>
+
+</interface>
