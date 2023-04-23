@@ -32,10 +32,6 @@ impl MainView {
             .build()
     }
 
-    widget!(header_bar, HeaderBar);
     widget!(source_view, sourceview5::View);
     widget!(console, GtkConsole);
-    widget!(btn_run, gtk::Button);
-    widget!(btn_build, gtk::Button);
-    widget!(btn_settings, gtk::Button);
 }

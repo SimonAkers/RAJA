@@ -1,16 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
-    <!--
-    <menu id='primary_menu'>
-        <section>
-            <item>
-                <attribute name='label' translatable='yes'>Settings</attribute>
-                <attribute name='action'>win.font</attribute>
-            </item>
-        </section>
-    </menu>
-    -->
-
     <menu id='file_menu'>
         <section>
             <item>
@@ -53,6 +42,8 @@
         </section>
     </menu>
 
+
+
     <template class="AppWindow" parent="AdwApplicationWindow">
         <property name="title">RAJA</property>
         <property name="default-width">1100</property>
@@ -61,11 +52,135 @@
         <property name="height-request">300</property>
 
         <child>
-            <object class="MainView" id="main_view">
-                <property name="hexpand">true</property>
-                <property name="vexpand">true</property>
-            </object>
+            <object class="GtkBox">
+                <property name="orientation">vertical</property>
 
+
+
+        <child>
+            <object class="GtkHeaderBar" id="header_bar">
+                <property name="title-widget">
+                    <object class="GtkLabel">
+                        <property name="label">RAJA</property>
+                    </object>
+                </property>
+
+
+                <child type="start">
+                    <object class="GtkButton" id="btn_settings">
+                        <property name="icon-name">view-more-horizontal-symbolic</property>
+                        <property name="has-frame">TRUE</property>
+                    </object>
+                </child>
+
+            </object>
+        </child>
+
+        <child>
+            <object class="GtkBox">
+                <property name="orientation">horizontal</property>
+                <property name="hexpand">True</property>
+                <property name="vexpand">False</property>
+                <property name="margin-top">12</property>
+                <property name="margin-bottom">12</property>
+                <property name="margin-start">12</property>
+                <property name="margin-end">12</property>
+                <property name="spacing">12</property>
+
+                <child>
+                    <object class="GtkMenuButton" id="btn_file">
+                        <property name="label">File</property>
+
+                        <property name="popover">
+                            <object class="GtkPopoverMenu" id="btn_file_popover">
+                                <property name="halign">start</property>
+                                <property name="menu-model">file_menu</property>
+                            </object>
+                        </property>
+                    </object>
+                </child>
+
+                <child>
+                    <object class="GtkMenuButton" id="btn_view">
+                        <property name="label">View</property>
+
+                        <property name="popover">
+                            <object class="GtkPopoverMenu">
+                                <property name="halign">start</property>
+                                <property name="menu-model">view_menu</property>
+                            </object>
+                        </property>
+                    </object>
+                </child>
+
+                <child>
+                    <object class="GtkSeparator"> </object>
+                </child>
+
+                <child>
+                    <object class="GtkButton" id="btn_build">
+                        <property name="icon-name">applications-engineering-symbolic</property>
+                        <property name="tooltip-text">Build</property>
+                    </object>
+                </child>
+
+                <child>
+                    <object class="GtkButton" id="btn_run">
+                        <property name="icon-name">media-playback-start-symbolic</property>
+                        <property name="tooltip-text">Run</property>
+                    </object>
+                </child>
+
+                <child>
+                    <object class="GtkButton">
+                        <property name="icon-name">go-bottom-symbolic</property>
+                        <property name="tooltip-text">Step into</property>
+                    </object>
+                </child>
+
+                <child>
+                    <object class="GtkButton">
+                        <property name="icon-name">go-jump-symbolic</property>
+                        <property name="tooltip-text">Step over</property>
+                    </object>
+                </child>
+
+                <child>
+                    <object class="GtkButton">
+                        <property name="icon-name">go-top-symbolic</property>
+                        <property name="tooltip-text">Step out</property>
+                    </object>
+                </child>
+
+            </object>
+        </child>
+
+        <child>
+            <object class="GtkSeparator">
+                <property name="orientation">horizontal</property>
+            </object>
+        </child>
+
+        <child>
+            <object class="GtkPaned">
+
+                <property name="start-child">
+                    <object class="MainView" id="main_view">
+                        <property name="hexpand">true</property>
+                        <property name="vexpand">true</property>
+                    </object>
+                </property>
+
+                <property name="end-child" >
+                    <object class="RegisterView" id="register_view">
+
+                    </object>
+                </property>
+
+            </object>
+        </child>
+
+            </object>
         </child>
     </template>
 

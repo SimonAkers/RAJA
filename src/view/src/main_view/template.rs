@@ -17,17 +17,9 @@ This mostly consists of gtk-rs boilerplate and should not be constructed directl
 #[template(file = "template.ui")]
 pub struct MainViewTemplate {
     #[template_child]
-    pub header_bar: TemplateChild<gtk::HeaderBar>,
-    #[template_child]
     pub source_view: TemplateChild<sourceview5::View>,
     #[template_child]
     pub console: TemplateChild<gtk_console::GtkConsole>,
-    #[template_child]
-    pub btn_run: TemplateChild<gtk::Button>,
-    #[template_child]
-    pub btn_build: TemplateChild<gtk::Button>,
-    #[template_child]
-    pub btn_settings: TemplateChild<gtk::Button>,
 }
 
 /// gtk-rs boilerplate implementation

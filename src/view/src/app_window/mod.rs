@@ -36,5 +36,9 @@ impl AppWindow {
     }
 
     // TODO: Further abstract these macro calls into a derive macro
+    widget!(header_bar, HeaderBar);
+    widget!(btn_run, gtk::Button);
+    widget!(btn_build, gtk::Button);
+    widget!(btn_settings, gtk::Button);
     widget!(main_view, MainView);
 }

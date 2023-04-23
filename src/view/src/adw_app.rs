@@ -159,7 +159,7 @@ impl AdwApp {
     - `window` - A reference to the app's window.
     */
     fn connect_btn_build(adw_app: Shared<AdwApp>, window: AppWindow) {
-        window.main_view().btn_build().connect_clicked(move |_| {
+        window.btn_build().connect_clicked(move |_| {
             debug_println!("BUILD BUTTON PRESSED");
             window.main_view().console().clear();
             Self::reset_flash_machine(&adw_app, &window);
@@ -174,7 +174,7 @@ impl AdwApp {
     - `window` - A reference to the app's window.
      */
     fn connect_btn_run(adw_app: Shared<AdwApp>, window: AppWindow) {
-        window.main_view().btn_run().connect_clicked(move |_| {
+        window.btn_run().connect_clicked(move |_| {
             debug_println!("[DEBUG] Assembling and running...");
 
             // Clear the console
@@ -188,7 +188,7 @@ impl AdwApp {
     }
 
     fn connect_btn_settings(window: AppWindow) {
-        window.main_view().btn_settings().connect_clicked(move |_| {
+        window.btn_settings().connect_clicked(move |_| {
             FontDialog::new().choose_font(Some(&window), None, Cancellable::NONE, |font| {
 
             })

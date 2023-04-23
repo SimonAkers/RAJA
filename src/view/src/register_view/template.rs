@@ -1,5 +1,5 @@
-use gtk::ListBox;
-use gtk::CompositeTemplate;
+use glib::subclass::InitializingObject;
+use gtk::{CompositeTemplate, ListBox};
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
 
@@ -13,7 +13,7 @@ This mostly consists of gtk-rs boilerplate and should not be constructed directl
 #[template(file = "template.ui")]
 pub struct RegisterViewTemplate {
     #[template_child]
-    pub list_box: TemplateChild<ListBox>
+    pub list_box: TemplateChild<ListBox>,
 }
 
 /// gtk-rs boilerplate implementation
@@ -23,6 +23,14 @@ impl ObjectSubclass for RegisterViewTemplate {
     const NAME: &'static str = "RegisterView";
     type Type = super::RegisterView;
     type ParentType = gtk::Box;
+
+    fn class_init(klass: &mut Self::Class) {
+        klass.bind_template();
+    }
+
+    fn instance_init(obj: &InitializingObject<Self>) {
+        obj.init_template();
+    }
 }
 
 impl ObjectImpl for RegisterViewTemplate {
@@ -30,7 +38,7 @@ impl ObjectImpl for RegisterViewTemplate {
         self.parent_constructed();
 
         for i in 1..100 {
-            self.list_box.append(&gtk::Label::new(Some(&format!("Row {i}"))));
+            self.obj().list_box().append(&gtk::Label::new(Some(&format!("Row {i}"))));
         }
     }
 }

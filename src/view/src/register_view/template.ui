@@ -6,13 +6,13 @@
 
         <child>
             <object class="GtkScrolledWindow">
-                <child>
+                <property name="child">
                     <object class="GtkListBox" id="list_box">
                         <property name="hexpand">true</property>
                         <property name="vexpand">true</property>
                         <property name="selection_mode">0</property>
                     </object>
-                </child>
+                </property>
             </object>
         </child>
     </template>
