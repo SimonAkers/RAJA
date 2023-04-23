@@ -6,7 +6,6 @@ use gtk::CompositeTemplate;
 use glib::subclass::InitializingObject;
 
 use crate::gtk_console;
-use crate::main_view::MainView;
 
 /**
 The template for [AppWindow][`crate::app_window::AppWindow`] \
@@ -16,19 +15,29 @@ This mostly consists of gtk-rs boilerplate and should not be constructed directl
  */
 #[derive(CompositeTemplate, Default)]
 #[template(file = "template.ui")]
-pub struct AppWindowTemplate {
+pub struct MainViewTemplate {
     #[template_child]
-    pub main_view: TemplateChild<MainView>,
+    pub header_bar: TemplateChild<gtk::HeaderBar>,
+    #[template_child]
+    pub source_view: TemplateChild<sourceview5::View>,
+    #[template_child]
+    pub console: TemplateChild<gtk_console::GtkConsole>,
+    #[template_child]
+    pub btn_run: TemplateChild<gtk::Button>,
+    #[template_child]
+    pub btn_build: TemplateChild<gtk::Button>,
+    #[template_child]
+    pub btn_settings: TemplateChild<gtk::Button>,
 }
 
 /// gtk-rs boilerplate implementation
 #[glib::object_subclass]
-impl ObjectSubclass for AppWindowTemplate {
+impl ObjectSubclass for MainViewTemplate {
     // `NAME` needs to match `class` attribute of template
-    const NAME: &'static str = "AppWindow";
+    const NAME: &'static str = "MainView";
 
-    type Type = super::AppWindow;
-    type ParentType = adw::ApplicationWindow;
+    type Type = super::MainView;
+    type ParentType = gtk::Box;
 
     fn class_init(klass: &mut Self::Class) {
         klass.bind_template();
@@ -40,13 +49,12 @@ impl ObjectSubclass for AppWindowTemplate {
 }
 
 /// gtk-rs boilerplate implementation
-impl ObjectImpl for AppWindowTemplate {
+impl ObjectImpl for MainViewTemplate {
     fn constructed(&self) {
         self.parent_constructed();
     }
 }
 
-impl WidgetImpl for AppWindowTemplate {}
-impl WindowImpl for AppWindowTemplate {}
-impl ApplicationWindowImpl for AppWindowTemplate {}
-impl AdwApplicationWindowImpl for AppWindowTemplate {}
+impl WidgetImpl for MainViewTemplate {}
+impl WindowImpl for MainViewTemplate {}
+impl BoxImpl for MainViewTemplate {}

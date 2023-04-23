@@ -5,7 +5,6 @@ use glib::Object;
 use glib::subclass::prelude::ObjectSubclassIsExt;
 use adw::Application;
 use crate::gtk_console::GtkConsole;
-use crate::main_view::MainView;
 use crate::widget;
 
 glib::wrapper! {
@@ -13,15 +12,13 @@ glib::wrapper! {
     A "subclass" of [`gtk::ApplicationWindow`].
     See also: [AppWindowTemplate][`crate::app_window::template::AppWindowTemplate`]
      */
-    pub struct AppWindow(ObjectSubclass<template::AppWindowTemplate>)
-        @extends gtk::ApplicationWindow, gtk::Window, gtk::Widget,
+    pub struct MainView(ObjectSubclass<template::MainViewTemplate>)
+        @extends gtk::Box, gtk::Window, gtk::Widget,
         @implements gio::ActionGroup, gio::ActionMap, gtk::Accessible, gtk::Buildable,
                     gtk::ConstraintTarget, gtk::Native, gtk::Root, gtk::ShortcutManager;
 }
 
-
-
-impl AppWindow {
+impl MainView {
     /**
     Creates a new AppWindow.
 
@@ -30,11 +27,15 @@ impl AppWindow {
      */
     pub fn new(app: &Application) -> Self {
         // Create new window
-        Object::builder::<AppWindow>()
+        Object::builder::<MainView>()
             .property("application", app)
             .build()
     }
 
-    // TODO: Further abstract these macro calls into a derive macro
-    widget!(main_view, MainView);
+    widget!(header_bar, HeaderBar);
+    widget!(source_view, sourceview5::View);
+    widget!(console, GtkConsole);
+    widget!(btn_run, gtk::Button);
+    widget!(btn_build, gtk::Button);
+    widget!(btn_settings, gtk::Button);
 }

@@ -1,6 +1,7 @@
 use glib::*;
 
 use crate::gtk_console::GtkConsole;
+use crate::main_view::MainView;
 use crate::register_view::RegisterView;
 
 /**
@@ -10,4 +11,5 @@ of [`gtk::Application`] is created.
 pub fn ensure_types() {
     GtkConsole::ensure_type();
     RegisterView::ensure_type();
+    MainView::ensure_type();
 }

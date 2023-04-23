@@ -118,7 +118,7 @@ impl AdwApp {
                 match info {
                     None => (),
                     Some(message) => {
-                        _window.console().print(&*format!("{}", message));
+                        _window.main_view().console().print(&*format!("{}", message));
                         debug_println!("[CONSOLE] {}", message);
                     }
                 }
@@ -133,7 +133,7 @@ impl AdwApp {
                 match info {
                     None => (),
                     Some(message) => {
-                        _window.console().print_err(&*format!("[ERROR] {}", message));
+                        _window.main_view().console().print_err(&*format!("[ERROR] {}", message));
                         debug_println!("[CONSOLE] [ERROR] {}", message);
                     }
                 }
@@ -146,7 +146,7 @@ impl AdwApp {
         callbacks.insert(
             SyscallDiscriminants::ReadAny,
             Callback::new(Box::new(move |_| {
-                _window.console().start_user_input();
+                _window.main_view().console().start_user_input();
             }))
         );
     }
@@ -159,9 +159,9 @@ impl AdwApp {
     - `window` - A reference to the app's window.
     */
     fn connect_btn_build(adw_app: Shared<AdwApp>, window: AppWindow) {
-        window.btn_build().connect_clicked(move |_| {
+        window.main_view().btn_build().connect_clicked(move |_| {
             debug_println!("BUILD BUTTON PRESSED");
-            window.console().clear();
+            window.main_view().console().clear();
             Self::reset_flash_machine(&adw_app, &window);
         });
     }
@@ -174,11 +174,11 @@ impl AdwApp {
     - `window` - A reference to the app's window.
      */
     fn connect_btn_run(adw_app: Shared<AdwApp>, window: AppWindow) {
-        window.btn_run().connect_clicked(move |_| {
+        window.main_view().btn_run().connect_clicked(move |_| {
             debug_println!("[DEBUG] Assembling and running...");
 
             // Clear the console
-            window.console().clear();
+            window.main_view().console().clear();
 
             // Reset and flash the assembly to the machine
             Self::reset_flash_machine(&adw_app, &window);
@@ -188,7 +188,7 @@ impl AdwApp {
     }
 
     fn connect_btn_settings(window: AppWindow) {
-        window.btn_settings().connect_clicked(move |_| {
+        window.main_view().btn_settings().connect_clicked(move |_| {
             FontDialog::new().choose_font(Some(&window), None, Cancellable::NONE, |font| {
 
             })
@@ -217,8 +217,8 @@ impl AdwApp {
                     Ok(index) => {
                         // If "yes" button was clicked
                         if index == 0 {
-                            _window.source_view().clear();
-                            _window.console().clear();
+                            _window.main_view().source_view().clear();
+                            _window.main_view().console().clear();
                         }
                     }
                     Err(_) => ()
@@ -255,7 +255,7 @@ impl AdwApp {
                 // Read the file into the editor
                 match fs::read_to_string(path) {
                     Ok(contents) => {
-                        _window.source_view().set_text(contents);
+                        _window.main_view().source_view().set_text(contents);
                     }
                     Err(_) => {}
                 }
@@ -284,7 +284,7 @@ impl AdwApp {
                 };
 
                 // Get the contents to write
-                let contents = _window.source_view().text();
+                let contents = _window.main_view().source_view().text();
 
                 // Write to the file
                 match fs::write(path, contents) {
@@ -323,7 +323,7 @@ impl AdwApp {
         let _window = window.clone();
         controller.connect_key_pressed(move |keyval, keycode, state, _| {
             if keycode == Key::Return {
-                let mut console = _window.console();
+                let mut console = _window.main_view().console();
 
                 if console.user_input_started() {
                     let machine = &mut adw_app.borrow_mut().machine;
@@ -344,7 +344,7 @@ impl AdwApp {
             Inhibit(false)
         });
 
-        window.console().add_controller(controller);
+        window.main_view().console().add_controller(controller);
     }
 
     pub fn start_simulator(adw_app: Shared<AdwApp>) {
@@ -370,7 +370,7 @@ impl AdwApp {
         let machine = &mut adw_app.borrow_mut().machine;
 
         // Get the assembly code
-        let mut src = window.source_view().text();
+        let mut src = window.main_view().source_view().text();
 
         // Reset the machine
         machine.hard_reset();
@@ -378,7 +378,7 @@ impl AdwApp {
         // Flash the machine
         match assembler(src) {
             Ok((mem, lbl)) => machine.flash(mem, lbl),
-            Err(err) => window.console().print_err(&format!("{err}"))
+            Err(err) => window.main_view().console().print_err(&format!("{err}"))
         };
     }
 
@@ -416,7 +416,7 @@ impl AdwApp {
         let window = AppWindow::new(app);
 
         // Style the source view
-        Self::style_srcview(&window.source_view());
+        Self::style_srcview(&window.main_view().source_view());
 
         window
     }
