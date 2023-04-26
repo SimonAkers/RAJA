@@ -7,6 +7,7 @@ use glib::subclass::InitializingObject;
 
 use crate::gtk_console;
 use crate::main_view::MainView;
+use crate::register_view::RegisterView;
 
 /**
 The template for [AppWindow][`crate::app_window::AppWindow`] \
@@ -27,6 +28,8 @@ pub struct AppWindowTemplate {
     pub btn_build: TemplateChild<gtk::Button>,
     #[template_child]
     pub btn_settings: TemplateChild<gtk::Button>,
+    #[template_child]
+    pub register_view: TemplateChild<RegisterView>,
 }
 
 /// gtk-rs boilerplate implementation

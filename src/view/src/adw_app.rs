@@ -183,7 +183,7 @@ impl AdwApp {
             // Reset and flash the assembly to the machine
             Self::reset_flash_machine(&adw_app, &window);
 
-            Self::start_simulator(adw_app.clone());
+            Self::start_simulator(adw_app.clone(), window.clone());
         });
     }
 
@@ -339,7 +339,7 @@ impl AdwApp {
                     machine.set_input(Some(console.input()));
 
                     // Continue the simulator
-                    Self::start_simulator(adw_app.clone());
+                    Self::start_simulator(adw_app.clone(), _window.clone());
                 }
             }
 
@@ -350,12 +350,16 @@ impl AdwApp {
         window.main_view().console().add_controller(controller);
     }
 
-    pub fn start_simulator(adw_app: Shared<AdwApp>) {
+    pub fn start_simulator(adw_app: Shared<AdwApp>, window: AppWindow) {
         glib::timeout_add_local(Duration::from_millis(1), move || {
             let machine = &mut adw_app.borrow_mut().machine;
 
             // Cycle the machine
-            match machine.cycle() {
+            let flow = machine.cycle();
+
+            window.register_view().update(machine.register_file());
+
+            match flow {
                 ControlFlow::Continue(_) => Continue(true),
                 ControlFlow::Break(_) => Continue(false)
             }

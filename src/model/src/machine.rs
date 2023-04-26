@@ -39,6 +39,10 @@ impl Machine {
     }
      */
 
+    pub fn register_file(&self) -> &RegisterFile<u32> {
+        &self.regs
+    }
+
     pub fn read_word(&self, addr: u32) -> Result<u32> {
         self.memory.get(addr)
     }

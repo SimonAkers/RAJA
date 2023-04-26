@@ -36,11 +36,6 @@ impl ObjectSubclass for RegisterViewTemplate {
 impl ObjectImpl for RegisterViewTemplate {
     fn constructed(&self) {
         self.parent_constructed();
-
-        // DEBUG
-        for i in 1..100 {
-            self.obj().list_box().append(&gtk::Label::new(Some(&format!("Row {i}"))));
-        }
     }
 }
 

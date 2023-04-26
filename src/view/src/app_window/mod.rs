@@ -6,6 +6,7 @@ use glib::subclass::prelude::ObjectSubclassIsExt;
 use adw::Application;
 use crate::gtk_console::GtkConsole;
 use crate::main_view::MainView;
+use crate::register_view::RegisterView;
 use crate::widget;
 
 glib::wrapper! {
@@ -41,4 +42,5 @@ impl AppWindow {
     widget!(btn_build, gtk::Button);
     widget!(btn_settings, gtk::Button);
     widget!(main_view, MainView);
+    widget!(register_view, RegisterView);
 }
