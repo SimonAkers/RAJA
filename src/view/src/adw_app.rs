@@ -308,18 +308,8 @@ impl AdwApp {
         window.register_view().update(machine.register_file());
 
         Self::connect_simple_action(window.clone(), "register", move |_, _| {
-            /*
-            let reg_view = RegisterView::new();
-
-            let reg_win = gtk::Window::builder()
-                .title("Registers")
-                .child(&reg_view)
-                .transient_for(&window)
-                .build();
-
-            reg_win.present();
-
-             */
+            let view = window.register_view();
+            view.set_visible(!view.get_visible());
         });
     }
 
