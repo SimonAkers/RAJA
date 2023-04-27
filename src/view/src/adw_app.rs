@@ -90,7 +90,7 @@ impl AdwApp {
         Self::connect_file_save_as(window.clone());
 
         // Connect the view buttons
-        Self::connect_view_register(window.clone());
+        Self::connect_register_view(adw_app.clone(), window.clone());
 
         // Connect the "enter" key to the console
         Self::connect_console_confirm(adw_app.clone(), window.clone());
@@ -303,7 +303,10 @@ impl AdwApp {
         });
     }
 
-    fn connect_view_register(window: AppWindow) {
+    fn connect_register_view(adw_app: Shared<AdwApp>, window: AppWindow) {
+        let machine = &mut adw_app.borrow_mut().machine;
+        window.register_view().update(machine.register_file());
+
         Self::connect_simple_action(window.clone(), "register", move |_, _| {
             /*
             let reg_view = RegisterView::new();
