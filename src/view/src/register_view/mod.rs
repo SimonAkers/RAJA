@@ -3,7 +3,7 @@ mod template;
 use std::borrow::{Borrow, BorrowMut};
 use glib::{BoolError, Object, Value};
 use glib::subclass::prelude::ObjectSubclassIsExt;
-use gtk::{Grid, Label, ListBox, ListBoxRow, Orientation, ScrolledWindow, SelectionMode};
+use gtk::{Align, Grid, Label, ListBox, ListBoxRow, Orientation, ScrolledWindow, SelectionMode};
 use gtk::pango::{AttrFontDesc, Attribute, AttrList, AttrString, FontDescription};
 use gtk::prelude::*;
 
@@ -43,11 +43,13 @@ impl RegisterView {
 
             let name = Label::builder()
                 .label(name)
+                .halign(Align::End)
                 .attributes(&attrs)
                 .build();
 
             let value = Label::builder()
                 .label(format!("{value:#010x}"))
+                .halign(Align::Start)
                 .attributes(&attrs)
                 .build();
 

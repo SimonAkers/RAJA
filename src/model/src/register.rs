@@ -2,11 +2,12 @@ use std::fmt;
 use std::str::FromStr;
 use strum::IntoEnumIterator;
 use strum_macros::{EnumIter, EnumString};
-use crate::register::Register::UNKNOWN;
+use crate::register::Register::ZERO;
 
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq, Hash, EnumString, EnumIter)]
 #[strum(serialize_all = "mixed_case")]
 pub enum Register {
+    #[default]
     ZERO = 0,
     AT = 1,
     V0 = 2,
@@ -75,9 +76,6 @@ pub enum Register {
 
     HI = 64,
     LO = 65,
-
-    #[default]
-    UNKNOWN = 999,
 }
 
 impl Register {
@@ -96,7 +94,7 @@ impl From<String> for Register {
     fn from(value: String) -> Self {
         match Register::from_str(value.as_str()) {
             Ok(register) => register,
-            Err(_) => UNKNOWN,
+            Err(_) => ZERO,
         }
     }
 }
@@ -127,6 +125,6 @@ impl From<u32> for Register {
             }
         }
 
-        UNKNOWN
+        ZERO
     }
 }
