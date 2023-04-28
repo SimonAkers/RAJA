@@ -172,14 +172,14 @@
                     <object class="MainView" id="main_view">
                         <property name="hexpand">true</property>
                         <property name="vexpand">true</property>
-                        <property name="width-request">100</property>
+                        <property name="width-request">200</property>
                     </object>
                 </property>
 
                 <property name="end-child" >
                     <object class="RegisterView" id="register_view">
                         <property name="visible">false</property>
-                        <property name="width-request">100</property>
+                        <property name="width-request">200</property>
                     </object>
                 </property>
 

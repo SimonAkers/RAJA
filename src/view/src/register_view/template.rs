@@ -1,5 +1,5 @@
 use glib::subclass::InitializingObject;
-use gtk::{CompositeTemplate, ListBox};
+use gtk::{CompositeTemplate, Grid};
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
 
@@ -13,7 +13,7 @@ This mostly consists of gtk-rs boilerplate and should not be constructed directl
 #[template(file = "template.ui")]
 pub struct RegisterViewTemplate {
     #[template_child]
-    pub list_box: TemplateChild<ListBox>,
+    pub grid: TemplateChild<Grid>,
 }
 
 /// gtk-rs boilerplate implementation
