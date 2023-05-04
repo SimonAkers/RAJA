@@ -3,9 +3,11 @@ use std::fs;
 use std::ops::ControlFlow;
 use std::time::Duration;
 
-use adw::{Application, ColorScheme, StyleManager};
+use adw::{Application, ColorScheme, StyleManager, Window};
+use adw::gdk::pango::FontDescription;
 use dark_light::Mode;
 use debug_print::*;
+use glib::Error;
 use glib::signal::Inhibit;
 use gtk::{AlertDialog, CssProvider, EventControllerKey, FileDialog, FileFilter, FontDialog, StyleContext};
 use gtk::builders::FontDialogBuilder;
@@ -19,6 +21,7 @@ use model::assembler;
 use model::callback::Callback;
 use model::machine::Machine;
 use model::syscall::SyscallDiscriminants;
+use util::settings::Settings;
 use util::shared::Shared;
 
 use crate::app_window::AppWindow;
@@ -33,6 +36,7 @@ const APP_ID: &str = "net.shayes.raja";
 pub struct AdwApp {
     app: Application,
     machine: Machine,
+    settings: Settings,
 }
 
 impl AdwApp {
@@ -47,7 +51,11 @@ impl AdwApp {
 
         // Create a shared instance of AdwApp
         let adw_app = Shared::new(
-            Self { app: app.clone(), machine: Default::default() }
+            Self {
+                app: app.clone(),
+                machine: Default::default(),
+                settings: Settings::load(),
+            }
         );
 
         // Connect the startup signal
@@ -190,7 +198,24 @@ impl AdwApp {
     fn connect_btn_settings(window: AppWindow) {
         window.btn_settings().connect_clicked(move |_| {
             FontDialog::new().choose_font(Some(&window), None, Cancellable::NONE, |font| {
-
+                match font {
+                    Ok(desc) => {
+                        Settings::load()
+                            .set_mono_font(desc.to_string())
+                            .save();
+                    }
+                    Err(err) => {
+                        AlertDialog::builder()
+                            .message("ERROR")
+                            .detail(
+                                format!("An error occurred while trying to change the font:\n{}",
+                                err.message())
+                            )
+                            .buttons(["Ok"])
+                            .build()
+                            .show(Window::NONE);
+                    }
+                }
             })
         });
     }
