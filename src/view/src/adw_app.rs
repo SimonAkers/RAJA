@@ -13,6 +13,7 @@ use gtk::{AlertDialog, CssProvider, EventControllerKey, FileDialog, FileFilter, 
 use gtk::builders::FontDialogBuilder;
 use gtk::gdk::{Display, Key};
 use gtk::gio::{Cancellable, SimpleAction};
+use gtk::pango::ffi::PANGO_SCALE;
 use gtk::prelude::*;
 use sourceview5::prelude::*;
 use sourceview5::StyleSchemeManager;
@@ -200,22 +201,67 @@ impl AdwApp {
             FontDialog::new().choose_font(Some(&window), None, Cancellable::NONE, |font| {
                 match font {
                     Ok(desc) => {
-                        Settings::load()
-                            .set_mono_font(desc.to_string())
-                            .save();
+                        let family = desc.family().unwrap_or("Monospace".into()).to_string();
+
+                        let size = match desc.is_size_absolute() {
+                            true => desc.size(),
+                            false => desc.size() / PANGO_SCALE,
+                        };
+
+                        let css = format!(".monospace {{ font: {size}pt \"{family}\" }}");
+
+                        match fs::write("src/view/res/mono_style.css", css) {
+                            Ok(_) => {
+                                AlertDialog::builder()
+                                    .message("Success!")
+                                    .detail("Font changed, restart to apply the changes.")
+                                    .buttons(["Ok"])
+                                    .build()
+                                    .show(Window::NONE);
+                            }
+                            Err(err) => {
+                                AlertDialog::builder()
+                                    .message("ERROR")
+                                    .detail(format!("An error occurred while trying to save changes:\n{err}"))
+                                    .buttons(["Ok"])
+                                    .build()
+                                    .show(Window::NONE);
+                            }
+                        }
                     }
                     Err(err) => {
                         AlertDialog::builder()
                             .message("ERROR")
-                            .detail(
-                                format!("An error occurred while trying to change the font:\n{}",
-                                err.message())
-                            )
+                            .detail(format!("An error occurred while trying to load the selected font:\n{err}"))
                             .buttons(["Ok"])
                             .build()
                             .show(Window::NONE);
                     }
                 }
+
+                /*
+                let desc = font.unwrap_or_default().to_string();
+
+                match Settings::load().set_mono_font(desc.to_string()).save() {
+                    Ok(_) => {
+                        AlertDialog::builder()
+                            .message("Success!")
+                            .detail("Font changed, restart to apply the changes.")
+                            .buttons(["Ok"])
+                            .build()
+                            .show(Window::NONE);
+                    }
+                    Err(err) => {
+                        AlertDialog::builder()
+                            .message("ERROR")
+                            .detail(format!("An error occurred while trying to change the font:\n{err}"))
+                            .buttons(["Ok"])
+                            .build()
+                            .show(Window::NONE);
+                    }
+                }
+
+                 */
             })
         });
     }
@@ -411,7 +457,7 @@ impl AdwApp {
     fn load_css() {
         // Load the CSS file and add it to the provider
         let provider = CssProvider::new();
-        provider.load_from_data(include_str!("../res/style.css"));
+        provider.load_from_data(include_str!("../res/mono_style.css"));
 
         // Add the provider to the default screen
         StyleContext::add_provider_for_display(

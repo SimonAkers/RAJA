@@ -1,7 +1,6 @@
-use std::error::Error;
 use std::fs::read_to_string;
+use std::io::Error;
 use serde::{Serialize, Deserialize};
-use serde_json::Result;
 
 pub const SETTINGS_PATH: &'static str = "./data/settings.json";
 
@@ -23,19 +22,11 @@ impl Settings {
         }
     }
 
-    pub fn save(&self) -> bool {
-        match serde_json::to_string(self) {
-            Ok(settings) => {
-                match std::fs::write(SETTINGS_PATH, settings) {
-                    Ok(_) => true,
-                    Err(err) => {
-                        println!("ERROR SAVING SETTINGS: {}", err.to_string());
-                        false
-                    }
-                }
-            }
-            Err(_) => false
-        }
+    pub fn save(&self) -> Result<String, Error> {
+        let settings = serde_json::to_string(self)?;
+        std::fs::write(SETTINGS_PATH, settings)?;
+
+        Ok("Settings saved!".to_string())
     }
 
     pub fn set_mono_font(&mut self, mono_font: String) -> &mut Settings {

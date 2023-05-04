@@ -29,6 +29,7 @@
                                 <property name="left-margin">8</property>
                                 <property name="right-margin">8</property>
                                 <property name="css-name">sourceview</property>
+                                <property name="monospace">True</property>
 
                                 <property name="show-line-numbers">True</property>
 
