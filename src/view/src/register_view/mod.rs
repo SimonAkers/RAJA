@@ -1,6 +1,7 @@
 mod template;
 
 use std::borrow::{Borrow, BorrowMut};
+use std::ops::Deref;
 use glib::{BoolError, Object, Value};
 use glib::subclass::prelude::ObjectSubclassIsExt;
 use gtk::{Align, Grid, Label, ListBox, ListBoxRow, Orientation, ScrolledWindow, SelectionMode};
@@ -31,16 +32,10 @@ impl RegisterView {
             grid.remove(&row);
         }
 
+        let attrs = self.imp().font_attrs.borrow();
+
         // Populate the grid
         for (i, (name, value)) in reg_file.map().iter().enumerate() {
-            let attrs = AttrList::new();
-            attrs.insert(Attribute::from(
-                AttrFontDesc::new(
-                    // TODO: Make this font dynamic (not hard coded)
-                    &FontDescription::from_string("Cascadia Mono")
-                )
-            ));
-
             let name = Label::builder()
                 .label(name)
                 .halign(Align::End)

@@ -1,7 +1,10 @@
+use std::cell::{Cell, RefCell};
 use glib::subclass::InitializingObject;
 use gtk::{CompositeTemplate, Grid};
+use gtk::pango::{AttrFontDesc, Attribute, AttrList, FontDescription};
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
+use util::settings::Settings;
 
 /**
 The template for [RegisterView][`crate::register_view::RegisterView`] \
@@ -14,6 +17,9 @@ This mostly consists of gtk-rs boilerplate and should not be constructed directl
 pub struct RegisterViewTemplate {
     #[template_child]
     pub grid: TemplateChild<Grid>,
+
+    // An AttrList containing font info
+    pub font_attrs: RefCell<AttrList>,
 }
 
 /// gtk-rs boilerplate implementation
@@ -36,6 +42,20 @@ impl ObjectSubclass for RegisterViewTemplate {
 impl ObjectImpl for RegisterViewTemplate {
     fn constructed(&self) {
         self.parent_constructed();
+
+        // Load the app settings
+        let settings = Settings::load();
+
+        // Create an AttrList of the font
+        let attrs = AttrList::new();
+        attrs.insert(Attribute::from(
+            AttrFontDesc::new(
+                &FontDescription::from_string(settings.mono_font())
+            )
+        ));
+
+        // Store the font
+        self.font_attrs.replace(attrs);
     }
 }
 

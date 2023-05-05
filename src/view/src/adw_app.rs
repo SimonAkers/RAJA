@@ -37,7 +37,6 @@ const APP_ID: &str = "net.shayes.raja";
 pub struct AdwApp {
     app: Application,
     machine: Machine,
-    settings: Settings,
 }
 
 impl AdwApp {
@@ -55,7 +54,6 @@ impl AdwApp {
             Self {
                 app: app.clone(),
                 machine: Default::default(),
-                settings: Settings::load(),
             }
         );
 
@@ -398,6 +396,7 @@ impl AdwApp {
             // Cycle the machine
             let flow = machine.cycle();
 
+            // TODO: URGENT!! Fix this blocking
             window.register_view().update(machine.register_file());
 
             match flow {

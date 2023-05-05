@@ -42,7 +42,7 @@ impl Settings {
 impl Default for Settings {
     fn default() -> Self {
         Self {
-            mono_font: "Monospace 18".to_string(),
+            mono_font: "Monospace 11".to_string(),
         }
     }
 }
