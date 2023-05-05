@@ -198,26 +198,19 @@ impl AdwApp {
 
     fn connect_btn_settings(window: AppWindow) {
         window.btn_settings().connect_clicked(move |_| {
-            FontDialog::new().choose_font(Some(&window), None, Cancellable::NONE, |font| {
+            let window = window.clone();
+
+            FontDialog::new().choose_font(Some(&window.clone()), None, Cancellable::NONE, move |font| {
                 match font {
                     Ok(desc) => {
-                        let family = desc.family().unwrap_or("Monospace".into()).to_string();
-
-                        let size = match desc.is_size_absolute() {
-                            true => desc.size(),
-                            false => desc.size() / PANGO_SCALE,
-                        };
-
-                        let css = format!(".monospace {{ font: {size}pt \"{family}\" }}");
-
-                        match fs::write("src/view/res/mono_style.css", css) {
+                        match Self::change_font(desc) {
                             Ok(_) => {
                                 AlertDialog::builder()
                                     .message("Success!")
                                     .detail("Font changed, restart to apply the changes.")
                                     .buttons(["Ok"])
                                     .build()
-                                    .show(Window::NONE);
+                                    .show(Some(&window));
                             }
                             Err(err) => {
                                 AlertDialog::builder()
@@ -225,43 +218,13 @@ impl AdwApp {
                                     .detail(format!("An error occurred while trying to save changes:\n{err}"))
                                     .buttons(["Ok"])
                                     .build()
-                                    .show(Window::NONE);
+                                    .show(Some(&window));
                             }
                         }
                     }
-                    Err(err) => {
-                        AlertDialog::builder()
-                            .message("ERROR")
-                            .detail(format!("An error occurred while trying to load the selected font:\n{err}"))
-                            .buttons(["Ok"])
-                            .build()
-                            .show(Window::NONE);
-                    }
+
+                    Err(_) => {}
                 }
-
-                /*
-                let desc = font.unwrap_or_default().to_string();
-
-                match Settings::load().set_mono_font(desc.to_string()).save() {
-                    Ok(_) => {
-                        AlertDialog::builder()
-                            .message("Success!")
-                            .detail("Font changed, restart to apply the changes.")
-                            .buttons(["Ok"])
-                            .build()
-                            .show(Window::NONE);
-                    }
-                    Err(err) => {
-                        AlertDialog::builder()
-                            .message("ERROR")
-                            .detail(format!("An error occurred while trying to change the font:\n{err}"))
-                            .buttons(["Ok"])
-                            .build()
-                            .show(Window::NONE);
-                    }
-                }
-
-                 */
             })
         });
     }
@@ -412,6 +375,20 @@ impl AdwApp {
         });
 
         window.main_view().console().add_controller(controller);
+    }
+
+    fn change_font(desc: FontDescription) -> std::io::Result<()> {
+        let family = desc.family().unwrap_or_default().to_string();
+
+        let size = match desc.is_size_absolute() {
+            true => desc.size(),
+            false => desc.size() / PANGO_SCALE,
+        };
+
+        let css = format!(".monospace {{ font: {size}pt \"{family}\" }}");
+
+        fs::write("src/view/res/mono_style.css", css)?;
+        Settings::load().set_mono_font(desc.to_string()).save()
     }
 
     pub fn start_simulator(adw_app: Shared<AdwApp>, window: AppWindow) {

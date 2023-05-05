@@ -22,11 +22,11 @@ impl Settings {
         }
     }
 
-    pub fn save(&self) -> Result<String, Error> {
+    pub fn save(&self) -> std::io::Result<()> {
         let settings = serde_json::to_string(self)?;
         std::fs::write(SETTINGS_PATH, settings)?;
 
-        Ok("Settings saved!".to_string())
+        Ok(())
     }
 
     pub fn set_mono_font(&mut self, mono_font: String) -> &mut Settings {
