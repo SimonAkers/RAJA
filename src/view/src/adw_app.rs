@@ -337,7 +337,7 @@ impl AdwApp {
 
     fn connect_register_view(adw_app: Shared<AdwApp>, window: AppWindow) {
         let machine = &mut adw_app.borrow_mut().machine;
-        window.register_view().update(machine.register_file());
+        window.register_view().init(machine.register_file());
 
         Self::connect_simple_action(window.clone(), "register", move |_, _| {
             let view = window.register_view();

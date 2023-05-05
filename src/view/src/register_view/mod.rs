@@ -2,7 +2,7 @@ mod template;
 
 use std::borrow::{Borrow, BorrowMut};
 use std::ops::Deref;
-use glib::{BoolError, Object, Value};
+use glib::{BoolError, Object, PropertyGet, Value};
 use glib::subclass::prelude::ObjectSubclassIsExt;
 use gtk::{Align, Grid, Label, ListBox, ListBoxRow, Orientation, ScrolledWindow, SelectionMode};
 use gtk::pango::{AttrFontDesc, Attribute, AttrList, AttrString, FontDescription};
@@ -25,6 +25,21 @@ glib::wrapper! {
 
 impl RegisterView {
     pub fn update(&mut self, reg_file: &RegisterFile<u32>) {
+        let mut grid = self.grid();
+
+        // Populate the grid
+        for (i, (name, value)) in reg_file.map().iter().enumerate() {
+            // TODO: Clean this up
+            let label_name = grid.child_at(0, i as i32).unwrap().dynamic_cast::<Label>().unwrap();
+            let label_value = grid.child_at(1, i as i32).unwrap().dynamic_cast::<Label>().unwrap();
+
+            label_name.set_text(name);
+            label_value.set_text(&format!("{value:#010x}"));
+        }
+    }
+
+    /// Must be called at least once before `update()`
+    pub fn init(&mut self, reg_file: &RegisterFile<u32>) {
         let mut grid = self.grid();
 
         // Clear the grid
