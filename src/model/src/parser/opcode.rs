@@ -102,8 +102,11 @@ pub fn opcode_name(input: u32) -> Option<&'static str> {
             0x0c => Some("andi"),
             0x0d => Some("ori"),
             0x0f => Some("lui"),
+            0x20 => Some("lb"),
+            0x28 => Some("sb"),
             0x23 => Some("lw"),
             0x2b => Some("sw"),
+
             _ => None,
         },
     }
@@ -133,6 +136,8 @@ pub fn opcode(input: &str) -> IResult<&str, InstructionParser, VerboseError<&str
                 "j" => Ok(InstructionParser::new(Opcode::Op(0x02), j_type)),
                 "jal" => Ok(InstructionParser::new(Opcode::Op(0x03), j_type)),
                 "jr" => Ok(InstructionParser::new(Opcode::Funct(0x08), jr_type)),
+                "lb" => Ok(InstructionParser::new(Opcode::Op(0x20), load_type)),
+                "sb" => Ok(InstructionParser::new(Opcode::Op(0x28), load_type)),
                 "lw" => Ok(InstructionParser::new(Opcode::Op(0x23), load_type)),
                 "sw" => Ok(InstructionParser::new(Opcode::Op(0x2b), load_type)),
                 "lui" => Ok(InstructionParser::new(Opcode::Op(0x0f), lui)),

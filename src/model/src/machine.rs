@@ -106,7 +106,7 @@ impl Machine {
 
     pub fn resolve_input(&mut self, input: &str) -> Result<()> {
         if let Some(syscall) = &self.pending_syscall {
-            resolve_syscall(&mut self.regs, syscall, input)?;
+            resolve_syscall(&mut self.regs, &mut self.memory, syscall, input)?;
             self.input = None;
         }
         Ok(())
@@ -166,7 +166,7 @@ impl Machine {
 
     Returns ControlFlow::Break if the machine should stop cycling, otherwise ControlFlow::Continue.
      */
-    fn handle_syscall(&mut self, syscall: &Syscall) -> ControlFlow<()> {
+    fn handle_syscall(&mut self, mut syscall: &Syscall) -> ControlFlow<()> {
         // Whether the syscall has been resolved (fully processed)
         let mut resolved = true;
         // Whether to run the callback for the given syscall
@@ -179,12 +179,13 @@ impl Machine {
             Syscall::Quit => (ControlFlow::Break(()), None),
 
             // TODO: Consolidate to some function to make more readable
-            Syscall::ReadInt | Syscall::ReadFloat => {
+            Syscall::ReadInt | Syscall::ReadFloat | Syscall::ReadString => {
                 match &self.input.clone() {
                     None => {
                         // No value is present, so stop cycling and mark syscall as unresolved
                         // Callback should put a value into the machine's input
                         resolved = false;
+                        syscall = &Syscall::ReadAny;
                         (ControlFlow::Break(()), None)
                     }
 
@@ -214,9 +215,15 @@ impl Machine {
         }
 
         if run_callback {
+            match self.callbacks.get_mut(&SyscallDiscriminants::from(syscall)) {
+                None => (),
+                Some(mut callback) => callback.call(info),
+            }
+
+            /*
             match syscall {
                 // Execute read callbacks
-                Syscall::ReadInt | Syscall::ReadFloat => {
+                Syscall::ReadInt | Syscall::ReadFloat | Syscall::ReadString => {
                     match self.callbacks.get_mut(&SyscallDiscriminants::ReadAny) {
                         None => (),
                         Some(mut callback) => callback.call(info),
@@ -231,6 +238,8 @@ impl Machine {
                     }
                 }
             }
+
+             */
         }
 
         flow

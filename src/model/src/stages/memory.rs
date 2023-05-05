@@ -37,7 +37,7 @@ pub fn memory(pc: &mut u32, memory: &mut Memory, input: ExMem) -> Result<MemWb> 
         println!("writing: {} to {}", input.write_data, input.alu_result);
     }
     if input.read {
-        read_data = memory.get(input.alu_result).context("In memory stage")?;
+        read_data = memory.get(input.alu_result)?;//.context("In memory stage")?;
     }
 
     if input.branch {

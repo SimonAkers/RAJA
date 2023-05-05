@@ -99,6 +99,19 @@ pub fn decode(reg_file: &mut RegisterFile<u32>, input: IfId) -> Result<IdEx> {
             jump = false;
             alu_op = OP_R;
         }
+        0x20 => {
+            // LB instruction
+            reg_dst = false;
+            alu_src = true;
+            mem_to_reg = true;
+            reg_write = true;
+            mem_read = true;
+            mem_write = false;
+            branch = false;
+            branch_not = false;
+            jump = false;
+            alu_op = OP_ADD;
+        }
         0x23 => {
             // LW instruction
             reg_dst = false;
