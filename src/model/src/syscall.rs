@@ -44,7 +44,7 @@ pub fn resolve_syscall(reg_file: &mut RegisterFile<u32>, mem: &mut Memory, sysca
 
             for i in 0..buf_size {
                 let byte = buffer.get(i as usize).unwrap_or(&0_u8).clone();
-                mem.set_byte(address + (i * 8), byte)?;
+                mem.set_byte(address + i, byte)?;
             }
         },
 

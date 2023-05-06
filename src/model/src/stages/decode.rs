@@ -1,7 +1,4 @@
-use crate::{
-    stages::execute::{op_ctrl::*, IdEx},
-    Register, RegisterFile,
-};
+use crate::{stages::execute::{op_ctrl::*, IdEx}, Register, RegisterFile, Align};
 use anyhow::{bail, Result};
 use crate::Register::ZERO;
 
@@ -82,6 +79,7 @@ pub fn decode(reg_file: &mut RegisterFile<u32>, input: IfId) -> Result<IdEx> {
     let branch_not; // enable branch not equal
     let jump; // enable jumping
     let mut syscall = false;
+    let mut word_align = true;
 
     // This is where instructions are defined
     match op {
@@ -107,6 +105,21 @@ pub fn decode(reg_file: &mut RegisterFile<u32>, input: IfId) -> Result<IdEx> {
             reg_write = true;
             mem_read = true;
             mem_write = false;
+            word_align = false;
+            branch = false;
+            branch_not = false;
+            jump = false;
+            alu_op = OP_ADD;
+        }
+        0x28 => {
+            // SB instruction
+            reg_dst = false;
+            alu_src = true;
+            mem_to_reg = false;
+            reg_write = false;
+            mem_read = false;
+            mem_write = true;
+            word_align = false;
             branch = false;
             branch_not = false;
             jump = false;
@@ -252,6 +265,7 @@ pub fn decode(reg_file: &mut RegisterFile<u32>, input: IfId) -> Result<IdEx> {
         rd,
         mem_write,
         mem_read,
+        word_align,
         mem_to_reg,
         reg_write,
         branch,
