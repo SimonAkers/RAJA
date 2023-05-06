@@ -25,6 +25,7 @@ pub struct IdEx {
     pub pc: u32,
     pub mem_write: bool,
     pub mem_read: bool,
+    pub word_align: bool,
     pub mem_to_reg: bool,
     pub reg_write: bool,
     pub rs: Register,
@@ -61,6 +62,8 @@ pub fn execute(input: IdEx, fwd_unit: ForwardingUnit) -> Result<ExMem> {
                 0x0c => (false, false, ALU_ADD), // syscall
                 0x06 => (false, false, ALU_SRL), // srlv
                 0x26 => (false, false, ALU_XOR), // xor
+                0x1c => (false, false, ALU_MUL), // mul
+
                 0x11 => {
                     // add.s
                     use_shamt = true;
@@ -138,6 +141,7 @@ pub fn execute(input: IdEx, fwd_unit: ForwardingUnit) -> Result<ExMem> {
         write_data: fwd_rt,
         write: input.mem_write,
         read: input.mem_read,
+        word_align: input.word_align,
         mem_to_reg: input.mem_to_reg,
         write_register: if input.reg_dst { input.rd } else { input.rt },
         reg_write: input.reg_write,
@@ -164,6 +168,7 @@ pub mod alu_signals {
     pub const ALU_UPPER: u8 = 7;
     pub const ALU_XOR: u8 = 8;
     pub const ALU_ADD_S: u8 = 9;
+    pub const ALU_MUL: u8 = 10;
 }
 use alu_signals::*;
 
@@ -185,6 +190,8 @@ pub fn alu(a: u32, b: u32, op: (bool, bool, u8)) -> Result<u32> {
         ALU_ADD => arith_a.overflowing_add(arith_b).0,
         ALU_SLL => a.overflowing_shl(b).0,
         ALU_XOR => a ^ b,
+
+        ALU_MUL => a * b,
 
         ALU_ADD_S => (f32::from_bits(a) + f32::from_bits(b)).to_bits(),
 

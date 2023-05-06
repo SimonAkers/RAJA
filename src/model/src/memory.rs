@@ -2,6 +2,20 @@ use std::collections::HashMap;
 
 use anyhow::{bail, Result};
 
+#[derive(Clone, Copy, Default)]
+pub enum Align {
+    Byte = 1,
+    Half = 2,
+    #[default]
+    Word = 4,
+}
+
+impl Align {
+    pub fn value(&self) -> u32 {
+        *self as u32
+    }
+}
+
 /// Handles memory
 ///
 /// Memory is allocated in pages of words

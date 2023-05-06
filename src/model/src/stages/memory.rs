@@ -1,3 +1,4 @@
+use std::fs::read;
 use super::writeback::MemWb;
 use crate::{Memory, Register};
 use anyhow::{Context, Result};
@@ -14,6 +15,7 @@ pub struct ExMem {
     pub write_data: u32,
     pub write: bool,
     pub read: bool,
+    pub word_align: bool,
     pub branch_pc: u32,
     pub jump_pc: u32,
     // forwarded data
@@ -33,11 +35,19 @@ pub fn memory(pc: &mut u32, memory: &mut Memory, input: ExMem) -> Result<MemWb> 
 
     // handle memory accesses
     if input.write {
-        *memory.get_mut(input.alu_result)? = input.write_data;
+        if input.word_align {
+            *memory.get_mut(input.alu_result)? = input.write_data;
+        } else {
+            memory.set_byte(input.alu_result, input.write_data as u8)?;
+        }
         println!("writing: {} to {}", input.write_data, input.alu_result);
     }
     if input.read {
-        read_data = memory.get(input.alu_result)?;//.context("In memory stage")?;
+        if input.word_align {
+            read_data = memory.get(input.alu_result)?;//.context("In memory stage")?;
+        } else {
+            read_data = memory.get_byte(input.alu_result)? as u32;
+        }
     }
 
     if input.branch {
