@@ -83,7 +83,7 @@ pub fn decode(reg_file: &mut RegisterFile<u32>, input: IfId) -> Result<IdEx> {
 
     // This is where instructions are defined
     match op {
-        0 | 1 => {
+        0 | 1 | 0x1c => {
             syscall = funct == 0x0c;
             // R-type instruction
             reg_dst = true;

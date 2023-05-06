@@ -106,6 +106,7 @@ pub fn opcode_name(input: u32) -> Option<&'static str> {
             0x28 => Some("sb"),
             0x23 => Some("lw"),
             0x2b => Some("sw"),
+            0x1c => Some("mul"),
 
             _ => None,
         },
@@ -163,6 +164,8 @@ pub fn opcode(input: &str) -> IResult<&str, InstructionParser, VerboseError<&str
                 ".asciiz" => Ok(InstructionParser::pseudo(asciiz_lit)),
                 ".text" => Ok(InstructionParser::pseudo(|i| segment(i, Segment::Text))),
                 ".data" => Ok(InstructionParser::pseudo(|i| segment(i, Segment::Data))),
+
+                "mul" => Ok(InstructionParser::new(Opcode::Op(0x1c), r_type)),
 
                 "add.s" => Ok(InstructionParser::new(Opcode::Funct(0x11), r_type)),
 
