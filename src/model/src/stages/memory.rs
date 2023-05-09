@@ -40,7 +40,7 @@ pub fn memory(pc: &mut u32, memory: &mut Memory, input: ExMem) -> Result<MemWb> 
         } else {
             memory.set_byte(input.alu_result, input.write_data as u8)?;
         }
-        println!("writing: {} to {}", input.write_data, input.alu_result);
+        //println!("writing: {} to {:#x}", input.write_data, input.alu_result);
     }
     if input.read {
         if input.word_align {
@@ -48,6 +48,7 @@ pub fn memory(pc: &mut u32, memory: &mut Memory, input: ExMem) -> Result<MemWb> 
         } else {
             read_data = memory.get_byte(input.alu_result)? as u32;
         }
+        //println!("reading: {} from {:#x}", input.write_data, input.alu_result);
     }
 
     if input.branch {

@@ -71,7 +71,7 @@ pub fn handle_syscall(reg_file: &mut RegisterFile<u32>, mem: &mut Memory) -> Res
             // print string
             let mut ptr = reg_file.value_or_default(Register::A0);
 
-            println!("SYSCALL 4 {ptr}");
+            //println!("SYSCALL 4 {ptr}");
             // to make this unicode aware we need to bundle it into a buffer first
             let mut buffer = vec![];
             let mut b = mem.get_byte(ptr)?;

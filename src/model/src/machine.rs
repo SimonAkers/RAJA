@@ -275,7 +275,15 @@ pub fn assembler(mut script: String) -> Result<(Memory, LabelTable)> {
             Line::Instruction(ins) => {
                 for word in ins {
                     let (bin, _) = word.asm(&labels, *pc);
-                    //println!("{pc:X} {bin:X}\t{word:?}");
+
+                    /* DEBUG
+                    let mut s = String::new();
+                    for byte in bin.clone() {
+                        s.push_str(&format!("{:08b} ", byte));
+                    }
+                    println!("{pc:x} {s}\t{word:?}");
+                     */
+
                     for byte in bin {
                         memory.set_byte(*pc, byte)?;
                         *pc += 1;

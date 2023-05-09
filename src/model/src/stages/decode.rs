@@ -21,8 +21,6 @@ pub fn decode(reg_file: &mut RegisterFile<u32>, input: IfId) -> Result<IdEx> {
     let j_mask = 0b00000011111111111111111111111111;
     let imm_mask = fn_mask | sh_mask | rd_mask;
 
-    //println!("Instruction: {:032b}", input.instruction);
-
     // Use masks to get the field values
     let mut rd = (input.instruction & rd_mask) >> 11;
     let mut rt = (input.instruction & rt_mask) >> 16;
@@ -32,6 +30,14 @@ pub fn decode(reg_file: &mut RegisterFile<u32>, input: IfId) -> Result<IdEx> {
     let op = (input.instruction & op_mask) >> 26;
     let mut imm = input.instruction & imm_mask;
     let j_imm = input.instruction & j_mask;
+
+    /*
+    if op == 0x2b {
+        println!("Instruction: {:032b}", input.instruction);
+        println!("Immediate: {imm:016b}");
+    }
+
+     */
 
     // sign extend the imm value
     imm = ((imm << 16) as i32 >> 16) as u32;
@@ -63,7 +69,6 @@ pub fn decode(reg_file: &mut RegisterFile<u32>, input: IfId) -> Result<IdEx> {
     let mut branch; // enable branching
     let mut branch_not; // enable branch not equal
     let mut jump; // enable jumping
-    let mut link = false; // whether to link for return
     let mut syscall = false;
     let mut word_align = true;
 
@@ -240,7 +245,6 @@ pub fn decode(reg_file: &mut RegisterFile<u32>, input: IfId) -> Result<IdEx> {
                 rd = Register::RA;
                 read_rs = input.pc;
                 read_rt = 4;
-                link = true;
             }
         }
         _ => {
@@ -283,7 +287,6 @@ pub fn decode(reg_file: &mut RegisterFile<u32>, input: IfId) -> Result<IdEx> {
         branch,
         branch_not,
         jump,
-        link,
         pc: input.pc,
         syscall,
         instruction: input.instruction,

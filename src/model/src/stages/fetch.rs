@@ -9,6 +9,7 @@ pub fn fetch(pc: &mut u32, mem: &mut Memory) -> Result<IfId> {
     // fetch instruction and increment pc
     let instruction = mem.get(*pc)?;//.context("In instruction fetch stage")?;
     *pc += 4;
+
     Ok(IfId {
         instruction,
         pc: *pc - 4,

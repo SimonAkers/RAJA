@@ -22,7 +22,6 @@ pub struct IdEx {
     pub branch: bool,
     pub branch_not: bool,
     pub jump: bool,
-    pub link: bool,
     pub pc: u32,
     pub mem_write: bool,
     pub mem_read: bool,
@@ -104,22 +103,20 @@ pub fn execute(input: IdEx, fwd_unit: ForwardingUnit) -> Result<ExMem> {
     let mut arg1 = input.reg_1;
     let mut arg2 = input.reg_2;
 
-    if !input.link {
-        // check forwarding unit on first register
-        if fwd_unit.mem_wb.0 && input.rs == fwd_unit.mem_wb.1 {
-            arg1 = fwd_unit.mem_wb.2;
-        }
-        if fwd_unit.ex_mem.0 && input.rs == fwd_unit.ex_mem.1 {
-            arg1 = fwd_unit.ex_mem.2;
-        }
+    // check forwarding unit on first register
+    if fwd_unit.mem_wb.0 && input.rs == fwd_unit.mem_wb.1 {
+        arg1 = fwd_unit.mem_wb.2;
+    }
+    if fwd_unit.ex_mem.0 && input.rs == fwd_unit.ex_mem.1 {
+        arg1 = fwd_unit.ex_mem.2;
+    }
 
-        // check forwarding unit on second register
-        if fwd_unit.mem_wb.0 && input.rt == fwd_unit.mem_wb.1 {
-            arg2 = fwd_unit.mem_wb.2;
-        }
-        if fwd_unit.ex_mem.0 && input.rt == fwd_unit.ex_mem.1 {
-            arg2 = fwd_unit.ex_mem.2;
-        }
+    // check forwarding unit on second register
+    if fwd_unit.mem_wb.0 && input.rt == fwd_unit.mem_wb.1 {
+        arg2 = fwd_unit.mem_wb.2;
+    }
+    if fwd_unit.ex_mem.0 && input.rt == fwd_unit.ex_mem.1 {
+        arg2 = fwd_unit.ex_mem.2;
     }
 
     let fwd_rt = arg2;
@@ -152,7 +149,7 @@ pub fn execute(input: IdEx, fwd_unit: ForwardingUnit) -> Result<ExMem> {
         branch_not: input.branch_not,
         jump: input.jump,
         jump_pc: input.imm << 2,
-        branch_pc: input.pc.wrapping_add((input.imm << 2) as i16 as u32), // casts are for sign extension
+        branch_pc: input.pc.wrapping_add((input.imm << 2) as i16 as u32) + 4, // casts are for sign extension
         syscall,
         instruction: input.instruction,
         pc: input.pc,
