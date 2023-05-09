@@ -20,7 +20,7 @@ pub fn _single_cycle(pc: &mut u32, regs: &mut RegisterFile<u32>, mem: &mut Memor
 
     let if_id = stages::fetch(pc, mem);
     let id_ex = stages::decode(regs, if_id.unwrap());
-    let ex_mem = stages::execute(id_ex.unwrap(), fwd_unit);
+    let ex_mem = stages::execute(regs, id_ex.unwrap(), fwd_unit);
     let mem_wb = stages::memory(pc, mem, ex_mem.unwrap()).unwrap();
     let pipe_out = stages::writeback(regs, mem_wb);
 
@@ -98,7 +98,7 @@ pub fn pipe_cycle(
 
     let mem_wb = stages::memory(pc, mem, state.ex_mem.clone())?;
 
-    let ex_mem = stages::execute(state.id_ex.clone(), fwd_unit)?;
+    let ex_mem = stages::execute(regs, state.id_ex.clone(), fwd_unit)?;
 
     // stall in case of syscall
     // TODO: Maybe not the best solution but ¯\_(ツ)_/¯

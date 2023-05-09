@@ -1,6 +1,6 @@
 use super::memory::ExMem;
 use crate::pipeline::ForwardingUnit;
-use crate::Register;
+use crate::{Register, RegisterFile};
 use anyhow::{bail, Result};
 
 /// Struct representing this stages input
@@ -46,7 +46,7 @@ pub mod op_ctrl {
 use op_ctrl::*;
 
 /// Runs execute stage
-pub fn execute(input: IdEx, fwd_unit: ForwardingUnit) -> Result<ExMem> {
+pub fn execute(reg_file: &mut RegisterFile<u32>, input: IdEx, fwd_unit: ForwardingUnit) -> Result<ExMem> {
     let syscall = input.syscall;
     let mut use_shamt = false;
     // compute ALU control lines
@@ -65,6 +65,8 @@ pub fn execute(input: IdEx, fwd_unit: ForwardingUnit) -> Result<ExMem> {
                 0x26 => (false, false, ALU_XOR), // xor
                 0x1c => (false, false, ALU_MUL), // mul
                 0x1a => (false, false, ALU_DIV), // div
+
+                0x10 | 0x12 => (false, false, ALU_ADD), // mflo & mfhi
 
                 0x11 => {
                     // add.s

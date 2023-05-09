@@ -123,6 +123,22 @@ pub fn r_no_dst(input: &str, op: Opcode) -> ParserOutput {
     ))
 }
 
+/// Parses mfhi and mflo instructions
+/// `<OP> <rd>`
+pub fn hilo(input: &str, op: Opcode) -> ParserOutput {
+    let (input, rd) = context("Destination Register", parser::register)(input)?;
+    Ok((
+        input,
+        Line::Instruction(vec![Instruction::R {
+            op,
+            rd,
+            rs: if op.value() == 0x10 { Register::HI } else { Register::LO },
+            rt: ZERO,
+            shamt: 0,
+        }]),
+    ))
+}
+
 /// Parses shift style instructions
 /// `<OP> <rd>, <rs>, shamt`
 pub fn shift_type(input: &str, op: Opcode) -> ParserOutput {
