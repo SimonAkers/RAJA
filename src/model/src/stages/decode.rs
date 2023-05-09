@@ -240,6 +240,7 @@ pub fn decode(reg_file: &mut RegisterFile<u32>, input: IfId) -> Result<IdEx> {
                 rd = Register::RA;
                 read_rs = input.pc;
                 read_rt = 4;
+                link = true;
             }
         }
         _ => {
@@ -259,7 +260,7 @@ pub fn decode(reg_file: &mut RegisterFile<u32>, input: IfId) -> Result<IdEx> {
         branch_not = false;
         jump = true;
         alu_op = OP_ADD;
-        imm = read_rs;
+        imm = read_rs >> 2;
     }
 
     Ok(IdEx {
