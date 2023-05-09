@@ -1,4 +1,4 @@
-use crate::{stages::execute::{op_ctrl::*, IdEx}, Register, RegisterFile, Align};
+use crate::{stages::execute::{op_ctrl::*, IdEx}, Register, RegisterFile, Align, opcode};
 use anyhow::{bail, Result};
 use crate::Register::ZERO;
 
@@ -54,15 +54,16 @@ pub fn decode(reg_file: &mut RegisterFile<u32>, input: IfId) -> Result<IdEx> {
 
     // handle controls
     let mut reg_dst; // determines destination register (0: rt, 1: rd)
-    let alu_src; // if enabled use immediate value as alu arg2
-    let mem_to_reg; // if enabled dest register gets a memory location otheriwse gets alu result
-    let reg_write; // if disabled don't write to dest register
-    let mem_write; // if enabled write to alu result
-    let mem_read; // if enabled read from alu result
-    let alu_op; // alu operation
-    let branch; // enable branching
-    let branch_not; // enable branch not equal
-    let jump; // enable jumping
+    let mut alu_src; // if enabled use immediate value as alu arg2
+    let mut mem_to_reg; // if enabled dest register gets a memory location otheriwse gets alu result
+    let mut reg_write; // if disabled don't write to dest register
+    let mut mem_write; // if enabled write to alu result
+    let mut mem_read; // if enabled read from alu result
+    let mut alu_op; // alu operation
+    let mut branch; // enable branching
+    let mut branch_not; // enable branch not equal
+    let mut jump; // enable jumping
+    let mut link = false; // whether to link for return
     let mut syscall = false;
     let mut word_align = true;
 
@@ -233,20 +234,32 @@ pub fn decode(reg_file: &mut RegisterFile<u32>, input: IfId) -> Result<IdEx> {
 
             if op == 0x03 {
                 reg_dst = true;
+                reg_write = true;
                 rs = ZERO;
                 rt = ZERO;
                 rd = Register::RA;
                 read_rs = input.pc;
                 read_rt = 4;
-
-                println!("{}", input.pc);
-
-                println!("JAL");
             }
         }
         _ => {
             bail!("Unrecognized instruction opcode 0x{:x}", op)
         }
+    }
+
+    if op == 0 && funct == 0x8 {
+        // JR instruction
+        reg_dst = false;
+        alu_src = false;
+        mem_to_reg = false;
+        reg_write = false;
+        mem_read = false;
+        mem_write = false;
+        branch = false;
+        branch_not = false;
+        jump = true;
+        alu_op = OP_ADD;
+        imm = read_rs;
     }
 
     Ok(IdEx {
@@ -269,6 +282,7 @@ pub fn decode(reg_file: &mut RegisterFile<u32>, input: IfId) -> Result<IdEx> {
         branch,
         branch_not,
         jump,
+        link,
         pc: input.pc,
         syscall,
         instruction: input.instruction,
