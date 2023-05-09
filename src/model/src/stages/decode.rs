@@ -36,11 +36,6 @@ pub fn decode(reg_file: &mut RegisterFile<u32>, input: IfId) -> Result<IdEx> {
     // sign extend the imm value
     imm = ((imm << 16) as i32 >> 16) as u32;
 
-    // DEBUG
-    if funct == 0x20 || funct == 0x11 {
-        println!("{rd} {rs} {rt}");
-    }
-
     // select float registers if floating point funct
     if funct == 0x11 {
         rd += 32;
@@ -48,27 +43,17 @@ pub fn decode(reg_file: &mut RegisterFile<u32>, input: IfId) -> Result<IdEx> {
         rs += 32;
     }
 
-    // DEBUG
-    if funct == 0x20 || funct == 0x11 {
-        println!("{rd} {rs} {rt}");
-    }
-
     // make registers typed
-    let rs: Register = rs.into();
-    let rt: Register = rt.into();
-    let rd: Register = rd.into();
-
-    // DEBUG
-    if funct == 0x20 || funct == 0x11 {
-        println!("{rd} {rs} {rt}");
-    }
+    let mut rs: Register = rs.into();
+    let mut rt: Register = rt.into();
+    let mut rd: Register = rd.into();
 
     // read rs and rt
-    let read_rs = reg_file.value_or_default(rs);
-    let read_rt = reg_file.value_or_default(rt);
+    let mut read_rs = reg_file.value_or_default(rs);
+    let mut read_rt = reg_file.value_or_default(rt);
 
     // handle controls
-    let reg_dst; // determines destination register (0: rt, 1: rd)
+    let mut reg_dst; // determines destination register (0: rt, 1: rd)
     let alu_src; // if enabled use immediate value as alu arg2
     let mem_to_reg; // if enabled dest register gets a memory location otheriwse gets alu result
     let reg_write; // if disabled don't write to dest register
@@ -83,7 +68,7 @@ pub fn decode(reg_file: &mut RegisterFile<u32>, input: IfId) -> Result<IdEx> {
 
     // This is where instructions are defined
     match op {
-        0 | 1 | 0x1c => {
+        0 | 1 | 0x1c | 0x2a => {
             syscall = funct == 0x0c;
             // R-type instruction
             reg_dst = true;
@@ -232,7 +217,7 @@ pub fn decode(reg_file: &mut RegisterFile<u32>, input: IfId) -> Result<IdEx> {
             jump = false;
             alu_op = OP_SUB;
         }
-        0x02 => {
+        0x02 | 0x03 => {
             // J instruction
             reg_dst = false;
             alu_src = false;
@@ -245,6 +230,19 @@ pub fn decode(reg_file: &mut RegisterFile<u32>, input: IfId) -> Result<IdEx> {
             jump = true;
             alu_op = OP_ADD;
             imm = j_imm;
+
+            if op == 0x03 {
+                reg_dst = true;
+                rs = ZERO;
+                rt = ZERO;
+                rd = Register::RA;
+                read_rs = input.pc;
+                read_rt = 4;
+
+                println!("{}", input.pc);
+
+                println!("JAL");
+            }
         }
         _ => {
             bail!("Unrecognized instruction opcode 0x{:x}", op)

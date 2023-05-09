@@ -134,15 +134,17 @@ pub fn opcode(input: &str) -> IResult<&str, InstructionParser, VerboseError<&str
                 "bge" => Ok(InstructionParser::pseudo(|i| multi_branch(i, false, true))),
                 "div" => Ok(InstructionParser::new(Opcode::Funct(0x1a), NO_PARSER)),
                 "divu" => Ok(InstructionParser::new(Opcode::Funct(0x1b), NO_PARSER)),
+
                 "j" => Ok(InstructionParser::new(Opcode::Op(0x02), j_type)),
                 "jal" => Ok(InstructionParser::new(Opcode::Op(0x03), j_type)),
                 "jr" => Ok(InstructionParser::new(Opcode::Funct(0x08), jr_type)),
+
                 "lb" => Ok(InstructionParser::new(Opcode::Op(0x20), load_type)),
                 "sb" => Ok(InstructionParser::new(Opcode::Op(0x28), load_type)),
                 "lw" => Ok(InstructionParser::new(Opcode::Op(0x23), load_type)),
                 "sw" => Ok(InstructionParser::new(Opcode::Op(0x2b), load_type)),
                 "lui" => Ok(InstructionParser::new(Opcode::Op(0x0f), lui)),
-                "slt" => Ok(InstructionParser::new(Opcode::Funct(0x2a), NO_PARSER)),
+                "slt" => Ok(InstructionParser::new(Opcode::Funct(0x2a), r_type)),
                 "ori" => Ok(InstructionParser::new(Opcode::Op(0x0d), i_type)),
                 "or" => Ok(InstructionParser::new(Opcode::Funct(0x25), r_type)),
                 "xor" => Ok(InstructionParser::new(Opcode::Funct(0x26), r_type)),
