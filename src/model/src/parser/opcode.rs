@@ -8,7 +8,7 @@ use super::model::{Line, Opcode, Segment};
 use nom::combinator::fail;
 use nom::error::{context, VerboseError};
 use nom::{bytes::complete::take_till, combinator::map_res, IResult};
-use crate::parser::instruction::mov_s_ins;
+use crate::parser::instruction::{mov_s_ins, r_no_dst};
 
 type InsParser = fn(&str, Opcode) -> IResult<&str, Line, VerboseError<&str>>;
 
@@ -132,7 +132,7 @@ pub fn opcode(input: &str) -> IResult<&str, InstructionParser, VerboseError<&str
                 "bgt" => Ok(InstructionParser::pseudo(|i| multi_branch(i, false, false))),
                 "ble" => Ok(InstructionParser::pseudo(|i| multi_branch(i, true, true))),
                 "bge" => Ok(InstructionParser::pseudo(|i| multi_branch(i, false, true))),
-                "div" => Ok(InstructionParser::new(Opcode::Funct(0x1a), NO_PARSER)),
+                "div" => Ok(InstructionParser::new(Opcode::Funct(0x1a), r_no_dst)),
                 "divu" => Ok(InstructionParser::new(Opcode::Funct(0x1b), NO_PARSER)),
 
                 "j" => Ok(InstructionParser::new(Opcode::Op(0x02), j_type)),

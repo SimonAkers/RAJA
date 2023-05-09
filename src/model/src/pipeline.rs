@@ -14,8 +14,8 @@ use anyhow::Result;
 pub fn _single_cycle(pc: &mut u32, regs: &mut RegisterFile<u32>, mem: &mut Memory) -> Option<Syscall> {
     // should never forward
     let fwd_unit = ForwardingUnit {
-        ex_mem: (false, Register::ZERO, 0),
-        mem_wb: (false, Register::ZERO, 0),
+        ex_mem: (false, Register::ZERO, (0, 0)),
+        mem_wb: (false, Register::ZERO, (0, 0)),
     };
 
     let if_id = stages::fetch(pc, mem);
@@ -46,8 +46,8 @@ pub struct PipelineState {
 
 #[derive(Debug, Clone, Copy)]
 pub struct ForwardingUnit {
-    pub ex_mem: (bool, Register, u32),
-    pub mem_wb: (bool, Register, u32),
+    pub ex_mem: (bool, Register, (u32, u32)),
+    pub mem_wb: (bool, Register, (u32, u32)),
 }
 
 /// Steps the machine forward in a pipelined manner.
@@ -71,7 +71,7 @@ pub fn pipe_cycle(
             state.mem_wb.reg_write,
             state.mem_wb.write_register,
             if state.mem_wb.mem_to_reg {
-                state.mem_wb.mem_data
+                (state.mem_wb.mem_data, 0)
             } else {
                 state.mem_wb.alu_data
             },

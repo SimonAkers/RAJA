@@ -7,7 +7,7 @@ use anyhow::{Context, Result};
 #[derive(Debug, Default, Clone)]
 pub struct ExMem {
     // stage data
-    pub alu_result: u32,
+    pub alu_result: (u32, u32),
     pub zero: bool,
     pub branch: bool,
     pub branch_not: bool,
@@ -22,6 +22,7 @@ pub struct ExMem {
     pub mem_to_reg: bool,
     pub write_register: Register,
     pub reg_write: bool,
+    pub use_hilo: bool,
     pub syscall: bool,
 
     // demo thing
@@ -36,17 +37,17 @@ pub fn memory(pc: &mut u32, memory: &mut Memory, input: ExMem) -> Result<MemWb> 
     // handle memory accesses
     if input.write {
         if input.word_align {
-            *memory.get_mut(input.alu_result)? = input.write_data;
+            *memory.get_mut(input.alu_result.0)? = input.write_data;
         } else {
-            memory.set_byte(input.alu_result, input.write_data as u8)?;
+            memory.set_byte(input.alu_result.0, input.write_data as u8)?;
         }
         //println!("writing: {} to {:#x}", input.write_data, input.alu_result);
     }
     if input.read {
         if input.word_align {
-            read_data = memory.get(input.alu_result)?;//.context("In memory stage")?;
+            read_data = memory.get(input.alu_result.0)?;//.context("In memory stage")?;
         } else {
-            read_data = memory.get_byte(input.alu_result)? as u32;
+            read_data = memory.get_byte(input.alu_result.0)? as u32;
         }
         //println!("reading: {} from {:#x}", input.write_data, input.alu_result);
     }
@@ -68,6 +69,7 @@ pub fn memory(pc: &mut u32, memory: &mut Memory, input: ExMem) -> Result<MemWb> 
         alu_data: input.alu_result,
         write_register: input.write_register,
         reg_write: input.reg_write,
+        use_hilo: input.use_hilo,
         syscall: input.syscall,
         instruction: input.instruction,
         pc: input.pc,

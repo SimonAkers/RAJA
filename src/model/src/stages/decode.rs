@@ -63,6 +63,7 @@ pub fn decode(reg_file: &mut RegisterFile<u32>, input: IfId) -> Result<IdEx> {
     let mut alu_src; // if enabled use immediate value as alu arg2
     let mut mem_to_reg; // if enabled dest register gets a memory location otheriwse gets alu result
     let mut reg_write; // if disabled don't write to dest register
+    let mut use_hilo = false; // if enabled write alu output to hilo regs
     let mut mem_write; // if enabled write to alu result
     let mut mem_read; // if enabled read from alu result
     let mut alu_op; // alu operation
@@ -87,6 +88,12 @@ pub fn decode(reg_file: &mut RegisterFile<u32>, input: IfId) -> Result<IdEx> {
             branch_not = false;
             jump = false;
             alu_op = OP_R;
+
+            // div
+            if op == 0 && funct == 0x1a {
+                reg_write = false;
+                use_hilo = true;
+            }
         }
         0x20 => {
             // LB instruction
@@ -284,6 +291,7 @@ pub fn decode(reg_file: &mut RegisterFile<u32>, input: IfId) -> Result<IdEx> {
         word_align,
         mem_to_reg,
         reg_write,
+        use_hilo,
         branch,
         branch_not,
         jump,

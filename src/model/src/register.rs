@@ -74,8 +74,8 @@ pub enum Register {
     F30 = 62,
     F31 = 63,
 
-    HI = 64,
-    LO = 65,
+    LO = 64,
+    HI = 65,
 }
 
 impl Register {

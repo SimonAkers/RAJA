@@ -9,6 +9,7 @@ use nom::{
 };
 
 use crate::parser::{self, model::Opcode};
+use crate::Register;
 
 use crate::Register::{AT, ZERO};
 
@@ -98,6 +99,23 @@ pub fn r_type(input: &str, op: Opcode) -> ParserOutput {
         Line::Instruction(vec![Instruction::R {
             op,
             rd,
+            rs,
+            rt,
+            shamt: 0,
+        }]),
+    ))
+}
+
+/// Parses R-type instructions with no destination register using the format
+/// `<OP> <rs>, <rt>`
+pub fn r_no_dst(input: &str, op: Opcode) -> ParserOutput {
+    let (input, rs) = context("Source Register", parser::register)(input)?;
+    let (input, rt) = context("Target Register", preceded(separator, parser::register))(input)?;
+    Ok((
+        input,
+        Line::Instruction(vec![Instruction::R {
+            op,
+            rd: ZERO,
             rs,
             rt,
             shamt: 0,
