@@ -163,7 +163,7 @@
 
         <child>
             <object class="GtkPaned">
-                <property name="position">800</property>
+                <property name="position">99999</property>
 
                 <property name="shrink-start-child">False</property>
                 <property name="shrink-end-child">False</property>
@@ -172,14 +172,14 @@
                     <object class="MainView" id="main_view">
                         <property name="hexpand">true</property>
                         <property name="vexpand">true</property>
-                        <property name="width-request">200</property>
+                        <property name="width-request">300</property>
                     </object>
                 </property>
 
                 <property name="end-child" >
                     <object class="RegisterView" id="register_view">
                         <property name="visible">false</property>
-                        <property name="width-request">200</property>
+                        <property name="width-request">300</property>
                     </object>
                 </property>
 
