@@ -64,6 +64,9 @@ impl ObjectImpl for GtkConsoleTemplate {
         // Create a tag used to highlight error text in red
         buffer.create_tag(Some(TAG_ERROR_TEXT), &[("foreground", &"#FF3535")]);
 
+        // Create a tag used to highlight success text
+        buffer.create_tag(Some(TAG_SUCCESS_TEXT), &[("foreground", &"#6EDB71")]);
+
         // Create a mark used to determine the beginning of user input
         buffer.create_mark(Some(MARK_START_USER_INPUT), &buffer.start_iter(), true);
 

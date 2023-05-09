@@ -56,6 +56,21 @@ impl GtkConsole {
     pub fn user_input_started(&self) -> bool {
         self.imp().user_input_started.get()
     }
+
+    fn print_with_tag(&self, tag: &str, msg: &str) {
+        let buffer = self.buffer();
+
+        // Print the message
+        self.print(msg);
+
+        // Get the bounds of the message we just printed
+        // (this must be done after modifying the buffer)
+        let start_iter = buffer.iter_at_offset(buffer.char_count() - msg.len() as i32);
+        let end_iter = buffer.end_iter();
+
+        // Apply a tag to style error text (color it)
+        buffer.apply_tag_by_name(tag, &start_iter, &end_iter);
+    }
 }
 
 /// See [Console][`crate::traits::Console`] for docs.
@@ -68,18 +83,13 @@ impl Console for GtkConsole {
     }
 
     fn print_err(&self, msg: &str) {
-        let buffer = self.buffer();
+        self.print("\n");
+        self.print_with_tag(TAG_ERROR_TEXT, msg);
+    }
 
-        // Print the message
-        self.print(msg);
-
-        // Get the bounds of the message we just printed
-        // (this must be done after modifying the buffer)
-        let start_iter = buffer.iter_at_offset(buffer.char_count() - msg.len() as i32);
-        let end_iter = buffer.end_iter();
-
-        // Apply a tag to style error text (color it)
-        buffer.apply_tag_by_name(TAG_ERROR_TEXT, &start_iter, &end_iter);
+    fn print_success(&self, msg: &str) {
+        self.print("\n");
+        self.print_with_tag(TAG_SUCCESS_TEXT, msg);
     }
 
     fn input(&self) -> String {

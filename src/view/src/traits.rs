@@ -41,6 +41,14 @@ pub trait Console {
     fn print_err(&self, msg: &str);
 
     /**
+    Prints a success message to the console.
+
+    # Arguments
+    - `msg` - The message to print.
+     */
+    fn print_success(&self, msg: &str);
+
+    /**
     Prompts the user for input.
 
     Returns an Option containing the user's input as a &str, or None.

@@ -156,6 +156,15 @@ impl AdwApp {
                 _window.main_view().console().start_user_input();
             }))
         );
+
+        let _window = window.clone();
+        callbacks.insert(
+            SyscallDiscriminants::Quit,
+            Callback::new(Box::new(move |_| {
+                let console = _window.main_view().console();
+                console.print_success("[SUCCESS] Process exited");
+            }))
+        );
     }
 
     /**
@@ -396,7 +405,6 @@ impl AdwApp {
             // Cycle the machine
             let flow = machine.cycle();
 
-            // TODO: URGENT!! Fix this blocking
             window.register_view().update(machine.register_file());
 
             match flow {
