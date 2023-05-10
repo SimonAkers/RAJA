@@ -31,22 +31,29 @@ pub fn decode(reg_file: &mut RegisterFile<u32>, input: IfId) -> Result<IdEx> {
     let mut imm = input.instruction & imm_mask;
     let j_imm = input.instruction & j_mask;
 
-    /*
-    if op == 0x2b {
+    if op == 0 && (funct == 0x10 || funct == 0x12) {
         println!("Instruction: {:032b}", input.instruction);
-        println!("Immediate: {imm:016b}");
+        //println!("Immediate: {imm:016b}");
     }
-
-     */
 
     // sign extend the imm value
     imm = ((imm << 16) as i32 >> 16) as u32;
 
-    // select float registers if floating point funct
-    if funct == 0x11 {
-        rd += 32;
-        rt += 32;
-        rs += 32;
+    // select proper registers based on the funct
+    match funct {
+        0x11 => {
+            // float regs
+            rd += 32;
+            rt += 32;
+            rs += 32;
+        }
+        0x10 | 0x12 => {
+            // hilo
+            if op == 0 {
+                rs += 64;
+            }
+        }
+        _ => {}
     }
 
     // make registers typed
@@ -57,6 +64,11 @@ pub fn decode(reg_file: &mut RegisterFile<u32>, input: IfId) -> Result<IdEx> {
     // read rs and rt
     let mut read_rs = reg_file.value_or_default(rs);
     let mut read_rt = reg_file.value_or_default(rt);
+
+    if funct == 0x10 || funct == 0x12 {
+        println!("{rs} {rt} {rd}");
+        println!("{read_rs} {read_rt}");
+    }
 
     // handle controls
     let mut reg_dst; // determines destination register (0: rt, 1: rd)
@@ -89,10 +101,17 @@ pub fn decode(reg_file: &mut RegisterFile<u32>, input: IfId) -> Result<IdEx> {
             jump = false;
             alu_op = OP_R;
 
-            // div
-            if op == 0 && funct == 0x1a {
-                reg_write = false;
-                use_hilo = true;
+            if op == 0 {
+                match funct {
+                    0x1a => {
+                        reg_write = false;
+                        use_hilo = true;
+                    }
+                    0x10 | 0x12 => {
+                        use_hilo = true;
+                    }
+                    _ => {}
+                }
             }
         }
         0x20 => {

@@ -46,7 +46,7 @@ pub mod op_ctrl {
 use op_ctrl::*;
 
 /// Runs execute stage
-pub fn execute(reg_file: &mut RegisterFile<u32>, input: IdEx, fwd_unit: ForwardingUnit) -> Result<ExMem> {
+pub fn execute(input: IdEx, fwd_unit: ForwardingUnit) -> Result<ExMem> {
     let syscall = input.syscall;
     let mut use_shamt = false;
     // compute ALU control lines

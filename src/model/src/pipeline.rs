@@ -14,13 +14,13 @@ use anyhow::Result;
 pub fn _single_cycle(pc: &mut u32, regs: &mut RegisterFile<u32>, mem: &mut Memory) -> Option<Syscall> {
     // should never forward
     let fwd_unit = ForwardingUnit {
-        ex_mem: (false, Register::ZERO, (0, 0)),
-        mem_wb: (false, Register::ZERO, (0, 0)),
+        ex_mem: (false, Register::ZERO, (0, 0), false),
+        mem_wb: (false, Register::ZERO, (0, 0), false),
     };
 
     let if_id = stages::fetch(pc, mem);
     let id_ex = stages::decode(regs, if_id.unwrap());
-    let ex_mem = stages::execute(regs, id_ex.unwrap(), fwd_unit);
+    let ex_mem = stages::execute(id_ex.unwrap(), fwd_unit);
     let mem_wb = stages::memory(pc, mem, ex_mem.unwrap()).unwrap();
     let pipe_out = stages::writeback(regs, mem_wb);
 
@@ -46,8 +46,8 @@ pub struct PipelineState {
 
 #[derive(Debug, Clone, Copy)]
 pub struct ForwardingUnit {
-    pub ex_mem: (bool, Register, (u32, u32)),
-    pub mem_wb: (bool, Register, (u32, u32)),
+    pub ex_mem: (bool, Register, (u32, u32), bool),
+    pub mem_wb: (bool, Register, (u32, u32), bool),
 }
 
 /// Steps the machine forward in a pipelined manner.
@@ -66,6 +66,7 @@ pub fn pipe_cycle(
             state.ex_mem.reg_write,
             state.ex_mem.write_register,
             state.ex_mem.alu_result,
+            state.ex_mem.use_hilo,
         ),
         mem_wb: (
             state.mem_wb.reg_write,
@@ -75,6 +76,7 @@ pub fn pipe_cycle(
             } else {
                 state.mem_wb.alu_data
             },
+            state.mem_wb.use_hilo,
         ),
     };
 
@@ -98,7 +100,7 @@ pub fn pipe_cycle(
 
     let mem_wb = stages::memory(pc, mem, state.ex_mem.clone())?;
 
-    let ex_mem = stages::execute(regs, state.id_ex.clone(), fwd_unit)?;
+    let ex_mem = stages::execute(state.id_ex.clone(), fwd_unit)?;
 
     // stall in case of syscall
     // TODO: Maybe not the best solution but ¯\_(ツ)_/¯
