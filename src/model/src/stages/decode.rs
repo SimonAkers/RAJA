@@ -31,11 +31,6 @@ pub fn decode(reg_file: &mut RegisterFile<u32>, input: IfId) -> Result<IdEx> {
     let mut imm = input.instruction & imm_mask;
     let j_imm = input.instruction & j_mask;
 
-    if op == 0 && (funct == 0x10 || funct == 0x12) {
-        println!("Instruction: {:032b}", input.instruction);
-        //println!("Immediate: {imm:016b}");
-    }
-
     // sign extend the imm value
     imm = ((imm << 16) as i32 >> 16) as u32;
 
@@ -65,17 +60,12 @@ pub fn decode(reg_file: &mut RegisterFile<u32>, input: IfId) -> Result<IdEx> {
     let mut read_rs = reg_file.value_or_default(rs);
     let mut read_rt = reg_file.value_or_default(rt);
 
-    if funct == 0x10 || funct == 0x12 {
-        println!("{rs} {rt} {rd}");
-        println!("{read_rs} {read_rt}");
-    }
-
     // handle controls
     let mut reg_dst; // determines destination register (0: rt, 1: rd)
     let mut alu_src; // if enabled use immediate value as alu arg2
     let mut mem_to_reg; // if enabled dest register gets a memory location otheriwse gets alu result
-    let mut reg_write; // if disabled don't write to dest register
-    let mut use_hilo = false; // if enabled write alu output to hilo regs
+    let mut reg_write; // if enabled write to dest register
+    let mut use_hilo = false; // if true then operate on hi/lo regs
     let mut mem_write; // if enabled write to alu result
     let mut mem_read; // if enabled read from alu result
     let mut alu_op; // alu operation
@@ -104,10 +94,12 @@ pub fn decode(reg_file: &mut RegisterFile<u32>, input: IfId) -> Result<IdEx> {
             if op == 0 {
                 match funct {
                     0x1a => {
+                        // div
                         reg_write = false;
                         use_hilo = true;
                     }
                     0x10 | 0x12 => {
+                        // mfhi, mflo
                         use_hilo = true;
                     }
                     _ => {}

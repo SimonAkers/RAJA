@@ -28,7 +28,7 @@ pub struct IdEx {
     pub word_align: bool,
     pub mem_to_reg: bool,
     pub reg_write: bool,
-    pub use_hilo: bool, // whether to use the hi/lo registers
+    pub use_hilo: bool,
     pub rs: Register,
 
     // demo thing
@@ -107,6 +107,16 @@ pub fn execute(input: IdEx, fwd_unit: ForwardingUnit) -> Result<ExMem> {
     let mut arg1 = input.reg_1;
     let mut arg2 = input.reg_2;
 
+    /*
+    if fwd_unit.mem_wb.3 {
+        println!("mem_wb: {:#x} {} {}", input.op_funct, input.rs, fwd_unit.mem_wb.1);
+    }
+
+    if fwd_unit.ex_mem.3 {
+        println!("ex_mem: {:#x} {} {}", input.op_funct, input.rt, fwd_unit.ex_mem.1);
+    }
+     */
+
     // check forwarding unit on first register
     if fwd_unit.mem_wb.0 && input.rs == fwd_unit.mem_wb.1 {
         arg1 = fwd_unit.mem_wb.2.0;
@@ -121,6 +131,27 @@ pub fn execute(input: IdEx, fwd_unit: ForwardingUnit) -> Result<ExMem> {
     }
     if fwd_unit.ex_mem.0 && input.rt == fwd_unit.ex_mem.1 {
         arg2 = fwd_unit.ex_mem.2.0;
+    }
+
+    // check forwarding unit on lo & hi registers
+    match input.rs {
+        HI => {
+            if fwd_unit.mem_wb.3 {
+                arg1 = fwd_unit.mem_wb.2.1;
+            } else if fwd_unit.ex_mem.3 {
+                arg1 = fwd_unit.ex_mem.2.1;
+            }
+        }
+
+        LO => {
+            if fwd_unit.mem_wb.3 {
+                arg1 = fwd_unit.mem_wb.2.0;
+            } else if fwd_unit.ex_mem.3 {
+                arg1 = fwd_unit.ex_mem.2.0;
+            }
+        }
+
+        _ => {}
     }
 
     let fwd_rt = arg2;
@@ -177,6 +208,7 @@ pub mod alu_signals {
     pub const ALU_DIV: u8 = 11;
 }
 use alu_signals::*;
+use crate::Register::{HI, LO};
 
 /// Simple ALU implementation.
 /// TODO: Handle carry flag
