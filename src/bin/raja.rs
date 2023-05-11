@@ -1,3 +1,5 @@
+#![windows_subsystem = "windows"]
+
 use view::adw_app::AdwApp;
 
 /// The main entry point of the program.
