@@ -5,14 +5,13 @@ use std::time::Duration;
 
 use adw::{Application, ColorScheme, StyleManager, Window};
 use adw::gdk::pango::FontDescription;
+use adw::gio::File;
 use dark_light::Mode;
 use debug_print::*;
-use glib::Error;
 use glib::signal::Inhibit;
-use gtk::{AlertDialog, CssProvider, EventControllerKey, FileDialog, FileFilter, FontDialog, StyleContext};
-use gtk::builders::FontDialogBuilder;
+use gtk::{ButtonsType, CssProvider, EventControllerKey, FileChooserAction, FileChooserNative, FileFilter, FontChooserDialog, MessageDialog, MessageType, ResponseType, StyleContext};
 use gtk::gdk::{Display, Key};
-use gtk::gio::{Cancellable, SimpleAction};
+use gtk::gio::SimpleAction;
 use gtk::pango::ffi::PANGO_SCALE;
 use gtk::prelude::*;
 use sourceview5::prelude::*;
@@ -27,7 +26,6 @@ use util::shared::Shared;
 
 use crate::app_window::AppWindow;
 use crate::ensure;
-use crate::register_view::RegisterView;
 use crate::traits::*;
 
 /// The application's ID
@@ -205,8 +203,59 @@ impl AdwApp {
 
     fn connect_btn_settings(window: AppWindow) {
         window.btn_settings().connect_clicked(move |_| {
-            let window = window.clone();
+            let dialog = FontChooserDialog::new(None, Some(&window));
 
+            let _window = window.clone();
+            dialog.connect_response(move |dialog, response| {
+                dialog.close();
+
+                if response != ResponseType::Ok {
+                    return;
+                }
+
+                match dialog.font_desc() {
+                    Some(desc) => {
+                        match Self::change_font(desc) {
+                            Ok(_) => {
+                                let dialog = MessageDialog::builder()
+                                    .text("Success!")
+                                    .secondary_text("Font changed, restart to apply the changes.")
+                                    .buttons(ButtonsType::Ok)
+                                    .message_type(MessageType::Info)
+                                    .transient_for(&_window)
+                                    .build();
+
+                                dialog.connect_response(|dialog, _| {
+                                    dialog.close();
+                                });
+
+                                dialog.present();
+                            }
+                            Err(err) => {
+                                let dialog = MessageDialog::builder()
+                                    .text("ERROR")
+                                    .secondary_text(format!("An error occurred while trying to save changes:\n{err}"))
+                                    .buttons(ButtonsType::Ok)
+                                    .message_type(MessageType::Error)
+                                    .transient_for(&_window)
+                                    .build();
+
+                                dialog.connect_response(|dialog, _| {
+                                    dialog.close();
+                                });
+
+                                dialog.present();
+                            }
+                        }
+                    }
+
+                    None => {}
+                }
+            });
+
+            dialog.present();
+
+            /* For GTK >= 4.10
             FontDialog::new().choose_font(Some(&window.clone()), None, Cancellable::NONE, move |font| {
                 match font {
                     Ok(desc) => {
@@ -233,6 +282,7 @@ impl AdwApp {
                     Err(_) => {}
                 }
             })
+             */
         });
     }
 
@@ -246,6 +296,30 @@ impl AdwApp {
 
     fn connect_file_new(window: AppWindow) {
         Self::connect_simple_action(window.clone(), "file-new", move |_, _| {
+            let dialog = MessageDialog::builder()
+                .text("WARNING")
+                .secondary_text("This will erase everything in the editor!\nAre you sure you want to continue?")
+                .buttons(ButtonsType::YesNo)
+                .message_type(MessageType::Warning)
+                .transient_for(&window)
+                .build();
+
+            let _window = window.clone();
+            dialog.connect_response(move |dialog, response| {
+                match response {
+                    ResponseType::Yes => {
+                        _window.main_view().source_view().clear();
+                        _window.main_view().console().clear();
+                    }
+                    _ => {}
+                }
+
+                dialog.close();
+            });
+
+            dialog.present();
+
+            /* For GTK >= 4.10
             let alert = AlertDialog::builder()
                 .message("WARNING")
                 .detail("This will erase everything in the editor!\nAre you sure you want to continue?")
@@ -265,20 +339,63 @@ impl AdwApp {
                     Err(_) => ()
                 }
             });
+             */
         });
     }
 
     fn connect_file_open(window: AppWindow) {
         Self::connect_simple_action(window.clone(), "file-open", move |_, _| {
-            // TODO: Investigate why this filter does not work
+            // TODO: Investigate why this filter does not work (maybe only an issue on Windows native)
             let filter = FileFilter::new();
             filter.add_pattern("*.s");
             filter.add_pattern("*.asm");
+
+            let dialog = FileChooserNative::builder()
+                .title("Open File")
+                .filter(&filter)
+                .action(FileChooserAction::Open)
+                .transient_for(&window)
+                .build();
+
+            let _window = window.clone();
+            dialog.connect_response(move |dialog, response| {
+                dialog.destroy();
+
+                // Return early if response is not "Accept"
+                if response != ResponseType::Accept {
+                    return;
+                }
+
+                // Return early if no file is selected
+                let file = match dialog.file() {
+                    None => return,
+                    Some(file) => file,
+                };
+
+                // Get the path of the file
+                let path = match file.path() {
+                    Some(path) => path,
+                    None => return
+                };
+
+                // Read the file into the editor
+                match fs::read_to_string(path) {
+                    Ok(contents) => {
+                        _window.main_view().source_view().set_text(contents);
+                    }
+                    Err(_) => {}
+                }
+            });
+
+            dialog.show();
+
+
+
+            /* For GTK >= 4.10
             let dialog = FileDialog::builder()
                 .title("Open File")
                 .default_filter(&filter)
                 .build();
-
             let _window = window.clone();
             dialog.open(Some(&window), Cancellable::NONE, move |result| {
                 // Get the file
@@ -301,11 +418,65 @@ impl AdwApp {
                     Err(_) => {}
                 }
             })
+             */
         });
     }
 
     fn connect_file_save_as(window: AppWindow) {
         Self::connect_simple_action(window.clone(), "file-save-as", move |_, _| {
+            let dialog = FileChooserNative::builder()
+                .title("Save File As")
+                .action(FileChooserAction::Save)
+                .transient_for(&window)
+                .build();
+
+            let _window = window.clone();
+            dialog.connect_response(move |dialog, response| {
+                // Return early if response is not "Accept"
+                if response != ResponseType::Accept {
+                    return;
+                }
+
+                // Return early if no file is selected
+                let file = match dialog.file() {
+                    None => return,
+                    Some(file) => file,
+                };
+
+                // Get the path of the file
+                let path = match file.path() {
+                    Some(path) => path,
+                    None => return
+                };
+
+                // Get the contents to write
+                let contents = _window.main_view().source_view().text();
+
+                // Write to the file
+                match fs::write(path, contents) {
+                    Ok(_) => {}
+                    Err(err) => {
+                        // Alert the user if failed
+                        let dialog = MessageDialog::builder()
+                            .text("ERROR: Failed to save")
+                            .secondary_text(err.to_string())
+                            .buttons(ButtonsType::Ok)
+                            .message_type(MessageType::Error)
+                            .transient_for(&_window)
+                            .build();
+
+                        dialog.connect_response(|dialog, _| {
+                            dialog.close();
+                        });
+
+                        dialog.present();
+                    }
+                }
+            });
+
+            dialog.show();
+
+            /* For GTK >= 4.10
             let dialog = FileDialog::builder()
                 .title("Save As")
                 .build();
@@ -341,6 +512,7 @@ impl AdwApp {
                     }
                 }
             })
+             */
         });
     }
 
@@ -382,6 +554,10 @@ impl AdwApp {
         });
 
         window.main_view().console().add_controller(controller);
+    }
+
+    fn load_file(file: File) {
+
     }
 
     fn change_font(desc: FontDescription) -> std::io::Result<()> {
