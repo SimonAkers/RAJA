@@ -10,7 +10,7 @@ use dark_light::Mode;
 use debug_print::*;
 use glib::Error;
 use glib::signal::Inhibit;
-use gtk::{AlertDialog, ButtonsType, CssProvider, EventControllerKey, FileChooserAction, FileChooserDialog, FileDialog, FileFilter, FontDialog, MessageDialog, MessageType, ResponseType, StyleContext};
+use gtk::{AlertDialog, ButtonsType, CssProvider, EventControllerKey, FileChooserAction, FileChooserDialog, FileChooserNative, FileDialog, FileFilter, FontDialog, MessageDialog, MessageType, ResponseType, StyleContext};
 use gtk::builders::FontDialogBuilder;
 use gtk::gdk::{Display, Key};
 use gtk::gio::{Cancellable, SimpleAction};
@@ -333,23 +333,42 @@ impl AdwApp {
             filter.add_pattern("*.s");
             filter.add_pattern("*.asm");
 
-            let dialog = FileChooserDialog::builder()
+            let dialog = FileChooserNative::builder()
                 .title("Open File")
                 .filter(&filter)
                 .action(FileChooserAction::Open)
                 .transient_for(&window)
                 .build();
 
-            dialog.connect_close(|dialog| {
-                match dialog.file() {
-                    None => {}
-                    Some(file) => {
-                        println!("{}", file)
+            let _window = window.clone();
+            dialog.connect_response(move |dialog, response| {
+                // Return early if response is not "Accept"
+                if response != ResponseType::Accept {
+                    return;
+                }
+
+                // Return early if no file is selected
+                let file = match dialog.file() {
+                    None => return,
+                    Some(file) => file,
+                };
+
+                // Get the path of the file
+                let path = match file.path() {
+                    Some(path) => path,
+                    None => return
+                };
+
+                // Read the file into the editor
+                match fs::read_to_string(path) {
+                    Ok(contents) => {
+                        _window.main_view().source_view().set_text(contents);
                     }
+                    Err(_) => {}
                 }
             });
 
-            dialog.present()
+            dialog.show();
 
 
 
@@ -478,6 +497,10 @@ impl AdwApp {
         });
 
         window.main_view().console().add_controller(controller);
+    }
+
+    fn load_file(file: File) {
+
     }
 
     fn change_font(desc: FontDescription) -> std::io::Result<()> {
