@@ -19,7 +19,7 @@ parts:
 
   rust-lang:
     plugin: rust
-    source: ../../
+    source: .
     after:
       - rust-deps
     build-packages:
