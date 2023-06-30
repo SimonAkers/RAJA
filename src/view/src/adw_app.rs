@@ -328,7 +328,7 @@ impl AdwApp {
 
     fn connect_file_open(window: AppWindow) {
         Self::connect_simple_action(window.clone(), "file-open", move |_, _| {
-            // TODO: Investigate why this filter does not work
+            // TODO: Investigate why this filter does not work (maybe only an issue on Windows native)
             let filter = FileFilter::new();
             filter.add_pattern("*.s");
             filter.add_pattern("*.asm");
