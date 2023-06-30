@@ -17,18 +17,49 @@ parts:
     override-pull: |
       curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 
-  rust-lang:
+  raja:
     plugin: rust
     source: .
     after:
       - rust-deps
+
     build-packages:
       - pkg-config
+      - libpango1.0-dev
+      - libgtk-3-dev
       - libgtk-4-dev
       - libadwaita-1-dev
       - libglib2.0-dev
+      - libgtksourceview-5-dev
+
+    stage-packages:
+      - libx11-6
+      - libxcomposite1
+      - libxcursor1
+      - libxdamage1
+      - libxext6
+      - libxi6
+      - libxinerama1
+      - libxrandr2
+      - libadwaita-1-0
+      - libatk1.0-0
+      - libatk-bridge2.0-0
+      - libatspi2.0-0
+      - libcairo-gobject2
+      - libcairo-script-interpreter2
+      - libcairo2
+      - libgtk-3-0
+      - libgtksourceview-5-0
+      - libwayland-cursor++0
+
+slots:
+  raja:
+    interface: dbus
+    bus: session
+    name: net.shayes.Raja
 
 apps:
   raja:
     command: bin/raja
+    common-id: net.shayes.Raja.desktop
 
