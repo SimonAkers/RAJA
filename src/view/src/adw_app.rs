@@ -5,11 +5,12 @@ use std::time::Duration;
 
 use adw::{Application, ColorScheme, StyleManager, Window};
 use adw::gdk::pango::FontDescription;
+use adw::gio::File;
 use dark_light::Mode;
 use debug_print::*;
 use glib::Error;
 use glib::signal::Inhibit;
-use gtk::{AlertDialog, CssProvider, EventControllerKey, FileDialog, FileFilter, FontDialog, StyleContext};
+use gtk::{AlertDialog, ButtonsType, CssProvider, EventControllerKey, FileChooserAction, FileChooserDialog, FileDialog, FileFilter, FontDialog, MessageDialog, MessageType, ResponseType, StyleContext};
 use gtk::builders::FontDialogBuilder;
 use gtk::gdk::{Display, Key};
 use gtk::gio::{Cancellable, SimpleAction};
@@ -212,20 +213,52 @@ impl AdwApp {
                     Ok(desc) => {
                         match Self::change_font(desc) {
                             Ok(_) => {
+                                let dialog = MessageDialog::builder()
+                                    .text("Success!")
+                                    .secondary_text("Font changed, restart to apply the changes.")
+                                    .buttons(ButtonsType::Ok)
+                                    .message_type(MessageType::Info)
+                                    .transient_for(&window)
+                                    .build();
+
+                                dialog.connect_response(|dialog, _| {
+                                    dialog.close();
+                                });
+
+                                dialog.present();
+
+                                /* For GTK >= 4.10
                                 AlertDialog::builder()
                                     .message("Success!")
                                     .detail("Font changed, restart to apply the changes.")
                                     .buttons(["Ok"])
                                     .build()
                                     .show(Some(&window));
+                                 */
                             }
                             Err(err) => {
+                                let dialog = MessageDialog::builder()
+                                    .text("ERROR")
+                                    .secondary_text(format!("An error occurred while trying to save changes:\n{err}"))
+                                    .buttons(ButtonsType::Ok)
+                                    .message_type(MessageType::Error)
+                                    .transient_for(&window)
+                                    .build();
+
+                                dialog.connect_response(|dialog, _| {
+                                    dialog.close();
+                                });
+
+                                dialog.present();
+
+                                /* For GTK >= 4.10
                                 AlertDialog::builder()
                                     .message("ERROR")
                                     .detail(format!("An error occurred while trying to save changes:\n{err}"))
                                     .buttons(["Ok"])
                                     .build()
                                     .show(Some(&window));
+                                 */
                             }
                         }
                     }
@@ -246,6 +279,30 @@ impl AdwApp {
 
     fn connect_file_new(window: AppWindow) {
         Self::connect_simple_action(window.clone(), "file-new", move |_, _| {
+            let dialog = MessageDialog::builder()
+                .text("WARNING")
+                .secondary_text("This will erase everything in the editor!\nAre you sure you want to continue?")
+                .buttons(ButtonsType::YesNo)
+                .message_type(MessageType::Warning)
+                .transient_for(&window)
+                .build();
+
+            let _window = window.clone();
+            dialog.connect_response(move |dialog, response| {
+                match response {
+                    ResponseType::Yes => {
+                        _window.main_view().source_view().clear();
+                        _window.main_view().console().clear();
+                    }
+                    _ => {}
+                }
+
+                dialog.close();
+            });
+
+            dialog.present();
+
+            /* For GTK >= 4.10
             let alert = AlertDialog::builder()
                 .message("WARNING")
                 .detail("This will erase everything in the editor!\nAre you sure you want to continue?")
@@ -265,6 +322,7 @@ impl AdwApp {
                     Err(_) => ()
                 }
             });
+             */
         });
     }
 
@@ -274,11 +332,32 @@ impl AdwApp {
             let filter = FileFilter::new();
             filter.add_pattern("*.s");
             filter.add_pattern("*.asm");
+
+            let dialog = FileChooserDialog::builder()
+                .title("Open File")
+                .filter(&filter)
+                .action(FileChooserAction::Open)
+                .transient_for(&window)
+                .build();
+
+            dialog.connect_close(|dialog| {
+                match dialog.file() {
+                    None => {}
+                    Some(file) => {
+                        println!("{}", file)
+                    }
+                }
+            });
+
+            dialog.present()
+
+
+
+            /* For GTK >= 4.10
             let dialog = FileDialog::builder()
                 .title("Open File")
                 .default_filter(&filter)
                 .build();
-
             let _window = window.clone();
             dialog.open(Some(&window), Cancellable::NONE, move |result| {
                 // Get the file
@@ -301,6 +380,7 @@ impl AdwApp {
                     Err(_) => {}
                 }
             })
+             */
         });
     }
 
@@ -332,12 +412,28 @@ impl AdwApp {
                     Ok(_) => {}
                     Err(err) => {
                         // Alert the user if failed
+                        let dialog = MessageDialog::builder()
+                            .text("ERROR: Failed to save")
+                            .secondary_text(err.to_string())
+                            .buttons(ButtonsType::Ok)
+                            .message_type(MessageType::Error)
+                            .transient_for(&_window)
+                            .build();
+
+                        dialog.connect_response(|dialog, _| {
+                            dialog.close();
+                        });
+
+                        dialog.present();
+
+                        /* For GTK >= 4.10
                         AlertDialog::builder()
                             .message("ERROR: Failed to save")
                             .detail(err.to_string())
                             .buttons(["Ok"])
                             .build()
                             .show(Some(&_window));
+                         */
                     }
                 }
             })
