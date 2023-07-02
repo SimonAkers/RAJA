@@ -203,7 +203,7 @@ impl AdwApp {
 
     fn connect_btn_settings(window: AppWindow) {
         window.btn_settings().connect_clicked(move |_| {
-            let dialog = FontChooserDialog::new(None, Some(&window));
+            let dialog = FontChooserDialog::new(Some("Change Font"), Some(&window));
 
             let _window = window.clone();
             dialog.connect_response(move |dialog, response| {
@@ -640,7 +640,7 @@ impl AdwApp {
         StyleManager::default().set_color_scheme(
             match dark_light::detect() {
                 Mode::Dark => ColorScheme::PreferDark,
-                Mode::Light => ColorScheme::PreferLight,
+                Mode::Light | Mode::Default => ColorScheme::PreferLight,
             }
         );
 
@@ -660,7 +660,7 @@ impl AdwApp {
         buffer.set_style_scheme(
             match dark_light::detect() {
                 Mode::Dark => StyleSchemeManager::default().scheme("Adwaita-dark"),
-                Mode::Light => StyleSchemeManager::default().scheme("Adwaita"),
+                Mode::Light | Mode::Default => StyleSchemeManager::default().scheme("Adwaita"),
             }.as_ref()
         );
 
