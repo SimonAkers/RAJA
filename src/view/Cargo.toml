@@ -1,6 +1,6 @@
 [package]
 name = "view"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -8,9 +8,9 @@ edition = "2021"
 [dependencies]
 model = { path = "../model" }
 util = { path = "../util" }
-adw = { package = "libadwaita", version = "0.3.1" }
-gtk = { package = "gtk4", version = "0.6.2" }
-sourceview5 = "0.6.0"
-glib = "0.17.0"
-dark-light = "0.2.3"
+adw = { package = "libadwaita", version = "0.4.4" }
+gtk = { package = "gtk4", version = "0.6.6" }
+sourceview5 = "0.6.1"
+glib = "0.17.10"
+dark-light = "1.0.0"
 debug_print = "1.0.0"
